@@ -1,13 +1,14 @@
-/* 暖文雷达 — 同事件合并 v1（代码负责稳定规则：归一化标题 + 字符 bigram 相似度 + 时间窗）
+/* 暖文雷达 — 同事件合并 v0.2（稳定内容指纹 + 分析/反馈完整继承）
  *
- * 两种重复分开处理：
- * - 同一事件重复（多篇文章报同一件事）→ 合并为一个事件（本文件）
- * - 同类故事重复（不同事件但母题相似，如多条救人新闻）→ 由 AI 分析的 uniqueness +
- *   建议用途体现，不在合并层删除
+ * 指纹 = hash(排序后文章ID + 排序后正文hash)。
+ * - 新旧事件文章与内容完全一致 → 完整继承 analysis/analysisAt/analysisArticleCount
+ *   /userStatus/userNoteAt/createdAt，不会因为新增了无关事件而重新分析；
+ * - 文章有增删或正文变化 → 继承用户状态，但 analysis 置空等待重分析；
+ * - 测试数据（isTestData）不参与事件。
  */
 import { getDb, scheduleFlush, hashId } from './store.js';
 
-const TIME_WINDOW_MS = 90 * 24 * 3600 * 1000; // 获奖时间相差 90 天内才可能同事件
+const TIME_WINDOW_MS = 90 * 24 * 3600 * 1000;
 const JACCARD_THRESHOLD = 0.6;
 const EXACT_THRESHOLD = 0.45;
 
@@ -32,31 +33,36 @@ function jaccard(a, b) {
   return inter / (a.size + b.size - inter);
 }
 
-/**
- * 全量重建事件分组（只在新增文章后调用；并查集 + 按时间滑窗比较，避免全量两两）。
- * 用户反馈（保留/忽略）通过"与旧事件的文章重叠"继承，避免重建后丢失。
- */
+function fingerprintOf(articleIds, db) {
+  const hashes = articleIds
+    .map((id) => db.articleIndex[id]?.contentHash || id)
+    .sort()
+    .join('|');
+  return hashId(articleIds.slice().sort().join('|') + '#' + hashes);
+}
+
 export function rebuildEvents() {
   const db = getDb();
-  const oldByArticle = new Map(); // articleId -> 旧事件
+  const oldByArticle = new Map();
   for (const ev of Object.values(db.events)) {
     for (const aid of ev.articleIds || []) oldByArticle.set(aid, ev);
   }
 
   const prepared = Object.entries(db.articleIndex)
+    .filter(([, a]) => !a.isTestData) // 测试数据不参与事件
     .map(([id, a]) => {
       const norm = normalizeTitle(a.title);
       return {
         id,
         title: a.title || '',
         media: a.media || '',
-        publishedAt: a.publishedAt || null,
-        at: a.publishedAt ? Date.parse(a.publishedAt) : 0,
+        publishedAt: a.awardDate || a.publishedAt || null,
+        at: a.publishedAt ? Date.parse(a.publishedAt) || 0 : 0,
         norm,
         grams: bigrams(norm),
       };
     })
-    .sort((x, y) => (x.at || 0) - (y.at || 0));
+    .sort((x, y) => x.at - y.at);
 
   const parent = new Map(prepared.map((p) => [p.id, p.id]));
   const find = (x) => {
@@ -78,15 +84,15 @@ export function rebuildEvents() {
     for (let j = i + 1; j < prepared.length; j++) {
       const q = prepared[j];
       if (!q.norm) continue;
-      if (q.at && p.at && q.at - p.at > TIME_WINDOW_MS) break; // 滑窗：时间窗之外不再比较
+      if (q.at && p.at && q.at - p.at > TIME_WINDOW_MS) break;
       const sim = jaccard(p.grams, q.grams);
-      if (sim >= JACCARD_THRESHOLD || (sim >= EXACT_THRESHOLD && (p.norm.includes(q.norm) || q.norm.includes(p.norm)))) {
+      const contains = p.norm.includes(q.norm) || q.norm.includes(p.norm);
+      if (sim >= JACCARD_THRESHOLD || (contains && sim >= 0.3)) {
         union(p.id, q.id);
       }
     }
   }
 
-  // 组装事件
   const groups = new Map();
   for (const p of prepared) {
     const root = find(p.id);
@@ -96,33 +102,65 @@ export function rebuildEvents() {
 
   const now = new Date().toISOString();
   const newEvents = {};
+  let inheritedAnalysis = 0;
+  let reanalyzedNeeded = 0;
   for (const list of groups.values()) {
-    list.sort((a, b) => (a.at || 0) - (b.at || 0));
+    list.sort((a, b) => a.at - b.at);
     const articleIds = list.map((p) => p.id);
     const first = list[0];
     const evId = 'ev-' + hashId(articleIds.slice().sort().join('|'));
-    const mediaList = [...new Set(list.map((p) => p.media).filter(Boolean))];
-    const old = articleIds.map((aid) => oldByArticle.get(aid)).filter(Boolean);
-    const oldEv = old.find((o) => o.userStatus) || old[0]; // 继承用户反馈与创建时间
-    newEvents[evId] = {
+    const fp = fingerprintOf(articleIds, db);
+
+    // 通过文章重叠找到旧事件：指纹一致完整继承；文章变化则只继承用户状态
+    const oldHits = new Map();
+    for (const aid of articleIds) {
+      const oe = oldByArticle.get(aid);
+      if (oe) oldHits.set(oe.id, (oldHits.get(oe.id) || 0) + 1);
+    }
+    let oldEv = null;
+    let maxOverlap = 0;
+    for (const [oeId, overlap] of oldHits) {
+      if (overlap > maxOverlap) {
+        maxOverlap = overlap;
+        oldEv = db.events[oeId];
+      }
+    }
+
+    const unchanged = oldEv && oldEv.fingerprint === fp;
+    const ev = {
       id: evId,
       title: first.title,
       articleIds,
-      mediaList,
+      fingerprint: fp,
+      mediaList: [...new Set(list.map((p) => p.media).filter(Boolean))],
       category: db.articleIndex[articleIds[0]]?.category || '',
       firstAt: first.publishedAt,
       lastAt: list[list.length - 1].publishedAt || first.publishedAt,
       origin: 'ttzl',
       createdAt: oldEv?.createdAt || now,
       updatedAt: now,
-      userStatus: oldEv?.userStatus || null, // null | kept | ignored
+      userStatus: oldEv?.userStatus || null,
       userNoteAt: oldEv?.userNoteAt || null,
-      analysis: null, // 由 analyze.js 填充；文章数变化后重新分析
-      analysisAt: null,
-      analysisArticleCount: 0,
     };
+    if (unchanged && oldEv?.analysis) {
+      ev.analysis = oldEv.analysis;
+      ev.analysisAt = oldEv.analysisAt;
+      ev.analysisArticleCount = oldEv.analysisArticleCount;
+      inheritedAnalysis++;
+    } else {
+      ev.analysis = null;
+      ev.analysisAt = null;
+      ev.analysisArticleCount = 0;
+      if (oldEv?.analysis) reanalyzedNeeded++;
+    }
+    newEvents[evId] = ev;
   }
   db.events = newEvents;
   scheduleFlush();
-  return { articleCount: prepared.length, eventCount: Object.keys(newEvents).length };
+  return {
+    articleCount: prepared.length,
+    eventCount: Object.keys(newEvents).length,
+    inheritedAnalysis,
+    reanalyzedNeeded,
+  };
 }

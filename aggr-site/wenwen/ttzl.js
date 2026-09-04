@@ -1,11 +1,15 @@
-/* 暖文雷达 — 天天正能量采集器
+/* 暖文雷达 — 天天正能量采集器 v0.2
  *
  * 站点 https://ttznl.alibabafoundation.com（阿里巴巴公益基金会）
  * - 列表页 /gainEnergy 为 CSR，无公开 JSON 接口（已探测确认）
- * - 详情页 /storyDetails/{id} 为 SSR，内嵌 window.__ICE_APP_CONTEXT__ 结构化数据，
- *   含标题/正文/媒体/类别/地域/职业/身份/奖金/获奖时间，且无 WAF 拦截
- * 因此采集策略：按 storyId 扫描详情页 —— 已知最大 id 向上探测增量（连续落空自动停止），
- * 需要历史时向下回扫（backfill）。所有正文本地留档。
+ * - 详情页 /storyDetails/{id} 为 SSR，内嵌 window.__ICE_APP_CONTEXT__ 结构化数据
+ *
+ * v0.2 采集游标（互相独立，均只单向前进，不因连续空 ID 倒退）：
+ *   meta.ttzlMaxValidId      最大有效案例 ID
+ *   meta.ttzlProbeHead       最近向上实际探测到的 ID（含空 ID）
+ *   meta.ttzlMinBackfilledId 当前最小已回填案例 ID
+ * 历史回填从 ttzlMinBackfilledId-1 继续向下，不重复扫描同一段。
+ * fetcher / sleepMs 可注入（自动化测试）。
  */
 import { getDb, upsertArticle } from './store.js';
 
@@ -13,53 +17,24 @@ const BASE = 'https://ttznl.alibabafoundation.com';
 const UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
 const HEADERS = { 'User-Agent': UA, 'Accept-Language': 'zh-CN,zh;q=0.9' };
-const SCAN_INTERVAL_MS = 500; // 对源站友好：请求间隔
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** 抓取单个案例；无此案例返回 null */
-export async function fetchStory(storyId) {
-  const url = `${BASE}/storyDetails/${storyId}`;
-  const res = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(20000) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const html = await res.text();
-  const anchor = html.indexOf('"storyDetails/:storyId"');
-  if (anchor < 0) return null; // 无此案例（页面仍 200，但无 SSR 数据）
-  const seg = html.slice(anchor);
-  const start = seg.indexOf('{');
-  let depth = 0;
-  let end = -1;
-  for (let j = start; j < seg.length; j++) {
-    if (seg[j] === '{') depth++;
-    else if (seg[j] === '}') {
-      depth--;
-      if (depth === 0) { end = j + 1; break; }
-    }
-  }
-  const parsed = JSON.parse(seg.slice(start, end));
-  const data = parsed.data || parsed;
-  if (!data.storyId || !data.storyTitle) return null;
+/** epoch(ms) → 中国日期字符串 'YYYY-MM-DD'（源站日期是中国日期，禁止经 UTC 转换显示） */
+export function toChinaDate(epochMs) {
+  if (!epochMs) return null;
+  const d = new Date(Number(epochMs) + 8 * 3600 * 1000); // 东八区偏移后取 UTC 分量即北京日期
+  if (isNaN(d.getTime())) return null;
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}`;
+}
 
-  const content = stripHtml(decodeEntities(String(data.storyContent || '')));
-  return {
-    id: 'ttzl-' + data.storyId,
-    origin: 'ttzl',
-    storyId: data.storyId,
-    url,
-    title: decodeEntities(data.storyTitle),
-    media: String(data.media || '').trim(),        // 推荐/合作媒体
-    source: String(data.storySource || '').trim(), // 来源说明
-    publishedAt: data.awardShowTime
-      ? new Date(Number(data.awardShowTime)).toISOString()
-      : null, // 获奖公示时间
-    awardPrize: Number(data.awardPrize) || 0,
-    category: String(data.storyTag || '').trim(),  // 站点已有类别（创益有为/善意温情…）
-    cities: data.cityList || [],
-    professions: data.professionList || [],
-    identities: data.identityList || [],
-    content: content.slice(0, 8000),
-    contentLength: content.length,
-    fetchedAt: new Date().toISOString(),
-  };
+/** 从正文开头尽力提取事件发生时间（不保证有，纯 best-effort） */
+function extractOccurredAt(content, awardDate) {
+  const m = /(\d{4})年(\d{1,2})月(\d{1,2})日|(\d{1,2})月(\d{1,2})日/.exec(String(content || '').slice(0, 400));
+  if (!m) return null;
+  if (m[1]) return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
+  const year = (awardDate || '').slice(0, 4);
+  return year ? `${year}-${String(m[4]).padStart(2, '0')}-${String(m[5]).padStart(2, '0')}` : null;
 }
 
 function decodeEntities(s) {
@@ -73,7 +48,7 @@ function decodeEntities(s) {
 }
 
 /** 与 server.js 同风格的 HTML→纯文本 */
-function stripHtml(html) {
+export function stripHtml(html) {
   return String(html)
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
@@ -91,9 +66,68 @@ function stripHtml(html) {
     .trim();
 }
 
-async function fetchStorySafe(id, errors) {
+/** 解析 SSR 详情页 HTML → 结构化数据（无案例返回 null）。独立导出供测试使用。 */
+export function parseStoryHtml(html) {
+  const anchor = String(html || '').indexOf('"storyDetails/:storyId"');
+  if (anchor < 0) return null;
+  const seg = html.slice(anchor);
+  const start = seg.indexOf('{');
+  let depth = 0;
+  let end = -1;
+  for (let j = start; j < seg.length; j++) {
+    if (seg[j] === '{') depth++;
+    else if (seg[j] === '}') {
+      depth--;
+      if (depth === 0) { end = j + 1; break; }
+    }
+  }
+  if (end < 0) return null;
+  let parsed;
   try {
-    return await fetchStory(id);
+    parsed = JSON.parse(seg.slice(start, end));
+  } catch {
+    return null;
+  }
+  const data = parsed.data || parsed;
+  if (!data.storyId || !data.storyTitle) return null;
+
+  const awardDate = toChinaDate(data.awardShowTime); // 中国日期字符串，如 2026-09-03
+  const content = stripHtml(decodeEntities(String(data.storyContent || '')));
+  return {
+    id: 'ttzl-' + data.storyId,
+    origin: 'ttzl',
+    storyId: data.storyId,
+    url: `${BASE}/storyDetails/${data.storyId}`,
+    title: decodeEntities(data.storyTitle),
+    media: String(data.media || '').trim(),        // 推荐/合作媒体
+    source: String(data.storySource || '').trim(), // 来源说明
+    awardDate,                                     // 天天正能量公示/获奖日期
+    publishedAt: awardDate,                        // 兼容旧字段
+    sourcePublishedAt: null,                       // 原始媒体报道时间，溯源后填
+    eventOccurredAt: extractOccurredAt(content, awardDate),
+    awardPrize: Number(data.awardPrize) || 0,
+    category: String(data.storyTag || '').trim(),
+    cities: data.cityList || [],
+    professions: data.professionList || [],
+    identities: data.identityList || [],
+    content: content.slice(0, 8000),
+    contentLength: content.length,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
+export async function defaultFetcher(storyId) {
+  const res = await fetch(`${BASE}/storyDetails/${storyId}`, {
+    headers: HEADERS,
+    signal: AbortSignal.timeout(20000),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return parseStoryHtml(await res.text());
+}
+
+async function fetchSafe(fetcher, id, errors) {
+  try {
+    return await fetcher(id);
   } catch (e) {
     errors.push({ id, error: e.message });
     return null;
@@ -101,68 +135,96 @@ async function fetchStorySafe(id, errors) {
 }
 
 /**
- * 增量采集。
+ * 增量采集 v0.2。
  * @param {object} opts
- *   upward    向上探测的新案例数上限（默认 40）
- *   backfill  本次向下回填的历史案例尝试数（默认 0；首次建库可给 200~500）
+ *   upward    本轮向上探测的请求预算（默认 40，连续 25 个空 ID 提前结束）
+ *   backfill  本轮向下回填的请求预算（默认 0；从 ttzlMinBackfilledId-1 继续向下，连续 15 空结束）
+ *   fetcher   注入的抓取函数（测试用），默认 defaultFetcher
+ *   sleepMs   请求间隔（测试可传 0）
  */
-export async function collect({ upward = 40, backfill = 0 } = {}) {
+export async function collect({
+  upward = 40,
+  backfill = 0,
+  fetcher = defaultFetcher,
+  sleepMs = 500,
+} = {}) {
   const db = getDb();
   const meta = db.meta;
   meta.ttzlSeen ||= {};
   const seen = meta.ttzlSeen;
-  const head = Number(meta.ttzlMaxStoryId || 45338); // 首次运行的已知头部（2026-09-04 侦察确认）
+  const maxValid = Number(meta.ttzlMaxValidId || 0);
+  const probeHead = Number(meta.ttzlProbeHead || 0);
+  const minBackfilled = Number(meta.ttzlMinBackfilledId || 0);
+
   const errors = [];
   const found = [];
-  const stats = { scanned: 0, saved: 0, skipped: 0, misses: 0, errors: errors.length };
+  const stats = { scanned: 0, saved: 0, skipped: 0, misses: 0, upwardScanned: 0, backfillScanned: 0, errors: 0 };
 
-  // 1) 向上：发现新案例（连续 25 个落空即认为到顶）
-  let miss = 0;
-  let maxId = head;
-  for (let id = head + 1; id <= head + upward && miss < 25; id++) {
+  const tryId = async (id) => {
     stats.scanned++;
-    const a = await fetchStorySafe(id, errors);
+    seen[id] = seen[id] || 1;
+    const a = await fetchSafe(fetcher, id, errors);
     if (a) {
-      miss = 0;
-      maxId = Math.max(maxId, a.storyId);
-      if (!seen[a.storyId]) { found.push(a); seen[a.storyId] = 1; stats.saved++; }
+      const { isNew } = await upsertArticle(a);
+      found.push(a);
+      if (isNew) stats.saved++;
       else stats.skipped++;
-    } else {
-      miss++;
-      stats.misses++;
+      meta.ttzlMaxValidId = Math.max(meta.ttzlMaxValidId || 0, a.storyId);
+      return a;
     }
-    await sleep(SCAN_INTERVAL_MS);
-  }
-  meta.ttzlMaxStoryId = Math.max(head, maxId - miss); // 顶部连续落空不计入已知
+    stats.misses++;
+    return null;
+  };
 
-  // 2) 向下：历史回填（连续 15 个落空即停）
-  if (backfill > 0) {
-    miss = 0;
-    const from = head;
-    const to = Math.max(1, from - backfill);
-    for (let id = from; id >= to && miss < 15; id--) {
-      if (seen[id]) { continue; }
-      stats.scanned++;
-      const a = await fetchStorySafe(id, errors);
+  // 1) 向上增量：从探测头+1 开始，连续 25 空提前结束；探测头只前进不倒退
+  let miss = 0;
+  const upStart = Math.max(probeHead, maxValid) + 1;
+  const upEnd = upStart + upward - 1;
+  let probedTo = Math.max(probeHead, maxValid);
+  if (maxValid > 0 || probeHead > 0) {
+    for (let id = upStart; id <= upEnd && miss < 25; id++) {
+      stats.upwardScanned++;
+      const a = await tryId(id);
+      probedTo = id;
       if (a) {
         miss = 0;
-        if (!seen[a.storyId]) { found.push(a); seen[a.storyId] = 1; stats.saved++; }
-        else stats.skipped++;
       } else {
         miss++;
-        stats.misses++;
       }
-      await sleep(SCAN_INTERVAL_MS);
+      if (sleepMs) await sleep(sleepMs);
+    }
+    meta.ttzlProbeHead = Math.max(probeHead, probedTo); // 只前进
+  }
+
+  // 2) 历史回填：从最小已回填-1 继续向下，预算 backfill 个请求，连续 15 空结束
+  if (backfill > 0) {
+    miss = 0;
+    const anchor = minBackfilled || meta.ttzlMaxValidId || maxValid;
+    if (anchor > 1) {
+      let scannedDown = 0;
+      let lastDown = anchor;
+      for (let id = anchor - 1; id >= 1 && scannedDown < backfill && miss < 15; id--) {
+        scannedDown++;
+        stats.backfillScanned++;
+        const a = await tryId(id);
+        lastDown = id;
+        if (a) {
+          miss = 0;
+          meta.ttzlMinBackfilledId = Math.min(meta.ttzlMinBackfilledId || Infinity, a.storyId);
+        } else {
+          miss++;
+        }
+        if (sleepMs) await sleep(sleepMs);
+      }
+      // 回填游标：扫过的最深位置（含空 ID），保证不重复扫描同一段
+      if (meta.ttzlMinBackfilledId === undefined || lastDown < (meta.ttzlMinBackfilledId || Infinity)) {
+        meta.ttzlMinBackfilledId = lastDown;
+      }
     }
   }
 
   meta.lastCollectAt = new Date().toISOString();
   meta.lastCollectStats = stats;
   meta.lastCollectErrors = errors.slice(0, 10);
-
-  // 3) 入库（留档 + 索引 + 信源抽取）
-  for (const a of found) {
-    await upsertArticle(a);
-  }
   return { ...stats, articles: found };
 }

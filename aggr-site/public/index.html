@@ -78,16 +78,41 @@
         <div class="ww-filters">
           <span class="ww-subtabs">
             <button id="ww-tab-cand" class="active">候选事件</button>
+            <button id="ww-tab-lib">本地资料库</button>
             <button id="ww-tab-reg">信源覆盖</button>
           </span>
-          <span id="ww-state-filters" class="ww-state-filters">
-            <button data-state="all" class="active">全部</button>
-            <button data-state="pending">待定</button>
-            <button data-state="kept">已保留</button>
-            <button data-state="ignored">已忽略</button>
+          <span id="ww-cand-filters" class="ww-cand-filters">
+            <select id="ww-filter-use" title="建议用途"><option value="">全部用途</option></select>
+            <select id="ww-filter-motif" title="母题"><option value="">全部母题</option></select>
+            <select id="ww-filter-behavior" title="行为类别"><option value="">全部行为</option></select>
+            <span id="ww-state-filters" class="ww-state-filters">
+              <button data-state="all" class="active">全部</button>
+              <button data-state="pending">待定</button>
+              <button data-state="kept">已保留</button>
+              <button data-state="ignored">已忽略</button>
+            </span>
           </span>
         </div>
         <div id="ww-candidates" class="ww-candidates"></div>
+        <div id="ww-library" class="ww-library" hidden>
+          <div id="ww-lib-health" class="ww-lib-health"></div>
+          <div class="ww-lib-bar">
+            <input id="ww-lib-q" placeholder="搜索标题/媒体/人物" style="width:170px" />
+            <input id="ww-lib-media" placeholder="媒体" style="width:100px" />
+            <input id="ww-lib-datefrom" type="date" title="获奖日期起" />
+            <input id="ww-lib-dateto" type="date" title="获奖日期止" />
+            <select id="ww-lib-hascontent"><option value="">全部正文</option><option value="1">有完整正文</option></select>
+            <select id="ww-lib-state"><option value="">全部状态</option><option value="pending">待定</option><option value="kept">已保留</option><option value="ignored">已忽略</option></select>
+            <button id="ww-lib-search">搜索</button>
+            <a class="ww-lib-export" href="/wenwen/api/export?format=json" download="暖文数据备份.json">导出 JSON</a>
+          </div>
+          <div id="ww-lib-list" class="ww-lib-list"></div>
+          <div class="ww-lib-pager">
+            <button id="ww-lib-prev">上一页</button>
+            <span id="ww-lib-page">1 / 1</span>
+            <button id="ww-lib-next">下一页</button>
+          </div>
+        </div>
         <div id="ww-registry" class="ww-registry" hidden></div>
       </section>
     </main>

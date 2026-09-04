@@ -3,6 +3,7 @@
  */
 import { collect } from './ttzl.js';
 import { rebuildEvents } from './merge.js';
+import { rebuildRegistry } from './mediaName.js';
 import { analyzePending } from './analyze.js';
 import { getDb, initStore, flushNow } from './store.js';
 
@@ -17,7 +18,10 @@ export async function runCollect({ backfill = 0 } = {}) {
   collecting = true;
   try {
     const result = await collect({ backfill });
-    if (result.saved > 0) rebuildEvents();
+    if (result.saved > 0) {
+      rebuildRegistry(); // 新案例可能带来新媒体名称，重建实体
+      rebuildEvents();
+    }
     getDb().meta.lastCollectAt = new Date().toISOString();
     console.log(`[wenwen] 采集完成: 扫描${result.scanned} 新增${result.saved} 跳过${result.skipped} 落空${result.misses}`);
     return result;
