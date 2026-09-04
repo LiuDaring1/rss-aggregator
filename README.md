@@ -15,12 +15,38 @@
 https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/data/report.md
 ```
 
-- [`data/report.md`](data/report.md) — 暖文候选报告（按建议用途排序，含一句话概述/人物/行动/记忆点/讨论方向/判断理由/原文链接）
+- [`data/report.md`](data/report.md) — 暖文候选报告（分章节：已保留/完整加工/优先补搜/短复述或案例/继续观察/暂时不用/待分析，含人物/行动/记忆点/母题/讨论角度/信息缺口/原文链接）
 - [`data/candidates.json`](data/candidates.json) — 全部事件的结构化数据
-- [`data/registry.json`](data/registry.json) — 信源覆盖表（123 家媒体）
+- [`data/registry.json`](data/registry.json) — 信源覆盖表（媒体实体 + 探测状态）
+- [`data/calibration-report.md`](data/calibration-report.md) — AI 筛选分层校准报告（分布 + 代表案例）
+- [`data/multisource-summary.md`](data/multisource-summary.md) — 多信源接入汇总
+- [`data/data-health.md`](data/data-health.md) — 数据健康报告
 - [`data/status.json`](data/status.json) — 采集状态
 
 > 数据快照随本地系统采集进度手动/定时更新；本地服务另有实时接口 `/wenwen/report`。
+
+## 当前规模（2026-09-04）
+
+- 天天正能量获奖案例 250 条（本地全文留档）+ 中国新闻网等外部信源真实文章持续入库
+- 合并后事件 260 个，其中 75 个已按 v0.2.1 规则完成 AI 结构化分析
+- 媒体实体 77 家（全部完成首次探测），实际接入采集 1 家（中国新闻网 RSS）
+- 筛选体系：材料价值 × 信息成熟度 → 代码组合建议用途（完整加工/优先补搜/短复述或案例/继续观察/暂时不用），附事件母题、讨论角度、信息缺口分级
+
+## 自动化测试
+
+```bash
+cd aggr-site && npm test   # 15 项测试（解析/游标/日期/指纹继承/媒体归属/来源记录/全文等）
+```
+
+推送时 GitHub Actions 会自动运行同一组测试（`.github/workflows/test.yml`）。
+
+## 本地数据与备份
+
+- 数据目录：`aggr-site/data/wenwen/`（原始正文留档 + 事件/信源/反馈索引，不入库不入包）
+- 页面「本地资料库」支持搜索、筛选、完整正文阅读与三种导出：
+  - 导出索引与分析 JSON（不含正文）
+  - 导出 Markdown 候选报告
+  - 下载完整数据备份 ZIP（含全部正文快照与 manifest，无任何敏感信息）
 
 ## 架构
 

@@ -11,7 +11,8 @@ import { initStore, getDb, upsertArticle, loadRaw, hashId } from './store.js';
 import { parseStoryHtml, toChinaDate, collect } from './ttzl.js';
 import { rebuildEvents } from './merge.js';
 import { resolveMedia, splitMediaNames } from './mediaName.js';
-import { mountWenwen } from './routes.js';
+import { probeMedia } from './probe.js';
+import { mountWenwen, mountWenwenReport } from './routes.js';
 
 function tmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'wenwen-test-'));
@@ -56,33 +57,30 @@ test('中国日期：epoch 转换为东八区日期字符串', () => {
   assert.equal(toChinaDate(0), null);
 });
 
-/* 2. 向上增量游标持续前进 */
+/* 2. 向上增量 v0.2.1：起点恒为最大有效 ID+1，重复检查不产生重复入库 */
 test('向上增量：连续空 ID 后游标仍前进且不重复抓取', async () => {
   const dir = tmpDir();
   await initStore({ dataDir: dir, reset: true });
   const db = getDb();
   db.meta.ttzlMaxValidId = 100;
-  db.meta.ttzlProbeHead = 100;
   db.meta.ttzlSeen = {};
 
-  const fetched = new Set();
+  const fetched = [];
   const fetcher = async (id) => {
-    fetched.add(id);
+    fetched.push(id);
     return id === 116 ? makeArticle(116, '山路上的背篓医生', '她背起药箱走了二十年。') : null;
   };
   const r1 = await collect({ upward: 40, fetcher, sleepMs: 0 });
-  const probe1 = db.meta.ttzlProbeHead;
   assert.equal(r1.saved, 1);
   assert.equal(db.meta.ttzlMaxValidId, 116);
-  assert.ok(probe1 >= 116, '探测头覆盖到有效 ID');
-  assert.equal(fetched.has(100), false, '不重复扫描已知区间');
+  assert.ok(db.meta.ttzlProbeHeadLog >= 116, '诊断扫描头覆盖到有效 ID');
+  assert.equal(fetched.includes(100), false, '不重复扫描已知区间');
 
-  // 第二轮：从探测头+1 继续（区间全空），游标必须继续前进
+  // 第二轮：起点仍是最大有效 ID+1（重复检查同区间，符合防漏报设计），但不会重复入库
   const r2 = await collect({ upward: 40, fetcher, sleepMs: 0 });
-  const probe2 = db.meta.ttzlProbeHead;
-  assert.ok(probe2 > probe1, `探测头前进 ${probe1} → ${probe2}`);
-  assert.equal(r2.saved, 0, '没有新案例时不重复入库');
-  for (const id of fetched) assert.ok(id > 100, '只扫描前进方向');
+  assert.equal(r2.saved, 0, '第二轮无重复入库');
+  assert.equal(db.meta.ttzlMaxValidId, 116, '最大有效 ID 稳定');
+  assert.equal(fetched.includes(101), true, '第二轮从 101 重新检查');
 });
 
 /* 3. 历史回填继续 */
@@ -170,10 +168,10 @@ test('媒体规范化：拆分复合名，品牌归一到主体', () => {
   assert.deepEqual(splitMediaNames('江南晚报 大象新闻'), ['江南晚报', '大象新闻']);
   const e1 = resolveMedia('潮新闻·钱江晚报');
   assert.equal(e1.main, '钱江晚报');
-  assert.ok(e1.brands.includes('潮新闻'));
+  assert.ok(e1.channels.includes('潮新闻'));
   const e2 = resolveMedia('扬子晚报·紫牛新闻');
   assert.equal(e2.main, '扬子晚报');
-  assert.equal(e2.brands.includes('紫牛新闻'), true);
+  assert.equal(e2.channels.includes('紫牛新闻'), true);
   const e3 = resolveMedia('江南晚报');
   assert.equal(e3.main, '江南晚报');
 });
@@ -213,4 +211,137 @@ test('本地全文：接口返回完整正文（超过 6000 字也不截断）',
   assert.equal(data.content.length, longContent.length, '返回完整正文，未被 6000 字截断');
   assert.equal(data.eventId, Object.keys(getDb().events)[0]);
   assert.equal(data.ttzlUrl.includes('storyDetails/501'), true);
+});
+
+/* ===== v0.2.1 新增测试 ===== */
+
+/* 未来 ID：上一轮为空、下一轮出现时可以抓到（漏报回归） */
+test('v021 增量：未来补录的 ID 不会因上一轮探测为空而漏掉', async () => {
+  const dir = tmpDir();
+  await initStore({ dataDir: dir, reset: true });
+  const db = getDb();
+  db.meta.ttzlMaxValidId = 100;
+  db.meta.ttzlSeen = {};
+
+  let exists = new Set();
+  const fetched = [];
+  const fetcher = async (id) => {
+    fetched.push(id);
+    return exists.has(id) ? makeArticle(id, `案例${id}`, `案例${id}的正文内容。`) : null;
+  };
+
+  // 第一轮：101-125 全部不存在
+  await collect({ upward: 40, fetcher, sleepMs: 0 });
+  assert.equal(db.meta.ttzlMaxValidId, 100, '最大有效 ID 未前进');
+  assert.equal(fetched.includes(101), true, '第一轮扫过 101');
+
+  // 第二轮：101 出现了 → 必须抓到
+  exists = new Set([101]);
+  const r = await collect({ upward: 40, fetcher, sleepMs: 0 });
+  assert.equal(r.saved, 1, '抓到新出现的 101');
+  assert.equal(db.meta.ttzlMaxValidId, 101, '最大有效 ID 前进到 101');
+});
+
+/* 媒体归属：潮新闻·浙江日报 不归到钱江晚报 */
+test('v021 媒体归属：显式主体优先，渠道不绑定单一媒体', () => {
+  const zj = resolveMedia('潮新闻·浙江日报');
+  assert.equal(zj.main, '浙江日报');
+  assert.ok(zj.channels.includes('潮新闻'));
+  assert.equal(zj.main.includes('钱江'), false);
+
+  const qj = resolveMedia('潮新闻·钱江晚报');
+  assert.equal(qj.main, '钱江晚报');
+
+  const bx = resolveMedia('犇视频·三湘都市报');
+  assert.equal(bx.main, '三湘都市报');
+  assert.ok(bx.channels.includes('犇视频'));
+
+  const cx = resolveMedia('晨视频·潇湘晨报');
+  assert.equal(cx.main, '潇湘晨报');
+
+  // 只有渠道单独出现：保留原始名称，不猜主体
+  assert.equal(resolveMedia('潮新闻').main, '潮新闻');
+});
+
+/* 已保留事件进入报告 + 待分析殿后 */
+test('v021 报告：已保留进入报告、已忽略默认排除、待分析排在已分析之后', () => {
+  const dir = tmpDir();
+  return (async () => {
+    await initStore({ dataDir: dir, reset: true });
+    await upsertArticle(makeArticle(601, '保留的暖事件甲', '完整正文。'));
+    await upsertArticle(makeArticle(602, '已分析的暖事件乙', '完整正文乙。'));
+    await upsertArticle(makeArticle(603, '被忽略的暖事件丙', '完整正文丙。'));
+    await upsertArticle(makeArticle(604, '还没分析的暖事件丁', '完整正文丁。'));
+    rebuildEvents();
+    const evs = Object.values(getDb().events);
+    for (const ev of evs) {
+      if (ev.title.includes('乙')) ev.analysis = { oneLine: '乙', suggestedUse: '短复述或案例', materialValue: '中', infoMaturity: '完整' };
+      if (ev.title.includes('丙')) ev.userStatus = 'ignored';
+      if (ev.title.includes('甲')) ev.userStatus = 'kept';
+    }
+    const captured = {};
+    const mockRes = { writeHead: () => {}, end: (b) => { captured.body = b; } };
+    mountWenwenReport({ method: 'GET' }, mockRes, new URL('http://localhost/wenwen/report'));
+    const md = captured.body;
+    assert.ok(md.includes('已保留（1）'), '已保留事件进入报告');
+    assert.ok(md.includes('保留的暖事件甲'), '已保留标题在报告中');
+    assert.ok(!md.includes('被忽略的暖事件丙'), '已忽略默认不进报告');
+    const idxAnalyzed = md.indexOf('短复述或案例（');
+    const idxPending = md.indexOf('待 AI 分析（');
+    assert.ok(idxAnalyzed >= 0 && idxPending > idxAnalyzed, '待分析排在已分析之后');
+    assert.ok(md.includes('还没分析的暖事件丁'), '待分析事件在报告中');
+  })();
+});
+
+/* 同正文不同媒体：来源记录不丢失 */
+test('v021 来源记录：同正文不同媒体全部保留', async () => {
+  const dir = tmpDir();
+  await initStore({ dataDir: dir, reset: true });
+  const content = '完全相同的通稿正文，用于验证来源记录保留。';
+  const r1 = await upsertArticle(makeArticle(701, '通稿标题', content, '甲日报'));
+  const a2 = { ...makeArticle(702, '通稿标题（转载）', content, '乙晚报') };
+  const r2 = await upsertArticle(a2);
+  assert.equal(r2.duplicateOf, 'ttzl-701');
+  assert.equal(r2.appearanceRecorded, true);
+  const main = await loadRaw('ttzl-701');
+  assert.equal(main.appearances.length, 2, '主记录保留两个来源');
+  assert.equal(main.appearances[1].media, '乙晚报', '转载媒体记录在案');
+  assert.equal(Object.keys(getDb().articleIndex).length, 1, '不重复建实体');
+  assert.equal(getDb().articleIndex['ttzl-701'].sourceCount, 2);
+});
+
+/* 超 8000 字正文保存不截断 */
+test('v021 本地留档：超过 8000 字的正文不截断', async () => {
+  const dir = tmpDir();
+  await initStore({ dataDir: dir, reset: true });
+  const content = '长'.repeat(12000);
+  await upsertArticle(makeArticle(801, '超长正文通讯', content));
+  const raw = await loadRaw('ttzl-801');
+  assert.equal(raw.content.length, 12000, '保存阶段不截断');
+  assert.equal(raw.contentLength, 12000);
+});
+
+/* 信源首探公平：全部信源都能轮到首次探测 */
+test('v021 探测队列：未探测信源轮流完成首次探测，不被抢占', async () => {
+  const dir = tmpDir();
+  await initStore({ dataDir: dir, reset: true });
+  const db = getDb();
+  // 三家无官网线索的实体（探测即刻完成，无网络）
+  db.registry = {};
+  for (const [i, name] of ['高热媒体', '中热媒体', '冷门媒体'].entries()) {
+    db.registry[name] = {
+      name, probeStatus: '未探测', articleCount: 100 - i * 40,
+      aliases: [], channels: [], registeredAt: new Date().toISOString(),
+    };
+  }
+  const r1 = await probeMedia({ queue: 'first', limit: 2 });
+  assert.equal(r1.probed, 2);
+  assert.equal(db.registry['高热媒体'].firstProbeDone, true);
+  assert.equal(db.registry['中热媒体'].firstProbeDone, true);
+  assert.equal(!db.registry['冷门媒体'].firstProbeDone, true, '冷门媒体等待下一轮');
+
+  await probeMedia({ queue: 'first', limit: 2 });
+  assert.equal(db.registry['冷门媒体'].firstProbeDone, true, '冷门媒体最终轮到');
+  const allDone = Object.values(db.registry).every((s) => s.firstProbeDone);
+  assert.equal(allDone, true, '全部信源完成首次探测');
 });

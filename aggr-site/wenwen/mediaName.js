@@ -12,23 +12,28 @@
  */
 import { getDb, scheduleFlush } from './store.js';
 
-/** 品牌/客户端 → 媒体主体（人工核实的已知映射，可持续补充） */
-const BRAND_TO_MAIN = {
-  潮新闻: '钱江晚报',
-  紫牛新闻: '扬子晚报',
-  封面新闻: '华西都市报',
-  齐鲁壹点: '齐鲁晚报',
-  极目新闻: '楚天都市报',
-  红星新闻: '成都商报',
-  上游新闻: '重庆晨报',
-  大风新闻: '华商报',
-  潇湘晨报: '潇湘晨报',
-  大象新闻: '河南广播电视台',
-  壹点公益: '齐鲁晚报',
+/** 内容客户端/渠道 → 该客户端可能的媒体主体（仅辅助线索，不强制归属）
+ *  客户端可以服务多家媒体（如 潮新闻 同时服务 浙江日报 和 钱江晚报）。
+ *  归属以名称中明确出现的主体为准；名称中没有明确主体时保留原始名称，不猜。
+ */
+const CLIENT_BRANDS = {
+  潮新闻: ['浙江日报', '钱江晚报'],
+  犇视频: ['三湘都市报'],
+  晨视频: ['潇湘晨报'],
+  紫牛新闻: ['扬子晚报'],
+  封面新闻: ['华西都市报'],
+  齐鲁壹点: ['齐鲁晚报'],
+  极目新闻: ['楚天都市报'],
+  红星新闻: ['成都商报'],
+  上游新闻: ['重庆晨报'],
+  大风新闻: ['华商报'],
+  大象新闻: ['河南广播电视台'],
+  壹点公益: ['齐鲁晚报'],
 };
 
 /** 媒体主体 → 官网（探测种子；只登记有把握的） */
 export const KNOWN_MEDIA = {
+  浙江日报: { homepage: 'https://zjnews.zjol.com.cn', region: '浙江杭州' },
   钱江晚报: { homepage: 'https://tidenews.com.cn', region: '浙江杭州' },
   齐鲁晚报: { homepage: 'https://www.qlid.com', region: '山东济南' },
   扬子晚报: { homepage: 'https://www.yangtse.com', region: '江苏南京' },
@@ -63,35 +68,33 @@ export function splitMediaNames(str) {
     .filter((s) => s.length >= 2 && s !== '等' && !/^\d+$/.test(s));
 }
 
-/** 单个名称（可能含 · 连接的品牌）→ 媒体实体 */
+/** 单个名称（可能含 · 连接的渠道/品牌）→ 媒体实体
+ *  解析原则：名称中明确出现的媒体主体优先；客户端品牌只作渠道归属，
+ *  且一个客户端可对应多个主体（潮新闻 → 浙江日报 或 钱江晚报）；
+ *  名称中没有明确主体时保留原始名称，不猜。
+ */
 export function resolveMedia(name) {
   const rawName = String(name || '').trim();
   if (!rawName) return null;
   const segments = rawName.split(/[·•・]/).map((s) => s.trim()).filter(Boolean);
   if (!segments.length) return null;
 
-  // 每段解析为主体：已知品牌映射到主体，未知段暂作主体候选
-  const mains = segments.map((seg) => ({ seg, main: BRAND_TO_MAIN[seg] || seg }));
+  const isClient = (s) => Object.prototype.hasOwnProperty.call(CLIENT_BRANDS, s);
+  // 显式主体：不是已知客户端渠道的段
+  const explicitMains = segments.filter((s) => !isClient(s));
+  const channels = segments.filter(isClient);
 
-  // 已知映射优先作为主体；否则取最长段为主体（如'广西日报传媒集团 南国今报'）
-  let main = null;
-  const brands = [];
-  for (const { seg, main: m } of mains) {
-    if (BRAND_TO_MAIN[seg] && BRAND_TO_MAIN[seg] === m) {
-      main = m;
-    } else if (BRAND_TO_MAIN[seg]) {
-      brands.push(seg);
-    }
-  }
-  if (!main) {
-    main = mains.map((m) => m.main).sort((a, b) => b.length - a.length)[0];
-  }
-  for (const { seg, main: m } of mains) {
-    if (seg !== main && m === main) brands.push(seg); // 非主体段都是品牌别名
+  let main;
+  if (explicitMains.length) {
+    // 明确主体优先：取最长的显式主体
+    main = explicitMains.sort((a, b) => b.length - a.length)[0];
+  } else {
+    // 全部是渠道（如只有"潮新闻"单独出现）：保留原始名称作为实体，不猜主体
+    main = rawName;
   }
   return {
     main,
-    brands: [...new Set(brands)],
+    channels: [...new Set(channels)],
     aliases: [rawName],
     rawName,
   };
@@ -108,16 +111,16 @@ export function rebuildRegistry() {
   const now = new Date().toISOString();
 
   // 从文章索引聚合每家媒体的原始名称与文章数
-  const stats = new Map(); // main -> { articleCount, rawNames:Set, firstAt, lastAt, brands:Set }
+  const stats = new Map(); // main -> { articleCount, rawNames:Set, firstAt, lastAt, channels:Set }
   for (const a of Object.values(db.articleIndex)) {
     if (a.isTestData) continue;
     for (const nm of splitMediaNames(a.media || '')) {
       const ent = resolveMedia(nm);
       if (!ent) continue;
-      const st = stats.get(ent.main) || { articleCount: 0, rawNames: new Set(), brands: new Set(), firstAt: null, lastSuccessAt: null };
+      const st = stats.get(ent.main) || { articleCount: 0, rawNames: new Set(), channels: new Set(), firstAt: null, lastSuccessAt: null };
       st.articleCount += 1;
       st.rawNames.add(nm);
-      for (const b of ent.brands) st.brands.add(b);
+      for (const b of ent.channels) st.channels.add(b);
       st.firstAt ||= now;
       st.lastSuccessAt = now;
       stats.set(ent.main, st);
@@ -127,22 +130,37 @@ export function rebuildRegistry() {
   const old = db.registry || {};
   for (const [main, st] of stats) {
     const prev = old[main] || {};
+    // 探测/接入成果必须跨重建保留（rssCandidate/connected/抓取统计等）
+    const carried = {
+      homepage: prev.homepage || KNOWN_MEDIA[main]?.homepage || null,
+      region: prev.region || KNOWN_MEDIA[main]?.region || null,
+      probeStatus: prev.probeStatus || (KNOWN_MEDIA[main]?.homepage ? '已定位官网' : '未定位官网'),
+      probeCount: prev.probeCount || 0,
+      firstProbeDone: prev.firstProbeDone || false,
+      probeVersion: prev.probeVersion || null,
+      lastProbeAt: prev.lastProbeAt || null,
+      nextRetryAt: prev.nextRetryAt || null,
+      failCount: prev.failCount || 0,
+      lastError: prev.lastError || null,
+      rssCandidate: prev.rssCandidate || null,
+      fetchMethod: prev.fetchMethod || null,
+      connected: prev.connected || false,
+      articlesFetchedTotal: prev.articlesFetchedTotal || 0,
+      lastFetchAt: prev.lastFetchAt || null,
+      warmHits: prev.warmHits || 0,
+    };
     entities.set(main, {
       name: main,
       isEntity: true,
-      brands: [...st.brands],
+      brands: [...st.channels],
+      channels: [...st.channels],
       aliases: [...st.rawNames],
-      origin: 'ttzl-case',
-      region: KNOWN_MEDIA[main]?.region || prev.region || null,
-      homepage: prev.homepage || KNOWN_MEDIA[main]?.homepage || null,
-      probeStatus: prev.probeStatus || (KNOWN_MEDIA[main]?.homepage ? '已定位官网' : '未定位官网'),
-      fetchMethod: prev.fetchMethod || null,
+      origin: prev.origin || 'ttzl-case',
       registeredAt: prev.registeredAt || now,
       articleCount: st.articleCount,
       firstArticleAt: st.firstAt,
       lastSuccessAt: st.lastSuccessAt,
-      lastProbeAt: prev.lastProbeAt || null,
-      lastError: prev.lastError || null,
+      ...carried,
     });
   }
   db.registry = Object.fromEntries(entities);

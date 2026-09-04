@@ -1,47 +1,23 @@
-/* 暖文雷达 — AI 候选分析 v0.2
+/* 暖文雷达 — AI 候选分析 v0.2.1
  *
- * 关键变化（对照 v0.2 任务书）：
- * 1. 「材料价值」与「信息成熟度」两个维度分开，建议用途由代码组合生成，
- *    不让模型直接输出单一结论导致全部塌缩成"完整加工"；
- * 2. 新字段：distinctiveWhy（特别在哪）、discussionAngles（自由讨论角度 1-4 条）、
- *    missingFacts（信息缺口）、motif（母题，用于同质统计）；
- * 3. 全文分析：主报道完整正文（≤8000 字）+ 补充报道，总输入可配置（默认 2 万字），
- *    不再只读开头 700 字；
- * 4. 讨论标签允许为空，不为凑数硬贴；
- * 5. 批次结束后自检分布，明显塌缩时在日志与状态中提示。
+ * v0.2.1 变更：
+ * - 分类表全部来自 taxonomies.js（事件母题与社会议题分开，集中维护）；
+ * - missingFacts 增加 importance（critical/optional）：只有 critical 缺口把
+ *   信息成熟度压到"待补充"，可选补充不再拉低成熟度；
+ * - 每条分析记录版本化（规则/提示词/分类表版本 + 事件指纹 + 模型 + 时间），
+ *   支持「按版本重分析」，不自动清空旧分析；
+ * - 建议用途仍由代码组合（computeSuggestedUse）。
  */
-import { getDb, loadRaw, scheduleFlush } from './store.js';
+import { getDb, loadRaw, scheduleFlush, hashId } from './store.js';
+import {
+  EVENT_MOTIFS, SOCIAL_TOPICS, BEHAVIOR_CATEGORIES, MATERIAL_VALUES, INFO_MATURITIES,
+  USES, USE_PRIORITY, GAP_IMPORTANCE, computeSuggestedUse,
+  ANALYSIS_RULES_VERSION, PROMPT_VERSION, TAXONOMY_VERSION,
+} from './taxonomies.js';
 
-export const BEHAVIOR_CATEGORIES = [
-  '英勇救人', '助人为乐', '诚实守信', '敬业奉献', '自立自强', '孝老爱亲', '温情互助', '其他',
-];
-export const DISCUSSION_TAGS = [
-  '职业教育', '青年成长', '老龄化与适老服务', '技能价值', '规则与温度', '公共服务',
-  '陌生人信任', '职业责任', '科技向善', '城乡关系', '社区互助',
-];
-export const MOTIFS = [
-  '水域救人', '火灾救援', '紧急医疗救助', '道路事故救助', '困境学子成长', '长期公益助学',
-  '公益食堂或爱心厨房', '适老服务', '技能助人', '无障碍与助残', '邻里长期守望',
-  '职业岗位上的额外担当', '乡村教育', '社区互助', '诚信与归还', '规则给予善意回应', '其他',
-];
-export const MATERIAL_VALUES = ['高', '中', '低'];
-export const INFO_MATURITIES = ['完整', '待补充', '线索'];
-export const USES = ['完整加工', '优先补搜', '短复述或案例', '继续观察', '暂时不用'];
-
-const USE_PRIORITY = { 完整加工: 0, 优先补搜: 1, 短复述或案例: 2, 继续观察: 3, 暂时不用: 4 };
-
-/** 代码负责稳定组合：材料价值 × 信息成熟度 → 建议用途 */
-export function computeSuggestedUse(materialValue, infoMaturity) {
-  if (materialValue === '低') return '暂时不用';
-  if (materialValue === '高') {
-    if (infoMaturity === '完整') return '完整加工';
-    if (infoMaturity === '待补充') return '优先补搜';
-    return '继续观察';
-  }
-  // 中
-  if (infoMaturity === '完整') return '短复述或案例';
-  return '继续观察';
-}
+export {
+  BEHAVIOR_CATEGORIES, SOCIAL_TOPICS, EVENT_MOTIFS, MATERIAL_VALUES, INFO_MATURITIES, USES, USE_PRIORITY,
+};
 
 async function loadAiConfig() {
   if (process.env.GLM_API_KEY) {
@@ -119,8 +95,8 @@ ${blocks}
  "detail": "最有记忆点的一个细节（25字内）",
  "result": "事件结果（30字内，报道未交代则写'报道未提及'）",
  "behaviorCategory": "英勇救人/助人为乐/诚实守信/敬业奉献/自立自强/孝老爱亲/温情互助/其他 中选1个",
- "motif": "母题，从这些里选1个最贴近的：水域救人/火灾救援/紧急医疗救助/道路事故救助/困境学子成长/长期公益助学/公益食堂或爱心厨房/适老服务/技能助人/无障碍与助残/邻里长期守望/职业岗位上的额外担当/乡村教育/社区互助/诚信与归还/规则给予善意回应/其他",
- "discussionTags": "从 职业教育/青年成长/老龄化与适老服务/技能价值/规则与温度/公共服务/陌生人信任/职业责任/科技向善/城乡关系/社区互助 中选0到3个，确实不相关就给空数组[]",
+ "eventMotif": "事件母题（描述发生了什么类型的事件），从 水域救援/火灾与险情救援/道路交通救援/医疗急救/高空坠落或建筑险情救援/应急救灾/长期助学与陪伴/困境成长/技能助人/适老服务/助残与无障碍/公益空间/爱心餐食/邻里长期守望/职业岗位善意/诚信与归还/其他 中选1个",
+ "discussionTags": "社会讨论主题数组，从 职业教育/青年成长/儿童监护/适老服务/公共服务/无障碍/职业责任/社区互助/规则与温度/陌生人信任/城乡关系/公益可持续/科技向善 中选0到3个，确实不相关就给空数组[]",
  "discussionAngles": ["1到4个具体的讨论角度，每个一句话，写清可以怎么展开（不要只写标签词）"],
  "distinctiveWhy": "与普通同类好人好事相比，这件事特别在哪里（一两句话；确实普通就写'属于常见母题，无特别增量'）",
  "completeness": "1到5整数：故事完整度",
@@ -129,7 +105,7 @@ ${blocks}
  "materialValue": "高/中/低",
  "infoMaturity": "完整/待补充/线索",
  "needMoreSearch": "布尔值",
- "missingFacts": [{"missing":"缺什么","why":"为什么影响使用","search":"应该补充搜索什么"}],
+ "missingFacts": [{"missing":"缺什么","why":"为什么影响使用","search":"应该补充搜索什么","importance":"critical（不补充就不能可靠使用）或 optional（补充后更丰富）"}],
  "reason": "判断理由（60字内，具体指出依据，不套话）"
 }`;
 
@@ -170,10 +146,22 @@ export async function analyzeEvent(ev, cfg, totalLimit = 20000) {
   const clamp = (v) => Math.min(5, Math.max(1, Number(v) || 1));
 
   const materialValue = MATERIAL_VALUES.includes(out.materialValue) ? out.materialValue : '中';
-  const infoMaturity = INFO_MATURITIES.includes(out.infoMaturity) ? out.infoMaturity : '待补充';
+  const infoMaturityRaw = INFO_MATURITIES.includes(out.infoMaturity) ? out.infoMaturity : '待补充';
   const tags = Array.isArray(out.discussionTags)
-    ? out.discussionTags.filter((t) => DISCUSSION_TAGS.includes(t)).slice(0, 3)
+    ? out.discussionTags.filter((t) => SOCIAL_TOPICS.includes(t)).slice(0, 3)
     : [];
+  const missingFacts = (Array.isArray(out.missingFacts) ? out.missingFacts : [])
+    .slice(0, 5)
+    .map((m) => ({
+      missing: String(m?.missing || '').slice(0, 60),
+      why: String(m?.why || '').slice(0, 80),
+      search: String(m?.search || '').slice(0, 80),
+      importance: m?.importance === 'critical' ? 'critical' : 'optional',
+    }))
+    .filter((m) => m.missing);
+  // 只有 critical 缺口才把信息成熟度压到"待补充"（可选补充不影响成熟度）
+  const hasCriticalGap = missingFacts.some((m) => m.importance === 'critical');
+  const infoMaturity = infoMaturityRaw === '完整' && hasCriticalGap ? '待补充' : infoMaturityRaw;
 
   ev.analysis = {
     oneLine: String(out.oneLine || '').slice(0, 60),
@@ -183,7 +171,7 @@ export async function analyzeEvent(ev, cfg, totalLimit = 20000) {
     detail: String(out.detail || '').slice(0, 50),
     result: String(out.result || '').slice(0, 50),
     behaviorCategory: BEHAVIOR_CATEGORIES.includes(out.behaviorCategory) ? out.behaviorCategory : '其他',
-    motif: MOTIFS.includes(out.motif) ? out.motif : '其他',
+    eventMotif: EVENT_MOTIFS.includes(out.eventMotif) ? out.eventMotif : '其他',
     discussionTags: tags,
     discussionAngles: (Array.isArray(out.discussionAngles) ? out.discussionAngles : [])
       .map((s) => String(s).slice(0, 80))
@@ -195,18 +183,18 @@ export async function analyzeEvent(ev, cfg, totalLimit = 20000) {
     expandability: clamp(out.expandability),
     materialValue,
     infoMaturity,
-    suggestedUse: computeSuggestedUse(materialValue, infoMaturity),
-    needMoreSearch: !!out.needMoreSearch,
-    missingFacts: (Array.isArray(out.missingFacts) ? out.missingFacts : [])
-      .slice(0, 4)
-      .map((m) => ({
-        missing: String(m?.missing || '').slice(0, 60),
-        why: String(m?.why || '').slice(0, 80),
-        search: String(m?.search || '').slice(0, 80),
-      }))
-      .filter((m) => m.missing),
+    suggestedUse: computeSuggestedUse(materialValue, infoMaturity, hasCriticalGap),
+    needMoreSearch: !!out.needMoreSearch || hasCriticalGap,
+    missingFacts,
     reason: String(out.reason || '').slice(0, 150),
     model: cfg.model,
+    version: {
+      rules: ANALYSIS_RULES_VERSION,
+      prompt: PROMPT_VERSION,
+      taxonomy: TAXONOMY_VERSION,
+      fingerprint: ev.fingerprint || null,
+      analyzedAt: new Date().toISOString(),
+    },
   };
   ev.analysisAt = new Date().toISOString();
   ev.analysisArticleCount = ev.articleIds.length;
@@ -224,32 +212,40 @@ export function pickPendingEvents(limit = 6) {
     .slice(0, limit);
 }
 
-/** 筛选结果自检：分布明显塌缩时提示（写日志 + meta 标记） */
+/** 筛选结果自检：分布明显塌缩时提示（写日志 + meta 标记）
+ * 塌缩判定：材料价值 / 建议用途 / 高独特性任一超过 80% 集中，
+ * 或事件母题大量（>60%）落入"其他"。
+ */
 export function checkDistribution() {
   const db = getDb();
   const analyzed = Object.values(db.events).filter((e) => e.analysis);
   const n = analyzed.length;
   if (n < 8) return null;
   const dist = {};
-  for (const k of ['materialValue', 'infoMaturity', 'suggestedUse', 'motif']) {
+  for (const k of ['materialValue', 'infoMaturity', 'suggestedUse', 'eventMotif']) {
     dist[k] = {};
     for (const ev of analyzed) {
       const v = ev.analysis[k] || '未知';
       dist[k][v] = (dist[k][v] || 0) + 1;
     }
   }
-  const useTop = Math.max(...Object.values(dist.suggestedUse));
+  const top = (obj) => Math.max(...Object.values(obj));
+  const warnings = [];
+  if (top(dist.materialValue) / n > 0.8) warnings.push(`材料价值 ${n > 0 ? '' : ''}超过 80% 集中于同一档`);
+  if (top(dist.suggestedUse) / n > 0.8) warnings.push('建议用途超过 80% 落入同一类');
   const uniHigh = analyzed.filter((e) => e.analysis.uniqueness >= 4).length;
-  const collapsed = useTop / n > 0.8 || uniHigh / n > 0.8;
+  if (uniHigh / n > 0.8) warnings.push('独特性分数过度集中（≥4 占比超 80%）');
+  const motifOther = dist.eventMotif['其他'] || 0;
+  if (motifOther / n > 0.6) warnings.push(`事件母题大量落入"其他"（${motifOther}/${n}）`);
   const result = {
     analyzedCount: n,
     distribution: dist,
-    collapsed,
-    warning: collapsed ? '筛选结果可能失去区分度（超过 80% 落入同一类）' : null,
+    collapsed: warnings.length > 0,
+    warning: warnings.join('；') || null,
     checkedAt: new Date().toISOString(),
   };
   db.meta.filterCheck = result;
-  if (collapsed) console.warn('[wenwen] ⚠️', result.warning);
+  if (warnings.length) console.warn('[wenwen] ⚠️', result.warning);
   return result;
 }
 

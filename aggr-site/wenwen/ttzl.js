@@ -1,14 +1,16 @@
-/* 暖文雷达 — 天天正能量采集器 v0.2
+/* 暖文雷达 — 天天正能量采集器 v0.2.1
  *
  * 站点 https://ttznl.alibabafoundation.com（阿里巴巴公益基金会）
  * - 列表页 /gainEnergy 为 CSR，无公开 JSON 接口（已探测确认）
  * - 详情页 /storyDetails/{id} 为 SSR，内嵌 window.__ICE_APP_CONTEXT__ 结构化数据
  *
- * v0.2 采集游标（互相独立，均只单向前进，不因连续空 ID 倒退）：
- *   meta.ttzlMaxValidId      最大有效案例 ID
- *   meta.ttzlProbeHead       最近向上实际探测到的 ID（含空 ID）
- *   meta.ttzlMinBackfilledId 当前最小已回填案例 ID
- * 历史回填从 ttzlMinBackfilledId-1 继续向下，不重复扫描同一段。
+ * v0.2.1 增量规则（修复漏报）：
+ *   向上扫描起点恒为「最大有效案例 ID + 1」；最大有效 ID 只在真正抓到案例时前进；
+ *   连续空 ID 只结束本轮扫描，下轮仍从最大有效 ID+1 重查（未来补录的 ID 不会漏掉）。
+ *   之前探测过的最高位置仅作诊断记录（ttzlProbeHeadLog），不作为扫描起点；
+ *   大于最大有效 ID 的 seen 记录视为无效，定期清理。
+ *   历史回填游标（ttzlMinBackfilledId）与增量游标互相独立。
+ * 本地留档保存完整清洗正文（不截断）；AI 输入长度由 analyze.js 单独控制。
  * fetcher / sleepMs 可注入（自动化测试）。
  */
 import { getDb, upsertArticle } from './store.js';
@@ -110,7 +112,7 @@ export function parseStoryHtml(html) {
     cities: data.cityList || [],
     professions: data.professionList || [],
     identities: data.identityList || [],
-    content: content.slice(0, 8000),
+    content, // 完整清洗正文，本地留档不截断（AI 输入限制在 analyze.js 单独处理）
     contentLength: content.length,
     fetchedAt: new Date().toISOString(),
   };
@@ -153,8 +155,14 @@ export async function collect({
   meta.ttzlSeen ||= {};
   const seen = meta.ttzlSeen;
   const maxValid = Number(meta.ttzlMaxValidId || 0);
-  const probeHead = Number(meta.ttzlProbeHead || 0);
   const minBackfilled = Number(meta.ttzlMinBackfilledId || 0);
+
+  // 清理大于最大有效 ID 的无效 seen 记录（那些 ID 当时不存在，未来可能出现）
+  if (maxValid > 0) {
+    for (const k of Object.keys(seen)) {
+      if (Number(k) > maxValid) delete seen[k];
+    }
+  }
 
   const errors = [];
   const found = [];
@@ -176,24 +184,21 @@ export async function collect({
     return null;
   };
 
-  // 1) 向上增量：从探测头+1 开始，连续 25 空提前结束；探测头只前进不倒退
+  // 1) 向上增量：起点恒为「最大有效 ID + 1」；连续 25 空提前结束本轮，下轮重查同区间
   let miss = 0;
-  const upStart = Math.max(probeHead, maxValid) + 1;
-  const upEnd = upStart + upward - 1;
-  let probedTo = Math.max(probeHead, maxValid);
-  if (maxValid > 0 || probeHead > 0) {
+  let probedTo = maxValid;
+  if (maxValid > 0) {
+    const upStart = maxValid + 1;
+    const upEnd = upStart + upward - 1;
     for (let id = upStart; id <= upEnd && miss < 25; id++) {
       stats.upwardScanned++;
       const a = await tryId(id);
       probedTo = id;
-      if (a) {
-        miss = 0;
-      } else {
-        miss++;
-      }
+      if (a) miss = 0;
+      else miss++;
       if (sleepMs) await sleep(sleepMs);
     }
-    meta.ttzlProbeHead = Math.max(probeHead, probedTo); // 只前进
+    meta.ttzlProbeHeadLog = Math.max(Number(meta.ttzlProbeHeadLog || 0), probedTo); // 仅诊断
   }
 
   // 2) 历史回填：从最小已回填-1 继续向下，预算 backfill 个请求，连续 15 空结束
@@ -216,7 +221,6 @@ export async function collect({
         }
         if (sleepMs) await sleep(sleepMs);
       }
-      // 回填游标：扫过的最深位置（含空 ID），保证不重复扫描同一段
       if (meta.ttzlMinBackfilledId === undefined || lastDown < (meta.ttzlMinBackfilledId || Infinity)) {
         meta.ttzlMinBackfilledId = lastDown;
       }

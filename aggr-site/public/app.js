@@ -17,7 +17,7 @@
     wwEvents: [], // 候选事件本地缓存（保留/忽略即时更新用）
   };
 
-  const MOTIFS = ['水域救人', '火灾救援', '紧急医疗救助', '道路事故救助', '困境学子成长', '长期公益助学', '公益食堂或爱心厨房', '适老服务', '技能助人', '无障碍与助残', '邻里长期守望', '职业岗位上的额外担当', '乡村教育', '社区互助', '诚信与归还', '规则给予善意回应', '其他'];
+  const MOTIFS = ['水域救援', '火灾与险情救援', '道路交通救援', '医疗急救', '高空坠落或建筑险情救援', '应急救灾', '长期助学与陪伴', '困境成长', '技能助人', '适老服务', '助残与无障碍', '公益空间', '爱心餐食', '邻里长期守望', '职业岗位善意', '诚信与归还', '其他'];
   const BEHAVIORS = ['英勇救人', '助人为乐', '诚实守信', '敬业奉献', '自立自强', '孝老爱亲', '温情互助', '其他'];
 
   const el = {
@@ -358,6 +358,9 @@
       mv.textContent = `价值 ${a.materialValue} · ${a.infoMaturity}`;
       mv.title = `材料价值 ${a.materialValue} / 信息成熟度 ${a.infoMaturity}`;
       meta.append(mv);
+      const motif = document.createElement('span');
+      motif.textContent = `母题：${a.eventMotif}`;
+      meta.append(motif);
     }
     const src = document.createElement('span');
     src.textContent =
@@ -403,7 +406,10 @@
         const miss = document.createElement('div');
         miss.className = 'ww-missing';
         miss.append(Object.assign(document.createElement('b'), { textContent: '信息缺口：' }));
-        for (const m of a.missingFacts) miss.append(Object.assign(document.createElement('p'), { textContent: `· ${m.missing}（${m.why}）` }));
+        for (const m of a.missingFacts) {
+          const tag = m.importance === 'critical' ? '【关键】' : '【可选】';
+          miss.append(Object.assign(document.createElement('p'), { textContent: `· ${tag}${m.missing}（${m.why}）` }));
+        }
         details.appendChild(miss);
       }
       const reason = document.createElement('p');
@@ -538,7 +544,7 @@
       const td4 = document.createElement('td');
       td4.textContent = art.hasContent ? `${art.contentLength} 字` : '无';
       const td5 = document.createElement('td');
-      td5.textContent = art.userStatus === 'kept' ? '⭐' : art.userStatus === 'ignored' ? '忽略' : '待定';
+      td5.textContent = art.userStatus === 'kept' ? '⭐ 已保留' : art.userStatus === 'ignored' ? '已忽略' : '未人工处理';
       const td6 = document.createElement('td');
       const readBtn = document.createElement('button');
       readBtn.className = 'ww-lib-read';

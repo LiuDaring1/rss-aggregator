@@ -116,8 +116,10 @@ export function qualityFlags(article) {
 }
 
 /**
- * 文章入库。返回 { isNew, duplicateOf }。
- * - 同一 contentHash 的文章视为精确重复，不重复入库（记录来源留档由调用方决定）。
+ * 文章入库。返回 { isNew, duplicateOf, appearanceRecorded }。
+ * - 同一 contentHash 的文章视为"同一篇内容的多次出现"：不重复建实体、
+ *   不重复跑 AI，但来源记录（媒体/URL/时间）追加到主记录的 appearances，
+ *   多信源阶段同一通稿的各家转载不会丢失。
  * - 测试数据/低质量文章正常入库，但带 flags，事件与候选阶段会排除。
  */
 export async function upsertArticle(article) {
@@ -126,12 +128,41 @@ export async function upsertArticle(article) {
   article.flags = qualityFlags(article);
   article.isTestData = article.flags.includes('疑似测试数据') || article.flags.includes('正文异常过短') && !article.media && !article.publishedAt;
 
+  const now = new Date().toISOString();
+  const selfAppearance = {
+    media: article.media || '',
+    rawMedia: article.source || article.media || '',
+    url: article.url,
+    title: article.title,
+    awardDate: article.awardDate || null,
+    fetchedAt: article.fetchedAt || now,
+    identicalContent: true,
+    suspectedRepost: false,
+    sourceType: article.origin || '',
+  };
+
   const dupOf = d.dedupe.contentHashes[article.contentHash];
   if (dupOf && dupOf !== article.id) {
+    // 同正文不同来源：追加来源记录，保留每家媒体与 URL，不重复分析
+    const main = await loadRaw(dupOf);
+    if (main) {
+      main.appearances ||= [];
+      if (!main.appearances.some((ap) => ap.url === article.url)) {
+        main.appearances.push({
+          ...selfAppearance,
+          mainId: dupOf,
+          identicalContent: true,
+          suspectedRepost: true,
+        });
+        await saveRaw(main);
+        if (db.articleIndex[dupOf]) db.articleIndex[dupOf].sourceCount = main.appearances.length;
+      }
+    }
     d.dedupe.dedupHits = (d.dedupe.dedupHits || 0) + 1;
-    return { isNew: false, duplicateOf: dupOf };
+    return { isNew: false, duplicateOf: dupOf, appearanceRecorded: true };
   }
   d.dedupe.contentHashes[article.contentHash] = article.id;
+  article.appearances = [selfAppearance];
 
   const isNew = !d.articleIndex[article.id];
   d.articleIndex[article.id] = {
@@ -145,6 +176,7 @@ export async function upsertArticle(article) {
     origin: article.origin || '',
     contentLength: (article.content || '').length,
     contentHash: article.contentHash,
+    sourceCount: 1,
     flags: article.flags,
     isTestData: article.isTestData,
   };

@@ -87,7 +87,8 @@
             <select id="ww-filter-behavior" title="行为类别"><option value="">全部行为</option></select>
             <span id="ww-state-filters" class="ww-state-filters">
               <button data-state="all" class="active">全部</button>
-              <button data-state="pending">待定</button>
+              <button data-state="pending">未人工处理</button>
+              <button data-state="unanalyzed">待 AI 分析</button>
               <button data-state="kept">已保留</button>
               <button data-state="ignored">已忽略</button>
             </span>
@@ -104,7 +105,9 @@
             <select id="ww-lib-hascontent"><option value="">全部正文</option><option value="1">有完整正文</option></select>
             <select id="ww-lib-state"><option value="">全部状态</option><option value="pending">待定</option><option value="kept">已保留</option><option value="ignored">已忽略</option></select>
             <button id="ww-lib-search">搜索</button>
-            <a class="ww-lib-export" href="/wenwen/api/export?format=json" download="暖文数据备份.json">导出 JSON</a>
+            <a class="ww-lib-export" href="/wenwen/api/export?format=json" download="暖文索引导出.json">导出索引与分析 JSON</a>
+            <a class="ww-lib-export" href="/wenwen/api/export?format=md" download="暖文报告.md">导出 Markdown 候选报告</a>
+            <a class="ww-lib-export" href="/wenwen/api/backup" download="暖文完整备份.zip">下载完整数据备份 ZIP</a>
           </div>
           <div id="ww-lib-list" class="ww-lib-list"></div>
           <div class="ww-lib-pager">
