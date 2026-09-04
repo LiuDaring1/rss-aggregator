@@ -25,6 +25,10 @@ https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/data/report.md
 
 > 数据快照随本地系统采集进度手动/定时更新；本地服务另有实时接口 `/wenwen/report`。
 
+## 📋 情况说明
+
+最新一轮的详细状态、受阻事项与下一步计划见 [docs/情况说明-20260904.md](docs/情况说明-20260904.md)。
+
 ## 当前规模（2026-09-04）
 
 - 天天正能量获奖案例 250 条（本地全文留档）+ 中国新闻网等外部信源真实文章持续入库
