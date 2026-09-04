@@ -1,0 +1,32 @@
+# 依赖与运行时（不入库）
+node_modules/
+.venv/
+__pycache__/
+.npm-cache/
+.pipcache/
+
+# 密钥与本地配置（绝不入库！）
+aggr-site/ai.json
+we-mp-rss/config.yaml
+we-mp-rss/data/
+*.env
+
+# 运行数据与日志（本机留档）
+aggr-site/data/wenwen/
+aggr-site/data/*.log
+aggr-site/server.log
+aggr-site/pnpm-install.log
+rsshub/rsshub.log
+rsshub/logs/
+we-mp-rss/*.log
+*.log
+
+# 上游引擎整包（自研部分在 upstream-custom/，安装方法见 README）
+rsshub/
+we-mp-rss/
+
+# 打包产物与系统文件
+*.tar.gz
+.DS_Store
+.video_agent/
+.video-agent/

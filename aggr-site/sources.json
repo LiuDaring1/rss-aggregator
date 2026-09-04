@@ -1,0 +1,90 @@
+[
+  {
+    "id": "zjxc",
+    "name": "浙江宣传",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/zjol/zjxc",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "thepaper-mashangping",
+    "name": "澎湃·马上评",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/thepaper/studio/20",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "infzm-ziyoutan",
+    "name": "南方周末·自由谈",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/infzm/117",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "sohu-hongxing",
+    "name": "红星评论",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/sohu/mp/MGEwMjE3NGYtNTQ4ZC00ZWRiLWFhOGUtYTA4ZGNjMDJjOTVm",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "bjnews-point",
+    "name": "新京报·快评",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/bjnews/kuaiping?filter_title=%E5%BF%AB%E8%AF%84%7C%E9%A3%8E%E5%90%91%E6%A0%87&limit=20",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "people-ruiping",
+    "name": "人民锐评",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/people/opinion/436867",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "people-yishiping",
+    "name": "人民网·壹时评",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/people/opinion/223228",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "youth-pinglun",
+    "name": "中青评论·热点",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/youth/pinglun/wztt",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "gmw-guancha",
+    "name": "光明网评论员",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/gmw/guancha/11273",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "rednet-mashang",
+    "name": "红辣椒·马上评论",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/rednet/channel/8288",
+    "category": "评论",
+    "enabled": true
+  },
+  {
+    "id": "rednet-qingjiao",
+    "name": "红辣椒·青椒融评",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/rednet/channel/33216",
+    "category": "评论",
+    "enabled": true
+  }
+]

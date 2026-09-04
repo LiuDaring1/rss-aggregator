@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>信息聚合站</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">📡</span>
+      <h1>信息聚合站</h1>
+    </div>
+    <div class="controls">
+      <select id="range" title="时间范围">
+        <option value="6">近 6 小时</option>
+        <option value="24">近 24 小时</option>
+        <option value="72">近 3 天</option>
+        <option value="168" selected>近 7 天</option>
+        <option value="720">近 30 天</option>
+        <option value="0">全部</option>
+      </select>
+      <button id="refresh" title="刷新">⟳ 刷新</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div id="sidebar-comment">
+        <h2>信息源 <span id="source-summary"></span></h2>
+        <ul id="source-list"></ul>
+        <div class="sidebar-footer">
+          <button id="check-btn" title="立即逐源重新抓取，测试所有源的连通性">🔌 测试连接</button>
+          <span id="check-result"></span>
+          <a href="/api/health" target="_blank">原始健康数据</a>
+        </div>
+      </div>
+      <div id="sidebar-wenwen" hidden>
+        <h2>暖文雷达</h2>
+        <div id="ww-side-stats" class="ww-side-stats">加载中…</div>
+        <p class="ww-side-note">信源：天天正能量（阿里巴巴公益基金会），持续增量采集中；更多暖文信源将在后续阶段接入。</p>
+      </div>
+    </aside>
+
+    <main class="content">
+      <nav class="view-tabs main-tabs">
+        <button id="tab-comment" class="active" title="11 家媒体评论源：时间流 + AI 热点归纳">📰 评论频道</button>
+        <button id="tab-wenwen-main" title="面向即兴口语训练的暖事件发现与筛选">💗 暖文雷达</button>
+      </nav>
+      <nav class="view-tabs sub-tabs" id="comment-subtabs">
+        <button id="tab-feed" class="active" title="按时间倒序浏览全部文章">时间流</button>
+        <button id="tab-topics" title="AI 归纳近期媒体集中关注的热点话题">AI 热点</button>
+      </nav>
+      <section id="feed-view">
+        <div id="solo-bar" class="solo-bar" hidden>
+          <span id="solo-text"></span>
+          <button id="solo-exit">返回全部</button>
+        </div>
+        <div id="status" class="status"></div>
+        <div id="items" class="items"></div>
+      </section>
+      <section id="topics-view" hidden>
+        <div class="topics-head">
+          <span id="topics-meta" class="topics-meta">AI 归纳近期媒体集中关注的热点，点右侧重新生成</span>
+          <button id="topics-regen" title="强制重新调用 AI 归纳（结果缓存 30 分钟）">⟳ 重新归纳</button>
+        </div>
+        <div id="topics-list" class="topics-list"></div>
+      </section>
+      <section id="wenwen-view" hidden>
+        <div class="topics-head">
+          <span id="wenwen-meta" class="topics-meta">加载中…</span>
+          <span class="wenwen-actions">
+            <button id="wenwen-collect" title="立即到天天正能量官网扫描新增获奖案例（增量，通常几十秒）">⬇ 采集新案例</button>
+            <button id="wenwen-analyze" title="对尚未分析的事件逐个调用 AI 提取结构化信息（每轮最多 10 个，约 1-2 分钟）">✨ AI 分析待定事件</button>
+          </span>
+        </div>
+        <div class="ww-filters">
+          <span class="ww-subtabs">
+            <button id="ww-tab-cand" class="active">候选事件</button>
+            <button id="ww-tab-reg">信源覆盖</button>
+          </span>
+          <span id="ww-state-filters" class="ww-state-filters">
+            <button data-state="all" class="active">全部</button>
+            <button data-state="pending">待定</button>
+            <button data-state="kept">已保留</button>
+            <button data-state="ignored">已忽略</button>
+          </span>
+        </div>
+        <div id="ww-candidates" class="ww-candidates"></div>
+        <div id="ww-registry" class="ww-registry" hidden></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
