@@ -25,6 +25,15 @@ https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/data/report.md
 
 > 数据快照随本地系统采集进度手动/定时更新；本地服务另有实时接口 `/wenwen/report`。
 
+## 📖 成品出口：口语素材周刊（试制样刊）
+
+系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。第一份试制样刊已产出：
+
+- [`weekly/sample-01/sample.pdf`](weekly/sample-01/sample.pdf) — 可直接打印的样刊（A4 黑白，10 页：5 则新闻复述 + 3 篇暖事件精讲 + 1 处评论拆解 + 本期积累）
+- [`weekly/sample-01/sample.md`](weekly/sample-01/sample.md) — 可继续修改的样刊正文母本
+- [`weekly/sample-01/editor-notes.md`](weekly/sample-01/editor-notes.md) — 教师备注（选材理由、逐篇来源与事实核对、未确认信息、范本字数）
+- 排版源码：同目录 `sample.html` + `style.css`，运行 `./render.sh` 重新导出 PDF
+
 ## 📋 情况说明
 
 最新一轮的详细状态、受阻事项与下一步计划见 [docs/情况说明-20260904.md](docs/情况说明-20260904.md)。
