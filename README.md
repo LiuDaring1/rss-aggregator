@@ -23,6 +23,17 @@ https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/data/report.md
 - [`data/data-health.md`](data/data-health.md) — 数据健康报告
 - [`data/status.json`](data/status.json) — 采集状态
 
+**口语素材周刊·试制样刊（第 0 期）审阅入口**：
+
+```
+https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/weekly/sample-01/sample.md
+https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/weekly/sample-01/editor-notes.md
+```
+
+- `sample.md` — 样刊正文（5 则新闻复述 + 3 篇暖事件精讲 + 1 处评论拆解 + 本期积累）
+- `editor-notes.md` — 教师备注（选材理由、逐篇来源与事实核对、未确认信息、范本字数）
+- 可打印 PDF：[`weekly/sample-01/sample.pdf`](weekly/sample-01/sample.pdf)（A4 黑白 10 页）
+
 > 数据快照随本地系统采集进度手动/定时更新；本地服务另有实时接口 `/wenwen/report`。
 
 ## 📖 成品出口：口语素材周刊（试制样刊）
