@@ -1,0 +1,152 @@
+/* 口语素材周刊 · A4 黑白打印版式（rev.1） */
+@page { size: A4; margin: 15mm 15mm 16mm 15mm; }
+
+* { box-sizing: border-box; }
+
+html { -webkit-print-color-adjust: exact; }
+
+body {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 10.5pt;
+  line-height: 1.66;
+  color: #000;
+  margin: 0;
+}
+
+h1, h2, h3, h4, .sans { font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+
+/* ---------- 封面区 ---------- */
+.masthead {
+  text-align: center;
+  border-bottom: 2.5pt solid #000;
+  padding-bottom: 5mm;
+  margin-bottom: 5mm;
+}
+.masthead .kicker { font-size: 10pt; letter-spacing: 0.3em; margin-bottom: 2mm; }
+.masthead h1 { font-size: 23pt; letter-spacing: 0.12em; margin: 0 0 2mm; }
+.masthead .sub { font-size: 10.5pt; }
+.masthead .week { font-size: 9.5pt; color: #333; margin-top: 1.5mm; }
+
+.usage {
+  border: 1pt solid #000;
+  padding: 2.5mm 4mm;
+  margin: 0 0 4mm;
+}
+.usage ol { margin: 1mm 0 0; padding-left: 6mm; }
+
+/* ---------- 栏目标题 ---------- */
+h2.sec {
+  font-size: 15pt;
+  border-bottom: 1.2pt solid #000;
+  padding-bottom: 1.5mm;
+  margin: 6mm 0 3.5mm;
+  break-after: avoid;
+}
+h2.sec:first-of-type { margin-top: 0; }
+h2.sec .no { display: inline-block; border: 1.2pt solid #000; padding: 0 2.5mm; margin-right: 3mm; }
+
+h3.piece { font-size: 12.5pt; margin: 4.5mm 0 2mm; break-after: avoid; }
+
+/* ---------- 复述条目 ---------- */
+.retell { break-inside: avoid; margin-bottom: 5mm; }
+.retell .src { font-size: 9pt; color: #333; margin-top: 1mm; }
+
+.kw {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  border-top: 0.6pt dashed #666;
+  border-bottom: 0.6pt dashed #666;
+  padding: 1.5mm 2mm;
+  margin: 2mm 0;
+}
+
+.tradeoff { font-size: 9pt; color: #333; margin: 1mm 0 0; }
+.src { font-size: 9pt; color: #333; }
+
+/* ---------- 标签块 ---------- */
+.lbl { font-family: "PingFang SC", sans-serif; font-weight: 700; }
+.block { margin: 2.5mm 0; }
+.block p { margin: 1mm 0; }
+
+.script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 10.2pt;
+  line-height: 1.62;
+  border: 1pt solid #000;
+  padding: 2.8mm 4mm;
+  margin: 2mm 0;
+  background: #fff;
+}
+.script p { margin: 1.4mm 0; text-indent: 2em; }
+.script p.ni { text-indent: 0; }
+
+.quote {
+  border-left: 2.5pt solid #000;
+  margin: 2.5mm 0;
+  padding: 1.5mm 4mm;
+  font-family: "Kaiti SC", "STKaiti", serif;
+}
+
+/* ---------- 启发问题 / 推导 ---------- */
+.qa {
+  border: 0.9pt solid #000;
+  padding: 2.5mm 4mm;
+  margin: 2.5mm 0;
+  break-inside: avoid;
+}
+.qa .cap { font-family: "PingFang SC", sans-serif; font-weight: 700; margin-bottom: 1.2mm; }
+.qa ol { margin: 0; padding-left: 7mm; }
+.qa li { margin: 1.2mm 0; }
+.qa .wl { border-bottom: 0.6pt dotted #555; height: 5.5mm; margin: 0.5mm 0 1.2mm; }
+
+.derive {
+  border: 0.9pt solid #000;
+  padding: 2.5mm 4mm;
+  margin: 2.5mm 0;
+  break-inside: avoid;
+}
+.derive .cap { font-family: "PingFang SC", sans-serif; font-weight: 700; margin-bottom: 1.2mm; }
+.derive p { margin: 1.2mm 0; }
+.derive b { font-family: "PingFang SC", sans-serif; }
+
+/* ---------- 列表 ---------- */
+ul.dash { list-style: none; padding-left: 0; margin: 1.5mm 0; }
+ul.dash li { margin: 1.2mm 0; padding-left: 5mm; text-indent: -5mm; }
+ul.dash li::before { content: "— "; }
+ul.dash b, .block b { font-family: "PingFang SC", sans-serif; }
+
+ol.step { margin: 1.5mm 0; padding-left: 7mm; }
+ol.step li { margin: 1.2mm 0; }
+
+/* ---------- 表格 ---------- */
+table { border-collapse: collapse; width: 100%; margin: 2.5mm 0; }
+th, td { border: 0.6pt solid #000; padding: 1.3mm 2.2mm; text-align: left; vertical-align: top; }
+th { font-family: "PingFang SC", sans-serif; font-size: 9.5pt; }
+td { font-size: 9.8pt; }
+
+/* ---------- 练习 / 留白 ---------- */
+.drill {
+  border: 0.9pt solid #000;
+  padding: 2.5mm 4mm;
+  margin: 2.5mm 0;
+  break-inside: avoid;
+}
+.drill .cap { font-family: "PingFang SC", sans-serif; font-weight: 700; margin-bottom: 1mm; }
+.drill p { margin: 1.2mm 0; }
+.blank { letter-spacing: 0.05em; }
+
+.writelines { margin-top: 2mm; }
+.writelines div { border-bottom: 0.6pt dotted #555; height: 6.5mm; }
+
+/* ---------- 分页 ---------- */
+.pb { break-before: page; }
+.avoid { break-inside: avoid; }
+
+/* ---------- 页脚 ---------- */
+.colophon {
+  margin-top: 4mm;
+  text-align: center;
+  font-size: 9pt;
+  color: #333;
+  border-top: 0.6pt solid #000;
+  padding-top: 2mm;
+}

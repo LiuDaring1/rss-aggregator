@@ -38,12 +38,14 @@ https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/weekly/sample-0
 
 ## 📖 成品出口：口语素材周刊（试制样刊）
 
-系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。第一份试制样刊已产出：
+系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。第一份试制样刊及按编辑标准 v0.1（试行）完成的修订版：
 
-- [`weekly/sample-01/sample.pdf`](weekly/sample-01/sample.pdf) — 可直接打印的样刊（A4 黑白，10 页：5 则新闻复述 + 3 篇暖事件精讲 + 1 处评论拆解 + 本期积累）
-- [`weekly/sample-01/sample.md`](weekly/sample-01/sample.md) — 可继续修改的样刊正文母本
-- [`weekly/sample-01/editor-notes.md`](weekly/sample-01/editor-notes.md) — 教师备注（选材理由、逐篇来源与事实核对、未确认信息、范本字数）
-- 排版源码：同目录 `sample.html` + `style.css`，运行 `./render.sh` 重新导出 PDF
+- [`weekly/sample-01-rev1/sample.pdf`](weekly/sample-01-rev1/sample.pdf) — **修订版 rev.1**（A4 黑白 12 页：上周热点复述 5 则 + 暖事精选 3 则 + 暖事件精讲 3 篇 + 评论拆解 + 积累页；目标周 2026-08-31~09-06）
+- [`weekly/sample-01-rev1/editor-notes.md`](weekly/sample-01-rev1/editor-notes.md) — 修订版教师备注（含 rev.0→rev.1 修改对照表）
+- [`weekly/sample-01/sample.pdf`](weekly/sample-01/sample.pdf) — 原版样刊（A4 黑白 10 页，保留不覆盖）
+- [`weekly/sample-01/sample.md`](weekly/sample-01/sample.md) — 原版正文母本
+- [`weekly/sample-01/editor-notes.md`](weekly/sample-01/editor-notes.md) — 原版教师备注
+- 排版源码：各目录内 `sample.html` + `style.css`，运行 `./render.sh` 重新导出 PDF
 
 ## 📋 情况说明
 
