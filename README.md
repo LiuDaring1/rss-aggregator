@@ -38,14 +38,14 @@ https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/weekly/sample-0
 
 ## 📖 成品出口：口语素材周刊（试刊）
 
-系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。当前最新为**三模块版 rev.2**（依据编辑任务书 v0.3 试行）：
+系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。当前最新为 **rev.3**（依据任务书 v0.4.1 试行；**插画待回传，现为审阅稿**）：
 
-- [`weekly/sample-01-rev2/sample.pdf`](weekly/sample-01-rev2/sample.pdf) — **完整版（42 页）**：复述 8 则（每则材料页/提示页/参考页实排三页，24 幅提示图）· 评论 6 单元（与复述同题，第一句即观点）· 原文拆解与积累 7 片段（真实评论原文）· 附录 AI 陪练指令
-- 三模块分册（同一正文拆分）：`sample-复述.pdf`（24 页）/ `sample-评论.pdf`（7 页）/ `sample-原文拆解与积累.pdf`（8 页）
-- [`weekly/sample-01-rev2/editor-notes.md`](weekly/sample-01-rev2/editor-notes.md) — 教师备注（事实来源、未核实项、回归检查对照）
-- [`weekly/sample-01-rev2/change-summary.md`](weekly/sample-01-rev2/change-summary.md) — rev.1→rev.2 修改对照与跨模块题目对应
-- [`weekly/sample-01-rev2/doubao-retelling-prompt.txt`](weekly/sample-01-rev2/doubao-retelling-prompt.txt) — AI 陪练指令（注明未实测）
-- 历史版本：[`weekly/sample-01/`](weekly/sample-01/)（rev.0，10 页）、[`weekly/sample-01-rev1/`](weekly/sample-01-rev1/)（rev.1，12 页），排版源码同目录（build.py + sample.html + style.css，`./render.sh` 重导）
+- [`weekly/sample-01-rev3/sample.pdf`](weekly/sample-01-rev3/sample.pdf) — 审阅版（39 页）：复述 8 则（每则材料页＋提示页两页；树状导图整块留空；插画位待回传）· 评论 6 单元（思考页/参考页分页）· 原文拆解与积累 6 单元（独立选文）· 集中参考与 AI 陪练指令
+- [`weekly/sample-01-rev3/illustration-briefs.md`](weekly/sample-01-rev3/illustration-briefs.md) — 插画需求包（R01–R08：事实、画面方案、可直接复制的提示词）
+- [`weekly/sample-01-rev3/editor-notes.md`](weekly/sample-01-rev3/editor-notes.md) — 教师备注（借鉴记录、事实边界、未决项）
+- [`weekly/sample-01-rev3/change-summary.md`](weekly/sample-01-rev3/change-summary.md) — rev.2→rev.3 修改对照、跨模块对应、页数
+- 三模块分册：`sample-复述.pdf`（18 页）/ `sample-评论.pdf`（12 页）/ `sample-原文拆解与积累.pdf`（6 页）
+- 历史版本：[`weekly/sample-01/`](weekly/sample-01/)（rev.0）、[`weekly/sample-01-rev1/`](weekly/sample-01-rev1/)、[`weekly/sample-01-rev2/`](weekly/sample-01-rev2/)（含已完成的 SVG 示意图版式）；排版源码同目录（content3.py + build3.py + style3.css）
 
 ## 📋 情况说明
 
