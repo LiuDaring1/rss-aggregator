@@ -36,16 +36,16 @@ https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/weekly/sample-0
 
 > 数据快照随本地系统采集进度手动/定时更新；本地服务另有实时接口 `/wenwen/report`。
 
-## 📖 成品出口：口语素材周刊（试制样刊）
+## 📖 成品出口：口语素材周刊（试刊）
 
-系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。第一份试制样刊及按编辑标准 v0.1（试行）完成的修订版：
+系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。当前最新为**三模块版 rev.2**（依据编辑任务书 v0.3 试行）：
 
-- [`weekly/sample-01-rev1/sample.pdf`](weekly/sample-01-rev1/sample.pdf) — **修订版 rev.1**（A4 黑白 12 页：上周热点复述 5 则 + 暖事精选 3 则 + 暖事件精讲 3 篇 + 评论拆解 + 积累页；目标周 2026-08-31~09-06）
-- [`weekly/sample-01-rev1/editor-notes.md`](weekly/sample-01-rev1/editor-notes.md) — 修订版教师备注（含 rev.0→rev.1 修改对照表）
-- [`weekly/sample-01/sample.pdf`](weekly/sample-01/sample.pdf) — 原版样刊（A4 黑白 10 页，保留不覆盖）
-- [`weekly/sample-01/sample.md`](weekly/sample-01/sample.md) — 原版正文母本
-- [`weekly/sample-01/editor-notes.md`](weekly/sample-01/editor-notes.md) — 原版教师备注
-- 排版源码：各目录内 `sample.html` + `style.css`，运行 `./render.sh` 重新导出 PDF
+- [`weekly/sample-01-rev2/sample.pdf`](weekly/sample-01-rev2/sample.pdf) — **完整版（42 页）**：复述 8 则（每则材料页/提示页/参考页实排三页，24 幅提示图）· 评论 6 单元（与复述同题，第一句即观点）· 原文拆解与积累 7 片段（真实评论原文）· 附录 AI 陪练指令
+- 三模块分册（同一正文拆分）：`sample-复述.pdf`（24 页）/ `sample-评论.pdf`（7 页）/ `sample-原文拆解与积累.pdf`（8 页）
+- [`weekly/sample-01-rev2/editor-notes.md`](weekly/sample-01-rev2/editor-notes.md) — 教师备注（事实来源、未核实项、回归检查对照）
+- [`weekly/sample-01-rev2/change-summary.md`](weekly/sample-01-rev2/change-summary.md) — rev.1→rev.2 修改对照与跨模块题目对应
+- [`weekly/sample-01-rev2/doubao-retelling-prompt.txt`](weekly/sample-01-rev2/doubao-retelling-prompt.txt) — AI 陪练指令（注明未实测）
+- 历史版本：[`weekly/sample-01/`](weekly/sample-01/)（rev.0，10 页）、[`weekly/sample-01-rev1/`](weekly/sample-01-rev1/)（rev.1，12 页），排版源码同目录（build.py + sample.html + style.css，`./render.sh` 重导）
 
 ## 📋 情况说明
 

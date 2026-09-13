@@ -1,0 +1,100 @@
+/* 口语素材周刊 rev.2 · 三模块版式（A4 黑白） */
+@page { size: A4; margin: 14mm 14mm 15mm 14mm; }
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; }
+
+body {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 10.5pt;
+  line-height: 1.66;
+  color: #000;
+  margin: 0;
+}
+
+h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------- 封面 ---------- */
+.cover { text-align: center; padding-top: 42mm; page-break-after: always; }
+.cover .kicker { font-size: 11pt; letter-spacing: 0.35em; color: #333; }
+.cover h1 { font-size: 34pt; letter-spacing: 0.16em; margin: 8mm 0 4mm; }
+.cover .issue { font-size: 13pt; margin-bottom: 16mm; }
+.cover-note {
+  display: inline-block; text-align: left;
+  border: 1.2pt solid #000; padding: 6mm 8mm; font-size: 11.5pt; line-height: 2.0;
+}
+
+/* ---------- 目录 ---------- */
+.tocpage { page-break-after: always; }
+.toc-h { font-size: 17pt; border-bottom: 1.4pt solid #000; padding-bottom: 2mm; }
+.toc-cols { display: flex; gap: 8mm; margin-top: 4mm; }
+.toc-col { flex: 1; }
+.toc-sec { font-size: 12.5pt; font-weight: 700; border-bottom: 0.9pt solid #000; margin: 2mm 0 2mm; padding-bottom: 1mm; }
+.toc-item { display: flex; align-items: baseline; gap: 1.6mm; margin: 1.7mm 0; font-size: 9.6pt; line-height: 1.45; }
+.toc-t { flex: 1; }
+.toc-p { flex-shrink: 0; font-family: "PingFang SC", sans-serif; }
+.toc-append { margin-top: 5mm; font-size: 10pt; border-top: 0.6pt solid #000; padding-top: 2mm; }
+.tag { display: inline-block; border: 0.9pt solid #000; font-size: 8.5pt; padding: 0 1.6mm; flex-shrink: 0; }
+.tag-hot { background: #000; color: #fff; }
+.tag-warm { background: #fff; color: #000; }
+
+/* ---------- 复述三页 ---------- */
+.rp { page-break-after: always; }
+
+.rhead { display: flex; align-items: baseline; gap: 3mm; margin-bottom: 2mm; }
+.rhead h3 { font-size: 15.5pt; margin: 0; line-height: 1.4; }
+.rno { display: inline-block; border: 1.4pt solid #000; font-weight: 700; font-size: 11pt; padding: 0.5mm 2.2mm; }
+
+.rmat .dateline { font-family: "PingFang SC", sans-serif; font-size: 11pt; border-bottom: 0.9pt solid #000; padding-bottom: 2mm; margin-bottom: 5mm; }
+.matbody { font-size: 16.5pt; line-height: 1.92; margin: 0 0 5.5mm; text-align: justify; }
+.rmat .src { font-size: 9.5pt; color: #333; margin-top: 4mm; }
+.aifoot {
+  margin-top: 8mm; border: 0.9pt dashed #555; padding: 2.5mm 3.5mm;
+  font-size: 9.5pt; color: #333; font-family: "PingFang SC", sans-serif;
+}
+
+.rhint .hint-note { font-size: 10.5pt; border: 0.9pt solid #000; padding: 2mm 3mm; margin-bottom: 3mm; font-family: "PingFang SC", sans-serif; }
+.hint-blk { margin: 0 0 2.5mm; }
+.hint-cap { font-size: 11pt; font-weight: 700; margin: 1.5mm 0 1mm; }
+.hint-blk svg { width: 100%; height: auto; }
+
+.rref .refbody { font-family: "Kaiti SC", "STKaiti", serif; font-size: 13.5pt; line-height: 2.0; border: 1pt solid #000; padding: 6mm 7mm; }
+.rref .mapkey { margin-top: 4mm; font-size: 9.5pt; color: #333; border-top: 0.6pt dashed #666; padding-top: 2mm; font-family: "Kaiti SC", "STKaiti", serif; }
+
+/* ---------- 模块头 ---------- */
+.modhead { break-before: page; margin-bottom: 4mm; }
+.modhead h2 { font-size: 18pt; border-bottom: 2pt solid #000; padding-bottom: 2mm; margin: 0 0 2.5mm; }
+.modnote { font-size: 10pt; border: 0.9pt solid #000; padding: 2mm 3mm; font-family: "PingFang SC", sans-serif; }
+
+/* ---------- 评论单元 ---------- */
+.cu { break-before: page; }
+.cuhead { display: flex; align-items: baseline; gap: 3mm; margin-bottom: 2.5mm; }
+.cuhead h3 { font-size: 14.5pt; margin: 0; flex: 1; }
+.backref { font-size: 9.5pt; color: #333; font-family: "PingFang SC", sans-serif; flex-shrink: 0; }
+.cu-blk { margin: 2.5mm 0; }
+.cu-blk .lbl { font-family: "PingFang SC", sans-serif; font-weight: 700; font-size: 11pt; border-left: 2.4pt solid #000; padding-left: 2.5mm; margin-bottom: 1.2mm; }
+ol.qs { margin: 0; padding-left: 7mm; }
+ol.qs li { margin: 1mm 0; font-size: 10.5pt; }
+.baseline { font-size: 10.5pt; color: #333; margin-bottom: 1.2mm; }
+ol.views { margin: 0; padding-left: 7mm; }
+ol.views li { margin: 1.4mm 0; font-size: 10.5pt; }
+.views .how { font-size: 9.5pt; color: #333; margin-top: 0.4mm; }
+.cu-script { font-family: "Kaiti SC", "STKaiti", serif; font-size: 12pt; line-height: 1.95; border: 1pt solid #000; padding: 4mm 5.5mm; margin: 1mm 0; }
+.cu-script p { margin: 1.6mm 0; text-indent: 2em; }
+.review { font-size: 10pt; margin: 0; }
+
+/* ---------- 原文拆解 ---------- */
+.frag-toc { font-size: 9.5pt; color: #333; border: 0.9pt solid #000; padding: 1.8mm 3mm; margin: 3mm 0 0; font-family: "PingFang SC", sans-serif; }
+.fu { break-before: page; }
+.fu .cuhead h3 { font-size: 13.5pt; }
+.ctx { font-size: 10.3pt; margin: 0.8mm 0; }
+.ctx b { font-family: "PingFang SC", sans-serif; }
+.fragtext { font-family: "Kaiti SC", "STKaiti", serif; font-size: 13pt; line-height: 1.95; margin: 2.5mm 0; }
+.src { font-size: 9pt; color: #333; }
+
+/* ---------- 附录 ---------- */
+.appendix { break-before: page; }
+.appendix h2 { font-size: 16pt; border-bottom: 1.4pt solid #000; padding-bottom: 2mm; }
+.prompt { white-space: pre-wrap; font-family: "Songti SC", "STSong", serif; font-size: 12pt; line-height: 2.0; border: 1pt solid #000; padding: 5mm 6mm; margin-top: 4mm; }
