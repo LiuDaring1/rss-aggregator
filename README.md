@@ -38,14 +38,14 @@ https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/weekly/sample-0
 
 ## 📖 成品出口：口语素材周刊（试刊）
 
-系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。当前最新为 **rev.3**（依据任务书 v0.4.1 试行；**插画待回传，现为审阅稿**）：
+系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。当前最新为 **rev.4**（依据任务书 v0.5 试行；**插画待回传，现为审阅稿**）：
 
-- [`weekly/sample-01-rev3/sample.pdf`](weekly/sample-01-rev3/sample.pdf) — 审阅版（39 页）：复述 8 则（每则材料页＋提示页两页；树状导图整块留空；插画位待回传）· 评论 6 单元（思考页/参考页分页）· 原文拆解与积累 6 单元（独立选文）· 集中参考与 AI 陪练指令
-- [`weekly/sample-01-rev3/illustration-briefs.md`](weekly/sample-01-rev3/illustration-briefs.md) — 插画需求包（R01–R08：事实、画面方案、可直接复制的提示词）
-- [`weekly/sample-01-rev3/editor-notes.md`](weekly/sample-01-rev3/editor-notes.md) — 教师备注（借鉴记录、事实边界、未决项）
-- [`weekly/sample-01-rev3/change-summary.md`](weekly/sample-01-rev3/change-summary.md) — rev.2→rev.3 修改对照、跨模块对应、页数
-- 三模块分册：`sample-复述.pdf`（18 页）/ `sample-评论.pdf`（12 页）/ `sample-原文拆解与积累.pdf`（6 页）
-- 历史版本：[`weekly/sample-01/`](weekly/sample-01/)（rev.0）、[`weekly/sample-01-rev1/`](weekly/sample-01-rev1/)、[`weekly/sample-01-rev2/`](weekly/sample-01-rev2/)（含已完成的 SVG 示意图版式）；排版源码同目录（content3.py + build3.py + style3.css）
+- [`weekly/sample-01-rev4/sample.pdf`](weekly/sample-01-rev4/sample.pdf) — 审阅版（45 页）：复述 8 则（材料页＋提示页两页一题；关键词/思维导图/插画三种辅助并行；思维导图为统一虚线补写框）· 集中参考 · 评论 6 题（**每题三页**：问题／观点与细致推演／范本与拆解）· 原文拆解与积累 6 单元（区分"值得记住的表达"与"可以借鉴的讲法"，每单元配完整口语示范）
+- [`weekly/sample-01-rev4/illustration-briefs.md`](weekly/sample-01-rev4/illustration-briefs.md) — 插画需求包（R01–R08：事实、画面方案、可直接复制的提示词）
+- [`weekly/sample-01-rev4/editor-notes.md`](weekly/sample-01-rev4/editor-notes.md) — 教师备注（借鉴记录、回归检查对照、版面修复说明、未决项）
+- [`weekly/sample-01-rev4/change-summary.md`](weekly/sample-01-rev4/change-summary.md) — rev.3→rev.4 修改对照、跨模块对应、页数
+- 三模块分册：`sample-复述.pdf`（18 页）/ `sample-评论.pdf`（18 页）/ `sample-原文拆解与积累.pdf`（6 页）
+- 历史版本：[`weekly/sample-01/`](weekly/sample-01/)（rev.0）、[`weekly/sample-01-rev1/`](weekly/sample-01-rev1/)、[`weekly/sample-01-rev2/`](weekly/sample-01-rev2/)、[`weekly/sample-01-rev3/`](weekly/sample-01-rev3/)；排版源码同目录（content4.py + build4.py + style4.css）
 
 ## 📋 情况说明
 
