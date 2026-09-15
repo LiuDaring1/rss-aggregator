@@ -38,14 +38,14 @@ https://raw.githubusercontent.com/LiuDaring1/rss-aggregator/main/weekly/sample-0
 
 ## 📖 成品出口：口语素材周刊（试刊）
 
-系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。当前最新为 **rev.4**（依据任务书 v0.5 试行；**插画待回传，现为审阅稿**）：
+系统的最终用途是给播音主持艺考生做可打印的口语素材周刊。当前最新为 **rev.5**（依据任务书 v0.6 定向修订；**插画待回传，现为审阅稿**）：
 
-- [`weekly/sample-01-rev4/sample.pdf`](weekly/sample-01-rev4/sample.pdf) — 审阅版（45 页）：复述 8 则（材料页＋提示页两页一题；关键词/思维导图/插画三种辅助并行；思维导图为统一虚线补写框）· 集中参考 · 评论 6 题（**每题三页**：问题／观点与细致推演／范本与拆解）· 原文拆解与积累 6 单元（区分"值得记住的表达"与"可以借鉴的讲法"，每单元配完整口语示范）
-- [`weekly/sample-01-rev4/illustration-briefs.md`](weekly/sample-01-rev4/illustration-briefs.md) — 插画需求包（R01–R08：事实、画面方案、可直接复制的提示词）
-- [`weekly/sample-01-rev4/editor-notes.md`](weekly/sample-01-rev4/editor-notes.md) — 教师备注（借鉴记录、回归检查对照、版面修复说明、未决项）
-- [`weekly/sample-01-rev4/change-summary.md`](weekly/sample-01-rev4/change-summary.md) — rev.3→rev.4 修改对照、跨模块对应、页数
+- [`weekly/sample-01-rev5/sample.pdf`](weekly/sample-01-rev5/sample.pdf) — 审阅版（45 页）：复述 8 则（首题压短至约 190 字）· 集中参考 · 评论 6 题（总观点段—两个分论点—收回，四项检查先行）· 原文拆解与积累 6 单元（解说话语化，"示范"独立成块）
+- [`weekly/sample-01-rev5/illustration-briefs.md`](weekly/sample-01-rev5/illustration-briefs.md) — 插画需求包（R01–R08）
+- [`weekly/sample-01-rev5/editor-notes.md`](weekly/sample-01-rev5/editor-notes.md) — 教师备注（六篇"四项检查"记录、逐篇修改说明）
+- [`weekly/sample-01-rev5/change-summary.md`](weekly/sample-01-rev5/change-summary.md) — rev.4→rev.5 修改对照
 - 三模块分册：`sample-复述.pdf`（18 页）/ `sample-评论.pdf`（18 页）/ `sample-原文拆解与积累.pdf`（6 页）
-- 历史版本：[`weekly/sample-01/`](weekly/sample-01/)（rev.0）、[`weekly/sample-01-rev1/`](weekly/sample-01-rev1/)、[`weekly/sample-01-rev2/`](weekly/sample-01-rev2/)、[`weekly/sample-01-rev3/`](weekly/sample-01-rev3/)；排版源码同目录（content4.py + build4.py + style4.css）
+- 历史版本：[`weekly/sample-01/`](weekly/sample-01/)（rev.0）至 [`weekly/sample-01-rev4/`](weekly/sample-01-rev4/)；排版源码同目录（content5.py + build5.py + style5.css）
 
 ## 📋 情况说明
 
