@@ -1,0 +1,6 @@
+{# 期刊封面模板 #}
+<div class="cover">
+  <div class="kicker">{{ manifest.kicker | default("播音主持艺考 · 即兴口语表达") }}</div>
+  <h1>{{ manifest.title | default("口语素材周刊") }}</h1>
+  <div class="issue">{{ manifest.issue_no_label | default(manifest.date_range) }}</div>
+</div>

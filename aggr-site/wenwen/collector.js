@@ -13,13 +13,14 @@ import { XMLParser } from 'fast-xml-parser';
 import { getDb, upsertArticle, hashId, scheduleFlush } from './store.js';
 import { stripHtml } from './ttzl.js';
 import { rebuildEvents } from './merge.js';
+import { rebuildRegistry } from './mediaName.js';
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126.0 Safari/537.36';
 const xmlParser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', cdataPropName: '__cdata', textNodeName: '#text', trimValues: true });
 
 /* ---------------- 预筛（便宜、稳定，不调用模型） ---------------- */
 
-const WARM_WORDS = /[救|援|捐|赠|暖心|温暖|温情|正能量|好人|好事|拾金不昧|见义勇为|坚守|义务|免费|助学|助老|敬老|孝|爱心|公益|志愿|无偿|救助|善|事迹|感动|助学|护送|上门|帮扶]/;
+const WARM_WORDS = /(?:救|援|捐|赠|暖心|温暖|温情|正能量|好人|好事|拾金不昧|见义勇为|坚守|义务|免费|助学|助老|敬老|孝|爱心|公益|志愿|无偿|救助|善|事迹|感动|护送|上门|帮扶)/;
 const COLD_WORDS = /会议|启动仪式|表彰|大会|慰问|调研|视察|致辞|换届|招标|通告|公示名单|干部任免|招聘公告/;
 
 export function prefilter(title) {

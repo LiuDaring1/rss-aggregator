@@ -1,0 +1,55 @@
+{# 期刊目录与陪练指令模板 #}
+<div class="tocpage">
+  <h2 class="toc-h">目录</h2>
+  <div class="toc-cols">
+    <div class="toc-col">
+      <div class="toc-sec">复述</div>
+      {% for it in retellings %}
+      {% set pg = page_map.get(it.id, "—") %}
+      {% set rng = (pg ~ "–" ~ (pg + 1)) if pg != "—" else "—" %}
+      <div class="toc-item">
+        <span class="tag {% if it.category == '社会热点' or it.category == '热点' %}tag-hot{% else %}tag-warm{% endif %}">{{ it.category }}</span>
+        <span class="toc-t">{{ it.title }}</span>
+        <span class="toc-p">{{ rng }}</span>
+      </div>
+      {% endfor %}
+      <div class="toc-item toc-sub">
+        <span class="toc-t">复述参考</span>
+        <span class="toc-p">{{ page_map.get("复述参考", "—") }}</span>
+      </div>
+    </div>
+
+    <div class="toc-col">
+      <div class="toc-sec">评论</div>
+      {% for c in commentaries %}
+      {% set pg = page_map.get(c.id, "—") %}
+      <div class="toc-item">
+        <span class="toc-t">{{ c.title }}</span>
+        <span class="toc-p">{{ pg }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="toc-col">
+      <div class="toc-sec">原文拆解与积累</div>
+      {% for f in excerpts %}
+      {% set pg = page_map.get(f.id, "—") %}
+      <div class="toc-item">
+        <span class="toc-t">{{ f.topic }}</span>
+        <span class="toc-p">{{ pg }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if ai_prompt %}
+  <div class="promptbox-aftertoc">
+    <div class="pb-cap">AI 陪练完整指令（复制给豆包等语音 AI；材料页脚为简短版）</div>
+    <pre class="pb-text">{{ ai_prompt }}</pre>
+  </div>
+  {% endif %}
+
+  <div class="toc-append">
+    附录 · 使用说明 <span class="toc-p">{{ page_map.get("附录", "—") }}</span>
+  </div>
+</div>

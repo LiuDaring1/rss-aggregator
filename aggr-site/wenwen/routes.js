@@ -121,6 +121,11 @@ async function buildDataHealth() {
 /* ---------------- 路由挂载 ---------------- */
 
 export async function mountWenwen(req, res, url) {
+  const isReadonly = process.env.AGGR_READONLY === 'on' || process.env.AGGR_MODE === 'readonly' || (process.env.AGGR_MODE || '').includes('readonly');
+  if (isReadonly && req.method === 'POST') {
+    return sendJson(res, 403, { ok: false, error: '系统处于只读模式（AGGR_READONLY=on），已拒绝写操作' });
+  }
+
   await initStore();
   const db = getDb();
   const p = url.pathname;
@@ -306,14 +311,18 @@ export async function mountWenwen(req, res, url) {
       note: '包含 db.json 与全部本地正文快照；不含任何密钥、Cookie、登录状态。',
     };
     const manifestPath = path.join(dataDir(), 'manifest.json');
-    await fsp.writeFile(manifestPath, JSON.stringify(manifest, null, 1));
+    if (!isReadonly) {
+      await fsp.writeFile(manifestPath, JSON.stringify(manifest, null, 1));
+    }
     const stamp = new Date().toISOString().slice(0, 10);
     res.writeHead(200, {
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="wenwen-full-backup-${stamp}.zip"`,
     });
-    // zip 从 data 目录打包 db.json/manifest.json/raw/，路径稳定且不含敏感物
-    const child = spawn('zip', ['-r', '-', 'db.json', 'manifest.json', 'raw'], { cwd: dataDir() });
+    // zip 从 data 目录打包 db.json/raw/（非只读模式附加 manifest.json）
+    const zipArgs = ['-r', '-', 'db.json', 'raw'];
+    if (fs.existsSync(manifestPath)) zipArgs.push('manifest.json');
+    const child = spawn('zip', zipArgs, { cwd: dataDir() });
     child.stdout.pipe(res);
     child.stderr.on('data', () => {});
     child.on('error', (e) => sendJson(res, 500, { error: `zip 不可用：${e.message}` }));

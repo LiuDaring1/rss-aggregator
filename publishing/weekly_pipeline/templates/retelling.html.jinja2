@@ -1,0 +1,46 @@
+{# 模块一：口语复述单元模板 (两页制) #}
+<section class="rp rmat">
+  {% if is_preview %}
+  <div class="preview-header">
+    <span>【单单元预览】复述单元 · {{ unit.id }}</span>
+    <span>类别：{{ unit.category }}</span>
+  </div>
+  {% endif %}
+  <div class="rhead">
+    <span class="rno">{{ unit.id }}</span>
+    <span class="tag {% if unit.category == '社会热点' or unit.category == '热点' %}tag-hot{% else %}tag-warm{% endif %}">{{ unit.category }}</span>
+    <h3>{{ unit.title }}</h3>
+  </div>
+  <div class="dateline">{{ unit.date_label }}</div>
+  {% for para in unit.material_paragraphs %}
+  <p class="matbody">{{ para }}</p>
+  {% endfor %}
+  <div class="src">{{ unit.source_label }}</div>
+  <div class="aifoot">{{ unit.ai_prompt_foot | default("AI 陪练提示：把本页拍给语音 AI 当复述听众，说完“我复述完毕”再听反馈（完整指令见目录页）。") }}</div>
+</section>
+
+<section class="rp rhint">
+  <div class="rhead">
+    <span class="rno">{{ unit.id }}</span>
+    <h3>{{ unit.title }} · 提示页</h3>
+  </div>
+  <div class="hint-blk">
+    <div class="hint-cap">关键词网络</div>
+    {{ keywords_svg | safe }}
+  </div>
+  <div class="hint-blk">
+    <div class="hint-cap">思维导图（虚线待补写）</div>
+    {{ mindmap_svg | safe }}
+  </div>
+  <div class="hint-blk">
+    <div class="hint-cap">插画</div>
+    {% if illustration_html %}
+      {{ illustration_html | safe }}
+    {% else %}
+    <div class="illhold">
+      <div class="ill-no">插画位 {{ unit.illustration_id | default("ILL-" ~ unit.id) }} · 插画待回传</div>
+      <div class="ill-note">{{ unit.illustration_brief | default("黑白报刊式叙事插画") }}</div>
+    </div>
+    {% endif %}
+  </div>
+</section>

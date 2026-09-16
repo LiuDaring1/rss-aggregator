@@ -38,11 +38,15 @@ export async function initStore({ dataDir, reset = false } = {}) {
   if (dataDir) DATA_DIR = dataDir;
   fs.mkdirSync(RAW_DIR(), { recursive: true });
   if (db && !reset) return db;
-  if (reset) db = null;
   try {
-    db = JSON.parse(await fsp.readFile(DB_FILE(), 'utf8'));
-  } catch {
-    db = {};
+    const raw = await fsp.readFile(DB_FILE(), 'utf8');
+    db = JSON.parse(raw);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      db = {};
+    } else {
+      throw new Error(`[wenwen] db.json 损坏或读取失败，已阻断初始化以防空库覆盖: ${err.message}`);
+    }
   }
   db.events ||= {};
   db.registry ||= {};
@@ -141,7 +145,8 @@ export async function upsertArticle(article) {
     sourceType: article.origin || '',
   };
 
-  const dupOf = d.dedupe.contentHashes[article.contentHash];
+  const hasSubstantialContent = Boolean((article.content || '').trim());
+  const dupOf = hasSubstantialContent ? d.dedupe.contentHashes[article.contentHash] : null;
   if (dupOf && dupOf !== article.id) {
     // 同正文不同来源：追加来源记录，保留每家媒体与 URL，不重复分析
     const main = await loadRaw(dupOf);
@@ -161,8 +166,30 @@ export async function upsertArticle(article) {
     d.dedupe.dedupHits = (d.dedupe.dedupHits || 0) + 1;
     return { isNew: false, duplicateOf: dupOf, appearanceRecorded: true };
   }
-  d.dedupe.contentHashes[article.contentHash] = article.id;
-  article.appearances = [selfAppearance];
+
+  // 若文章正文哈希变动，清理旧哈希记录
+  const existingIndex = d.articleIndex[article.id];
+  if (existingIndex && existingIndex.contentHash && existingIndex.contentHash !== article.contentHash) {
+    if (d.dedupe.contentHashes[existingIndex.contentHash] === article.id) {
+      delete d.dedupe.contentHashes[existingIndex.contentHash];
+    }
+  }
+
+  if (hasSubstantialContent) {
+    d.dedupe.contentHashes[article.contentHash] = article.id;
+  }
+
+  // 重抓/更新时保留既有 appearances 来源记录，不重置为单条
+  const existingRaw = await loadRaw(article.id);
+  if (existingRaw && Array.isArray(existingRaw.appearances) && existingRaw.appearances.length > 0) {
+    const existingUrls = new Set(existingRaw.appearances.map((ap) => ap.url));
+    article.appearances = existingRaw.appearances;
+    if (!existingUrls.has(selfAppearance.url)) {
+      article.appearances.push(selfAppearance);
+    }
+  } else {
+    article.appearances = [selfAppearance];
+  }
 
   const isNew = !d.articleIndex[article.id];
   d.articleIndex[article.id] = {
@@ -176,7 +203,7 @@ export async function upsertArticle(article) {
     origin: article.origin || '',
     contentLength: (article.content || '').length,
     contentHash: article.contentHash,
-    sourceCount: 1,
+    sourceCount: article.appearances.length,
     flags: article.flags,
     isTestData: article.isTestData,
   };

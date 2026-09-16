@@ -1,0 +1,50 @@
+{# 模块三：原文拆解与积累单元模板 (一页制) #}
+<section class="fu">
+  {% if is_preview %}
+  <div class="preview-header">
+    <span>【单单元预览】原文拆解单元 · {{ unit.id }}</span>
+    <span>话题：{{ unit.topic }}</span>
+  </div>
+  {% endif %}
+  {% if is_first_in_issue %}
+  <div class="modhead-inline">
+    <h2>原文拆解与积累</h2>
+  </div>
+  {% endif %}
+  <div class="cuhead">
+    <span class="rno">{{ unit.id }}</span>
+    <h3>{{ unit.topic }}</h3>
+    <span class="backref">{{ unit.source_name }}{% if unit.source_date %}（{{ unit.source_date }}）{% endif %}</span>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">前因后果</div>
+    <p class="ctx">{{ unit.context }}</p>
+  </div>
+  <div class="quote fragtext">
+    {% for para in unit.quote_paragraphs %}
+    <p>{{ para }}</p>
+    {% endfor %}
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">重点拆解</div>
+    <p class="ctx">{{ unit.analyze }}</p>
+  </div>
+  {% if unit.memorize %}
+  <div class="cu-blk">
+    <div class="lbl">积累</div>
+    <p class="ctx"><b>值得记住的表达</b>　{{ unit.memorize }}</p>
+  </div>
+  {% endif %}
+  {% if unit.method %}
+  <div class="cu-blk">
+    <div class="lbl">借鉴</div>
+    <p class="ctx"><b>可以借鉴的讲法</b>　{{ unit.method }}</p>
+  </div>
+  {% endif %}
+  {% if unit.demo_text %}
+  <div class="demoblock">
+    <div class="demo-cap">{{ unit.demo_title | default("示范｜换个话题，可以这样说") }}</div>
+    <p class="demo-text">{{ unit.demo_text }}</p>
+  </div>
+  {% endif %}
+</section>

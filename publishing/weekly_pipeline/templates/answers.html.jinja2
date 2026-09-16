@@ -1,0 +1,21 @@
+{# 集中复述参考答案模板 #}
+<section class="refsec">
+  <h2>复述参考</h2>
+</section>
+{% for it in retellings %}
+<div class="ans">
+  <div class="anshead">
+    <span class="rno">{{ it.id }}</span>
+    <span class="ans-t">{{ it.title }}</span>
+    {% if page_map and page_map[it.id] %}
+    <span class="backref">材料见第 {{ page_map[it.id] }} 页</span>
+    {% else %}
+    <span class="backref">对应材料页</span>
+    {% endif %}
+  </div>
+  <p class="refbody">{{ it.ref_retelling }}</p>
+  {% if it.mapkey %}
+  <div class="mapkey">导图参照：{{ it.mapkey }}</div>
+  {% endif %}
+</div>
+{% endfor %}

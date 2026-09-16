@@ -1,0 +1,87 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "packet_id": {
+      "description": "稳定的事件包ID，如 pkt-2026-dan-jiao-xie",
+      "title": "Packet Id",
+      "type": "string"
+    },
+    "legacy_event_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "关联的旧版雷达事件ID哈希别名",
+      "title": "Legacy Event Id"
+    },
+    "title": {
+      "description": "事件核心标题",
+      "title": "Title",
+      "type": "string"
+    },
+    "source_ids": {
+      "description": "引用的来源文档ID列表",
+      "items": {
+        "type": "string"
+      },
+      "title": "Source Ids",
+      "type": "array"
+    },
+    "core_facts": {
+      "description": "客观核实的关键事实列表",
+      "items": {
+        "type": "string"
+      },
+      "title": "Core Facts",
+      "type": "array"
+    },
+    "quotes": {
+      "description": "当事人或采访原话",
+      "items": {
+        "type": "string"
+      },
+      "title": "Quotes",
+      "type": "array"
+    },
+    "timeline": {
+      "description": "时间线节点",
+      "items": {
+        "type": "string"
+      },
+      "title": "Timeline",
+      "type": "array"
+    },
+    "gaps": {
+      "description": "信息缺口与未证实处",
+      "items": {
+        "type": "string"
+      },
+      "title": "Gaps",
+      "type": "array"
+    },
+    "relevant_commentaries": {
+      "description": "相关媒体评论要点或引用",
+      "items": {
+        "type": "string"
+      },
+      "title": "Relevant Commentaries",
+      "type": "array"
+    }
+  },
+  "required": [
+    "packet_id",
+    "title"
+  ],
+  "title": "EventPacket",
+  "type": "object"
+}

@@ -1,0 +1,41 @@
+{% extends "layout.html.jinja2" %}
+
+{% block content %}
+{# 1. 封面 #}
+{% include "cover.html.jinja2" %}
+
+{# 2. 目录 #}
+{% include "toc.html.jinja2" %}
+
+{# 3. 模块一：复述素材与提示 #}
+{% for r_data in retellings_data %}
+  {% set unit = r_data.unit %}
+  {% set keywords_svg = r_data.keywords_svg %}
+  {% set mindmap_svg = r_data.mindmap_svg %}
+  {% set illustration_html = r_data.illustration_html %}
+  {% set is_preview = false %}
+  {% include "retelling.html.jinja2" %}
+{% endfor %}
+
+{# 4. 集中复述参考 #}
+{% include "answers.html.jinja2" %}
+
+{# 5. 模块二：评论单元 (三页制) #}
+{% for c_data in commentaries_data %}
+  {% set unit = c_data.unit %}
+  {% set backref_page = c_data.backref_page %}
+  {% set is_preview = false %}
+  {% include "commentary.html.jinja2" %}
+{% endfor %}
+
+{# 6. 模块三：原文拆解与积累 #}
+{% for f_data in excerpts_data %}
+  {% set unit = f_data.unit %}
+  {% set is_first_in_issue = loop.first %}
+  {% set is_preview = false %}
+  {% include "excerpt.html.jinja2" %}
+{% endfor %}
+
+{# 7. 附录 #}
+{% include "appendix.html.jinja2" %}
+{% endblock %}

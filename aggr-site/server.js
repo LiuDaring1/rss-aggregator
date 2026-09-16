@@ -423,9 +423,17 @@ const server = http.createServer(async (req, res) => {
       );
       return;
     }
+    const isReadonly = process.env.AGGR_READONLY === 'on' || (process.env.AGGR_MODE || '').includes('readonly');
+    const isOffline = process.env.AGGR_OFFLINE === 'on' || (process.env.AGGR_MODE || '').includes('offline');
+
     if (url.pathname === '/api/health') {
-      const force = url.searchParams.get('force') === '1'; // ?force=1 绕过缓存逐源重抓
       const sources = await loadSources();
+      if (isOffline) {
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ ok: true, offline: true, sources: sources.map((s) => ({ id: s.id, name: s.name, offline: true, count: 0 })) }));
+        return;
+      }
+      const force = url.searchParams.get('force') === '1'; // ?force=1 绕过缓存逐源重抓
       const results = await Promise.all(
         sources.map(async (s) => ({
           id: s.id,
@@ -438,6 +446,11 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (url.pathname === '/api/topics') {
+      if (isOffline) {
+        res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ error: '离线模式（AGGR_OFFLINE=on）：不调用外部 AI 模型' }));
+        return;
+      }
       const hours = Number(url.searchParams.get('hours') || 72);
       const force = url.searchParams.get('force') === '1';
       try {
@@ -457,21 +470,27 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, async () => {
+server.listen(PORT, '127.0.0.1', async () => {
   const sources = await loadSources();
-  console.log(`[aggr-site] 聚合站点已启动: http://127.0.0.1:${PORT}`);
+  const isReadonly = process.env.AGGR_READONLY === 'on' || (process.env.AGGR_MODE || '').includes('readonly');
+  const isOffline = process.env.AGGR_OFFLINE === 'on' || (process.env.AGGR_MODE || '').includes('offline');
+
+  console.log(`[aggr-site] 聚合站点已启动: http://127.0.0.1:${PORT} (显式绑定 127.0.0.1)`);
   console.log(`[aggr-site] 已配置 ${sources.length} 个信息源`);
-  // 交接适配（仅本副本）：设 AGGR_AUTOTASKS=off 可禁用 AI 预热与暖文雷达定时采集/分析，避免写库与 API 调用
-  if (process.env.AGGR_AUTOTASKS === 'off') {
-    console.log('[aggr-site] AGGR_AUTOTASKS=off：已跳过 AI 热点预热与暖文雷达调度（交接验证模式）');
+  if (isReadonly) console.log('[aggr-site] AGGR_READONLY=on：已启用只读模式，拒绝所有写操作');
+  if (isOffline) console.log('[aggr-site] AGGR_OFFLINE=on：已启用离线模式，禁止外网抓取与模型调用');
+
+  // 交接与离线适配：若设 AGGR_AUTOTASKS=off 或处于只读/离线模式，跳过 AI 预热与调度
+  if (process.env.AGGR_AUTOTASKS === 'off' || isReadonly || isOffline) {
+    console.log('[aggr-site] 已跳过 AI 热点预热与暖文雷达调度（只读/离线/交接模式）');
   } else {
-  // 后台预热 AI 热点归纳（72h / 7d），用户点开时大概率已有缓存
-  for (const h of [72, 168]) {
-    getTopics(h, false)
-      .then(() => console.log(`[aggr-site] AI 热点预热完成（${h}h）`))
-      .catch((e) => console.log(`[aggr-site] AI 热点预热失败（${h}h）: ${e.message}`));
-  }
-  // 暖文雷达：启动采集/分析调度
-  await startWenwenScheduler();
+    // 后台预热 AI 热点归纳（72h / 7d），用户点开时大概率已有缓存
+    for (const h of [72, 168]) {
+      getTopics(h, false)
+        .then(() => console.log(`[aggr-site] AI 热点预热完成（${h}h）`))
+        .catch((e) => console.log(`[aggr-site] AI 热点预热失败（${h}h）: ${e.message}`));
+    }
+    // 暖文雷达：启动采集/分析调度
+    await startWenwenScheduler();
   }
 });

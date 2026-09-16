@@ -1,0 +1,321 @@
+{
+  "$defs": {
+    "DeconstructionItem": {
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "description": "拆解对象，如 【开头亮剑统领】或【主体一立足细节】",
+          "title": "Target",
+          "type": "string"
+        },
+        "instruction": {
+          "description": "具体的论证方法说明与教学解析",
+          "title": "Instruction",
+          "type": "string"
+        }
+      },
+      "required": [
+        "target",
+        "instruction"
+      ],
+      "title": "DeconstructionItem",
+      "type": "object"
+    },
+    "LearningBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "recap_facts": {
+          "description": "材料回想核心事实（不提前剧透结论）",
+          "items": {
+            "type": "string"
+          },
+          "title": "Recap Facts",
+          "type": "array"
+        },
+        "questions": {
+          "description": "具体有启发的思考问题（入口思考）",
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "baseline_diagnostic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "初步直觉与教学诊断",
+          "title": "Baseline Diagnostic"
+        },
+        "viewpoints": {
+          "description": "多角度观点参考池",
+          "items": {
+            "$ref": "#/$defs/ViewpointItem"
+          },
+          "title": "Viewpoints",
+          "type": "array"
+        },
+        "reasoning_lessons": {
+          "description": "拆开讲：一至两处重点耐心推演",
+          "items": {
+            "$ref": "#/$defs/ReasoningLesson"
+          },
+          "title": "Reasoning Lessons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "recap_facts",
+        "questions",
+        "viewpoints",
+        "reasoning_lessons"
+      ],
+      "title": "LearningBlock",
+      "type": "object"
+    },
+    "ReasoningLesson": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "description": "推演主题，如 抓反差看成因 / 抓细节看深度",
+          "title": "Title",
+          "type": "string"
+        },
+        "target_viewpoint_ids": {
+          "description": "关联推导的观点ID列表",
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Viewpoint Ids",
+          "type": "array"
+        },
+        "deduction_text": {
+          "description": "细致的因果推演与处境还原过程，拒绝跳步",
+          "title": "Deduction Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "deduction_text"
+      ],
+      "title": "ReasoningLesson",
+      "type": "object"
+    },
+    "SpeechBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "selected_viewpoint_ids": {
+          "description": "范本选定的观点主线ID",
+          "items": {
+            "type": "string"
+          },
+          "title": "Selected Viewpoint Ids",
+          "type": "array"
+        },
+        "main_claim": {
+          "description": "开头两三句话，亮明具体总判断，统领全文",
+          "title": "Main Claim",
+          "type": "string"
+        },
+        "body": {
+          "description": "两个有不同增量的主体段",
+          "items": {
+            "$ref": "#/$defs/SpeechBodyParagraph"
+          },
+          "title": "Body",
+          "type": "array"
+        },
+        "closing": {
+          "description": "结尾单独成段收束，回到主线",
+          "title": "Closing",
+          "type": "string"
+        }
+      },
+      "required": [
+        "main_claim",
+        "body",
+        "closing"
+      ],
+      "title": "SpeechBlock",
+      "type": "object"
+    },
+    "SpeechBodyParagraph": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "主体段编号，如 b1, b2",
+          "title": "Id",
+          "type": "string"
+        },
+        "claim": {
+          "description": "该段开头亮出的小观点（证明或解释什么）",
+          "title": "Claim",
+          "type": "string"
+        },
+        "paragraphs": {
+          "description": "围绕该小观点的论述理由与必要事实",
+          "items": {
+            "type": "string"
+          },
+          "title": "Paragraphs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "claim",
+        "paragraphs"
+      ],
+      "title": "SpeechBodyParagraph",
+      "type": "object"
+    },
+    "TeachingBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "spine": {
+          "description": "全文主线组织结构说明",
+          "title": "Spine",
+          "type": "string"
+        },
+        "deconstruction": {
+          "description": "教学拆解要点",
+          "items": {
+            "$ref": "#/$defs/DeconstructionItem"
+          },
+          "title": "Deconstruction",
+          "type": "array"
+        },
+        "editor_notes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "教师/编辑内部备注（不进学生版）",
+          "title": "Editor Notes"
+        }
+      },
+      "required": [
+        "spine",
+        "deconstruction"
+      ],
+      "title": "TeachingBlock",
+      "type": "object"
+    },
+    "ViewpointItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "观点编号，如 v1, v2",
+          "title": "Id",
+          "type": "string"
+        },
+        "claim": {
+          "description": "具体明确的判断，绝非仅关键词或空泛口号",
+          "title": "Claim",
+          "type": "string"
+        },
+        "evidence": {
+          "description": "该判断在材料中的事实依据与出处",
+          "title": "Evidence",
+          "type": "string"
+        },
+        "explanation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "对该观点的简要补充说明",
+          "title": "Explanation"
+        }
+      },
+      "required": [
+        "id",
+        "claim",
+        "evidence"
+      ],
+      "title": "ViewpointItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "description": "评论单元ID，如 C01, C02",
+      "title": "Id",
+      "type": "string"
+    },
+    "retelling_ref": {
+      "description": "对应的复述单元ID，如 R01",
+      "title": "Retelling Ref",
+      "type": "string"
+    },
+    "packet_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "引用的事件资料包ID",
+      "title": "Packet Ref"
+    },
+    "title": {
+      "description": "评论标题",
+      "title": "Title",
+      "type": "string"
+    },
+    "learning": {
+      "$ref": "#/$defs/LearningBlock",
+      "description": "第1页问题与第2页多观点推演"
+    },
+    "speech": {
+      "$ref": "#/$defs/SpeechBlock",
+      "description": "第3页口语范本（双主体段）"
+    },
+    "teaching": {
+      "$ref": "#/$defs/TeachingBlock",
+      "description": "第3页拆解与教学指导"
+    },
+    "legacy_unreviewed": {
+      "default": false,
+      "description": "标记是否为旧版未经多观点重构的过渡稿",
+      "title": "Legacy Unreviewed",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "retelling_ref",
+    "title",
+    "learning",
+    "speech",
+    "teaching"
+  ],
+  "title": "CommentaryUnit",
+  "type": "object"
+}

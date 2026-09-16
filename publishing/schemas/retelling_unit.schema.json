@@ -1,0 +1,203 @@
+{
+  "$defs": {
+    "MindmapBranch": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "主枝分类名称",
+          "title": "Name",
+          "type": "string"
+        },
+        "leaves": {
+          "description": "下属待填叶节点",
+          "items": {
+            "$ref": "#/$defs/MindmapLeaf"
+          },
+          "title": "Leaves",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "MindmapBranch",
+      "type": "object"
+    },
+    "MindmapLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "hint": {
+          "description": "填空大框提示词/分类",
+          "title": "Hint",
+          "type": "string"
+        },
+        "answer": {
+          "description": "完整参考答案内容",
+          "title": "Answer",
+          "type": "string"
+        },
+        "fact_refs": {
+          "description": "对应材料事实依据",
+          "items": {
+            "type": "string"
+          },
+          "title": "Fact Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "hint",
+        "answer"
+      ],
+      "title": "MindmapLeaf",
+      "type": "object"
+    },
+    "MindmapTree": {
+      "additionalProperties": false,
+      "properties": {
+        "center": {
+          "description": "中心主题",
+          "title": "Center",
+          "type": "string"
+        },
+        "branches": {
+          "description": "思维导图主枝",
+          "items": {
+            "$ref": "#/$defs/MindmapBranch"
+          },
+          "title": "Branches",
+          "type": "array"
+        }
+      },
+      "required": [
+        "center"
+      ],
+      "title": "MindmapTree",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "description": "单元ID，如 R01, R02",
+      "title": "Id",
+      "type": "string"
+    },
+    "category": {
+      "default": "社会热点",
+      "enum": [
+        "社会热点",
+        "暖文",
+        "正向社会生活"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "packet_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "引用的事件资料包ID",
+      "title": "Packet Ref"
+    },
+    "title": {
+      "description": "材料标题",
+      "title": "Title",
+      "type": "string"
+    },
+    "date_label": {
+      "description": "时间标签，如 8月21日",
+      "title": "Date Label",
+      "type": "string"
+    },
+    "source_label": {
+      "description": "来源标注，如 合肥晚报 2026-08-25",
+      "title": "Source Label",
+      "type": "string"
+    },
+    "material_paragraphs": {
+      "description": "新闻事实正文段落（事实为主，中性讲述）",
+      "items": {
+        "type": "string"
+      },
+      "title": "Material Paragraphs",
+      "type": "array"
+    },
+    "keywords": {
+      "description": "关键词网络节点",
+      "items": {
+        "type": "string"
+      },
+      "title": "Keywords",
+      "type": "array"
+    },
+    "mindmap_tree": {
+      "$ref": "#/$defs/MindmapTree",
+      "description": "结构化分枝思维导图"
+    },
+    "ref_retelling": {
+      "description": "集中参考复述文本（以事实为主）",
+      "title": "Ref Retelling",
+      "type": "string"
+    },
+    "mapkey": {
+      "description": "导图参照文字",
+      "title": "Mapkey",
+      "type": "string"
+    },
+    "illustration_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "插画编号，如 ILL-R01",
+      "title": "Illustration Id"
+    },
+    "illustration_brief": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "插画需求描述",
+      "title": "Illustration Brief"
+    }
+  },
+  "required": [
+    "id",
+    "title",
+    "date_label",
+    "source_label",
+    "material_paragraphs",
+    "mindmap_tree",
+    "ref_retelling",
+    "mapkey"
+  ],
+  "title": "RetellingUnit",
+  "type": "object"
+}

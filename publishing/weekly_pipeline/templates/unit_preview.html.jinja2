@@ -1,0 +1,22 @@
+{% extends "layout.html.jinja2" %}
+
+{% block content %}
+{% if unit_type == "retelling" %}
+  {% set unit = unit_data.unit %}
+  {% set keywords_svg = unit_data.keywords_svg %}
+  {% set mindmap_svg = unit_data.mindmap_svg %}
+  {% set illustration_html = unit_data.illustration_html %}
+  {% set is_preview = true %}
+  {% include "retelling.html.jinja2" %}
+{% elif unit_type == "commentary" %}
+  {% set unit = unit_data.unit %}
+  {% set backref_page = unit_data.backref_page %}
+  {% set is_preview = true %}
+  {% include "commentary.html.jinja2" %}
+{% elif unit_type == "excerpt" %}
+  {% set unit = unit_data.unit %}
+  {% set is_first_in_issue = true %}
+  {% set is_preview = true %}
+  {% include "excerpt.html.jinja2" %}
+{% endif %}
+{% endblock %}

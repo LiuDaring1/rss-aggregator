@@ -1,0 +1,116 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "id": {
+      "description": "拆解单元ID，如 F01, F02",
+      "title": "Id",
+      "type": "string"
+    },
+    "topic": {
+      "description": "拆解主题，如 低保装空调背后的治理温度",
+      "title": "Topic",
+      "type": "string"
+    },
+    "source_name": {
+      "description": "媒体名称，如 新京报·快评",
+      "title": "Source Name",
+      "type": "string"
+    },
+    "source_date": {
+      "description": "发表日期，如 2026-08-15",
+      "title": "Source Date",
+      "type": "string"
+    },
+    "source_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "原文链接",
+      "title": "Source Url"
+    },
+    "context": {
+      "description": "前因后果与事件背景",
+      "title": "Context",
+      "type": "string"
+    },
+    "quote_paragraphs": {
+      "description": "真实原文摘录段落",
+      "items": {
+        "type": "string"
+      },
+      "title": "Quote Paragraphs",
+      "type": "array"
+    },
+    "analyze": {
+      "description": "重点拆解：作者为何这样论述、因果推演机制",
+      "title": "Analyze",
+      "type": "string"
+    },
+    "memorize": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "值得记住的表达",
+      "title": "Memorize"
+    },
+    "method": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "可以借鉴的讲法",
+      "title": "Method"
+    },
+    "demo_title": {
+      "description": "示范小标题，如 示范｜谈……，可以这样说",
+      "title": "Demo Title",
+      "type": "string"
+    },
+    "demo_text": {
+      "description": "一段已经说成的口语表达示范",
+      "title": "Demo Text",
+      "type": "string"
+    },
+    "demo_is_hypothetical": {
+      "default": false,
+      "description": "该示范是否为教学假设案例（尊重真实案例）",
+      "title": "Demo Is Hypothetical",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "topic",
+    "source_name",
+    "source_date",
+    "context",
+    "quote_paragraphs",
+    "analyze",
+    "demo_title",
+    "demo_text"
+  ],
+  "title": "ExcerptUnit",
+  "type": "object"
+}

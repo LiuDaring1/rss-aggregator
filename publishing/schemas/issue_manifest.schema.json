@@ -1,0 +1,120 @@
+{
+  "$defs": {
+    "BuildConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "pdf_render_timeout_ms": {
+          "default": 10000,
+          "title": "Pdf Render Timeout Ms",
+          "type": "integer"
+        },
+        "font_family_serif": {
+          "default": "\"Songti SC\", \"STSong\", \"SimSun\", serif",
+          "title": "Font Family Serif",
+          "type": "string"
+        },
+        "font_family_sans": {
+          "default": "\"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", sans-serif",
+          "title": "Font Family Sans",
+          "type": "string"
+        },
+        "font_family_kaiti": {
+          "default": "\"Kaiti SC\", \"STKaiti\", serif",
+          "title": "Font Family Kaiti",
+          "type": "string"
+        },
+        "min_font_size_pt": {
+          "default": 9.0,
+          "title": "Min Font Size Pt",
+          "type": "number"
+        }
+      },
+      "title": "BuildConfig",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "issue_id": {
+      "description": "期刊期号ID，如 sample-01-rev5",
+      "title": "Issue Id",
+      "type": "string"
+    },
+    "title": {
+      "description": "刊名，如 口语素材周刊",
+      "title": "Title",
+      "type": "string"
+    },
+    "kicker": {
+      "default": "高中播音艺考口语素材周刊",
+      "title": "Kicker",
+      "type": "string"
+    },
+    "issue_no_label": {
+      "description": "期号显示，如 试刊 · 第 0 期",
+      "title": "Issue No Label",
+      "type": "string"
+    },
+    "date_range": {
+      "description": "本期素材时间范围",
+      "title": "Date Range",
+      "type": "string"
+    },
+    "retelling_ids": {
+      "description": "入选复述单元ID列表",
+      "items": {
+        "type": "string"
+      },
+      "title": "Retelling Ids",
+      "type": "array"
+    },
+    "commentary_ids": {
+      "description": "入选评论单元ID列表",
+      "items": {
+        "type": "string"
+      },
+      "title": "Commentary Ids",
+      "type": "array"
+    },
+    "excerpt_ids": {
+      "description": "入选原文摘录单元ID列表",
+      "items": {
+        "type": "string"
+      },
+      "title": "Excerpt Ids",
+      "type": "array"
+    },
+    "ai_prompt_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "ai-retelling-prompt.txt",
+      "description": "AI陪练提示词路径",
+      "title": "Ai Prompt Path"
+    },
+    "build_config": {
+      "$ref": "#/$defs/BuildConfig"
+    }
+  },
+  "required": [
+    "issue_id",
+    "title",
+    "issue_no_label",
+    "date_range",
+    "retelling_ids",
+    "commentary_ids",
+    "excerpt_ids"
+  ],
+  "title": "IssueManifest",
+  "type": "object"
+}

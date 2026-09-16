@@ -1,0 +1,36 @@
+schema_version: '1.0'
+issue_id: sample-01-rev5
+title: 口语素材周刊
+kicker: 高中播音艺考口语素材周刊
+issue_no_label: 试刊 · 第 0 期（rev.5 迁移版）
+date_range: 2026年9月第1周
+retelling_ids:
+- R01
+- R02
+- R03
+- R04
+- R05
+- R06
+- R07
+- R08
+commentary_ids:
+- C01
+- C02
+- C03
+- C04
+- C05
+- C06
+excerpt_ids:
+- F01
+- F02
+- F03
+- F04
+- F05
+- F06
+ai_prompt_path: ai-retelling-prompt.txt
+build_config:
+  pdf_render_timeout_ms: 10000
+  font_family_serif: '"Songti SC", "STSong", "SimSun", serif'
+  font_family_sans: '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
+  font_family_kaiti: '"Kaiti SC", "STKaiti", serif'
+  min_font_size_pt: 9.0

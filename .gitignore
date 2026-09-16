@@ -5,11 +5,19 @@ __pycache__/
 .npm-cache/
 .pipcache/
 
-# 密钥与本地配置（绝不入库！）
+# 密钥与本地私密配置（绝不入库！）
 aggr-site/ai.json
 we-mp-rss/config.yaml
 we-mp-rss/data/
+_private/
+references/teaching-private/
 *.env
+*.env.*
+
+# 本地重构与临时产物
+local-data/
+outputs/
+*.tmp
 
 # 运行数据与日志（本机留档）
 aggr-site/data/wenwen/
@@ -31,3 +39,4 @@ we-mp-rss/
 .video_agent/
 .video-agent/
 .github/
+
