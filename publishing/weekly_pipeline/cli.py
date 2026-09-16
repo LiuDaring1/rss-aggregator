@@ -108,13 +108,26 @@ def cmd_preview(args):
         target = found
         
     print(f"正在预览单元: {target}...")
+    # 收集已有复述单元
+    available_retellings = set()
+    r_dir = os.path.join("content", "retellings")
+    if os.path.exists(r_dir):
+        for rf in os.listdir(r_dir):
+            if rf.endswith(".yaml") or rf.endswith(".yml"):
+                available_retellings.add(rf.rsplit(".", 1)[0])
+                
     # 严格前置校验：重复键或非法结构拒绝渲染
-    val_res = validate_file(target)
+    val_res = validate_file(target, available_retellings=available_retellings)
     if not val_res.is_valid:
-        print(f"❌ 单元前置校验失败，拒绝渲染预览: {target}")
-        for err in val_res.errors:
-            print(f"   - {err}")
-        sys.exit(1)
+        # 判断是否仅为单篇草稿未载入复述引用
+        is_only_retell_ref_err = len(val_res.errors) == 1 and "未在有效复述材料列表中找到" in val_res.errors[0]
+        if is_only_retell_ref_err:
+            print(f"⚠️ [草稿预览] {val_res.errors[0]}（单篇草稿预览标记为【未核验】，允许生成预览）")
+        else:
+            print(f"❌ 单元前置校验失败，拒绝渲染预览: {target}")
+            for err in val_res.errors:
+                print(f"   - {err}")
+            sys.exit(1)
         
     with open(target, "r", encoding="utf-8") as f:
         data = load_yaml_safely(f.read())
@@ -159,6 +172,7 @@ def cmd_build(args):
         
     # 加载 units (带严格前置校验与安全解析)
     retellings = []
+    available_retellings = set(manifest.retelling_ids)
     for rid in manifest.retelling_ids:
         yp = os.path.join("content", "retellings", f"{rid}.yaml")
         if not os.path.exists(yp):
@@ -179,7 +193,7 @@ def cmd_build(args):
         if not os.path.exists(yp):
             print(f"❌ 缺少评论单元文件: {yp}")
             sys.exit(1)
-        val_res = validate_file(yp)
+        val_res = validate_file(yp, available_retellings=available_retellings)
         if not val_res.is_valid:
             print(f"❌ 单元前置校验失败，终止构建: {yp}")
             for err in val_res.errors:
@@ -260,8 +274,12 @@ def cmd_export_md(args):
     out_dir = args.outdir
     edition = getattr(args, "edition", "both")
     print(f"正在导出同源 Markdown 审阅文件 ({edition}): {c_dir} -> {out_dir}...")
-    files = export_all_markdown(c_dir, out_dir, edition=edition)
-    print(f"  ✅ 导出完成: 共生成 {len(files)} 个 Markdown 审阅文件在 {out_dir}")
+    try:
+        files = export_all_markdown(c_dir, out_dir, edition=edition)
+        print(f"  ✅ 导出完成: 共生成 {len(files)} 个 Markdown 审阅文件在 {out_dir}")
+    except Exception as e:
+        print(f"  ❌ 导出终止并阻断发布:\n{e}")
+        sys.exit(1)
 
 def main():
     parser = argparse.ArgumentParser(description="口语素材周刊 命令行工具")

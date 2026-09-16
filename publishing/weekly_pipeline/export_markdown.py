@@ -82,26 +82,25 @@ def export_commentary_markdown(unit: CommentaryUnit, edition: str = "teacher") -
         lines.append(f"> {lesson.deduction_text}")
         lines.append("")
     
-    # 口语范本：直接输出规范的 4 个口语段落
-    spoken_paras = unit.get_spoken_paragraphs()
-    lines.append("## 三、两分钟口语范本（正文 4 段）")
-    if len(spoken_paras) >= 4:
-        lines.append("### 【开头·总论点】")
-        lines.append(f"> {spoken_paras[0]}")
+    # 口语范本：按开头、主体段一、主体段二、结尾语义组织，杜绝前四项数组硬切
+    lines.append("## 三、两分钟口语范本")
+    lines.append("### 【开头·总论点】")
+    lines.append(f"> {unit.speech.main_claim.strip()}")
+    lines.append("")
+    for b_idx, b in enumerate(unit.speech.body):
+        ordinal = "一" if b_idx == 0 else "二"
+        lines.append(f"### 【主体段{ordinal}·{b.claim.strip()}】")
+        claim_clean = b.claim.strip()
+        for p_idx, p in enumerate(b.paragraphs):
+            p_clean = p.strip()
+            if p_idx == 0 and not p_clean.startswith(claim_clean):
+                lines.append(f"> {claim_clean} {p_clean}")
+            else:
+                lines.append(f"> {p_clean}")
         lines.append("")
-        lines.append("### 【主体段一·分论点一】")
-        lines.append(f"> {spoken_paras[1]}")
-        lines.append("")
-        lines.append("### 【主体段二·分论点二】")
-        lines.append(f"> {spoken_paras[2]}")
-        lines.append("")
-        lines.append("### 【结尾·收束总结】")
-        lines.append(f"> {spoken_paras[3]}")
-        lines.append("")
-    else:
-        for p in spoken_paras:
-            lines.append(f"> {p}")
-            lines.append("")
+    lines.append("### 【结尾·收束总结】")
+    lines.append(f"> {unit.speech.closing.strip()}")
+    lines.append("")
             
     spoken_text = unit.get_full_spoken_text()
     cn_len = count_chinese_chars(spoken_text)
@@ -144,70 +143,113 @@ def export_excerpt_markdown(unit: ExcerptUnit, edition: str = "teacher") -> str:
     lines.append(f"> {unit.demo_text}")
     return "\n".join(lines)
 
-def _export_edition(content_dir: str, target_dir: str, edition: str) -> List[str]:
-    os.makedirs(target_dir, exist_ok=True)
-    generated = []
+def _export_edition(content_dir: str, target_dir: str, edition: str, available_retellings: Optional[set] = None) -> List[str]:
+    import tempfile
+    import shutil
     
-    # 导出 retellings
+    # 1. 预先收集并校验所有可用复述单元
     r_dir = os.path.join(content_dir, "retellings")
+    c_dir = os.path.join(content_dir, "commentaries")
+    f_dir = os.path.join(content_dir, "excerpts")
+    
+    if available_retellings is None:
+        available_retellings = set()
+        if os.path.exists(r_dir):
+            for fn in os.listdir(r_dir):
+                if fn.endswith(".yaml") or fn.endswith(".yml"):
+                    available_retellings.add(fn.rsplit(".", 1)[0])
+                    
+    # 2. 全量前置校验：任一单元非法即刻阻断，拒绝写入半成品
+    validation_errors = []
+    
+    # 校验 retellings
+    r_files = []
     if os.path.exists(r_dir):
         for fn in sorted(os.listdir(r_dir)):
-            if fn.endswith(".yaml"):
-                val_res = validate_file(os.path.join(r_dir, fn))
+            if fn.endswith(".yaml") or fn.endswith(".yml"):
+                fp = os.path.join(r_dir, fn)
+                val_res = validate_file(fp)
                 if not val_res.is_valid:
-                    print(f"⚠️ 跳过校验未通过文件: {fn}")
-                    continue
-                with open(os.path.join(r_dir, fn), "r", encoding="utf-8") as fp:
-                    u = RetellingUnit.model_validate(load_yaml_safely(fp.read()))
-                md = export_retelling_markdown(u, edition=edition)
-                out_path = os.path.join(target_dir, f"{u.id}.md")
-                with open(out_path, "w", encoding="utf-8") as fp:
-                    fp.write(md)
-                generated.append(out_path)
-                
-    # 导出 commentaries
-    c_dir = os.path.join(content_dir, "commentaries")
+                    validation_errors.append(f"[复述] {fn}: {'; '.join(val_res.errors)}")
+                else:
+                    r_files.append(fp)
+                    
+    # 校验 commentaries（必须传入 available_retellings 检查引用有效性）
+    c_files = []
     if os.path.exists(c_dir):
         for fn in sorted(os.listdir(c_dir)):
-            if fn.endswith(".yaml"):
-                val_res = validate_file(os.path.join(c_dir, fn))
+            if fn.endswith(".yaml") or fn.endswith(".yml"):
+                fp = os.path.join(c_dir, fn)
+                val_res = validate_file(fp, available_retellings=available_retellings)
                 if not val_res.is_valid:
-                    print(f"⚠️ 跳过校验未通过文件: {fn}")
-                    continue
-                with open(os.path.join(c_dir, fn), "r", encoding="utf-8") as fp:
-                    u = CommentaryUnit.model_validate(load_yaml_safely(fp.read()))
-                md = export_commentary_markdown(u, edition=edition)
-                out_path = os.path.join(target_dir, f"{u.id}.md")
-                with open(out_path, "w", encoding="utf-8") as fp:
-                    fp.write(md)
-                generated.append(out_path)
-                
-    # 导出 excerpts
-    f_dir = os.path.join(content_dir, "excerpts")
+                    validation_errors.append(f"[评论] {fn}: {'; '.join(val_res.errors)}")
+                else:
+                    c_files.append(fp)
+                    
+    # 校验 excerpts
+    f_files = []
     if os.path.exists(f_dir):
         for fn in sorted(os.listdir(f_dir)):
-            if fn.endswith(".yaml"):
-                val_res = validate_file(os.path.join(f_dir, fn))
+            if fn.endswith(".yaml") or fn.endswith(".yml"):
+                fp = os.path.join(f_dir, fn)
+                val_res = validate_file(fp)
                 if not val_res.is_valid:
-                    print(f"⚠️ 跳过校验未通过文件: {fn}")
-                    continue
-                with open(os.path.join(f_dir, fn), "r", encoding="utf-8") as fp:
-                    u = ExcerptUnit.model_validate(load_yaml_safely(fp.read()))
-                md = export_excerpt_markdown(u, edition=edition)
-                out_path = os.path.join(target_dir, f"{u.id}.md")
-                with open(out_path, "w", encoding="utf-8") as fp:
-                    fp.write(md)
-                generated.append(out_path)
-                
+                    validation_errors.append(f"[原文拆解] {fn}: {'; '.join(val_res.errors)}")
+                else:
+                    f_files.append(fp)
+                    
+    if validation_errors:
+        err_msg = "\n".join(f"  ❌ {e}" for e in validation_errors)
+        raise ValueError(f"导出前置校验失败（发现 {len(validation_errors)} 个错误，拒绝写入导出目录）:\n{err_msg}")
+
+    # 3. 在临时目录中渲染写入，成功后原子同步至 target_dir，防止残留旧文件
+    generated = []
+    with tempfile.TemporaryDirectory() as tmp_out:
+        for fp in r_files:
+            with open(fp, "r", encoding="utf-8") as f:
+                u = RetellingUnit.model_validate(load_yaml_safely(f.read()))
+            md = export_retelling_markdown(u, edition=edition)
+            out_file = os.path.join(tmp_out, f"{u.id}.md")
+            with open(out_file, "w", encoding="utf-8") as f:
+                f.write(md)
+            generated.append(os.path.join(target_dir, f"{u.id}.md"))
+            
+        for fp in c_files:
+            with open(fp, "r", encoding="utf-8") as f:
+                u = CommentaryUnit.model_validate(load_yaml_safely(f.read()))
+            md = export_commentary_markdown(u, edition=edition)
+            out_file = os.path.join(tmp_out, f"{u.id}.md")
+            with open(out_file, "w", encoding="utf-8") as f:
+                f.write(md)
+            generated.append(os.path.join(target_dir, f"{u.id}.md"))
+            
+        for fp in f_files:
+            with open(fp, "r", encoding="utf-8") as f:
+                u = ExcerptUnit.model_validate(load_yaml_safely(f.read()))
+            md = export_excerpt_markdown(u, edition=edition)
+            out_file = os.path.join(tmp_out, f"{u.id}.md")
+            with open(out_file, "w", encoding="utf-8") as f:
+                f.write(md)
+            generated.append(os.path.join(target_dir, f"{u.id}.md"))
+            
+        # 全量生成完毕，清空目标目录并同步写入
+        os.makedirs(target_dir, exist_ok=True)
+        # 清理旧的 .md 文件防止陈旧坏稿残留
+        for old_fn in os.listdir(target_dir):
+            if old_fn.endswith(".md"):
+                os.remove(os.path.join(target_dir, old_fn))
+        for tmp_fn in os.listdir(tmp_out):
+            shutil.copy2(os.path.join(tmp_out, tmp_fn), os.path.join(target_dir, tmp_fn))
+            
     return generated
 
-def export_all_markdown(content_dir: str, out_dir: str, edition: str = "both") -> List[str]:
+def export_all_markdown(content_dir: str, out_dir: str, edition: str = "both", available_retellings: Optional[set] = None) -> List[str]:
     generated = []
     if edition == "both":
         student_dir = os.path.join(out_dir, "student")
         teacher_dir = os.path.join(out_dir, "teacher")
-        generated.extend(_export_edition(content_dir, student_dir, "student"))
-        generated.extend(_export_edition(content_dir, teacher_dir, "teacher"))
+        generated.extend(_export_edition(content_dir, student_dir, "student", available_retellings=available_retellings))
+        generated.extend(_export_edition(content_dir, teacher_dir, "teacher", available_retellings=available_retellings))
     else:
-        generated.extend(_export_edition(content_dir, out_dir, edition))
+        generated.extend(_export_edition(content_dir, out_dir, edition, available_retellings=available_retellings))
     return generated

@@ -308,5 +308,101 @@ category: 重复的社会热点
             if os.path.exists(tf_path):
                 os.remove(tf_path)
 
+    def test_e2_export_commentary_markdown_multi_paragraph_body(self):
+        """E2回归测试：主体段包含多个小段时，Markdown导出绝不截断结尾，完整呈现所有段落"""
+        from weekly_pipeline.export_markdown import export_commentary_markdown
+        from weekly_pipeline.models import SpeechBodyParagraph
+        
+        cu = create_sample_commentary(viewpoint_count=3, body_count=2)
+        # 第一主体包含 2 小段，第二主体包含 1 小段（总共 1 开头 + 2 主体一 + 1 主体二 + 1 结尾 = 5 段）
+        cu.speech.body = [
+            SpeechBodyParagraph(
+                id="b1",
+                claim="分论点一：第一层理由说明",
+                paragraphs=[
+                    "第一小段详细论述事实与原因。",
+                    "第二小段递进阐释影响与推导。"
+                ]
+            ),
+            SpeechBodyParagraph(
+                id="b2",
+                claim="分论点二：第二层推进思考",
+                paragraphs=[
+                    "第二主体唯一小段论述治理与制度。"
+                ]
+            )
+        ]
+        cu.speech.closing = "真正的结尾收束总结段落，绝不应丢失。"
+        
+        md_text = export_commentary_markdown(cu, edition="teacher")
+        
+        # 断言所有小段都在导出 Markdown 中出现
+        self.assertIn("第一小段详细论述事实与原因", md_text)
+        self.assertIn("第二小段递进阐释影响与推导", md_text)
+        self.assertIn("第二主体唯一小段论述治理与制度", md_text)
+        # 核心断言：结尾收束段落必须保留并正确标示，绝不可被误标或截断
+        self.assertIn("### 【结尾·收束总结】", md_text)
+        self.assertIn("真正的结尾收束总结段落，绝不应丢失", md_text)
+
+    def test_e1_and_e3_export_md_aborts_on_invalid_file_and_missing_retelling(self):
+        """E1与E3回归测试：导出时若发现非法单元或缺少引用，立即抛出异常并阻断，不留残留半成品"""
+        import tempfile
+        import shutil
+        from weekly_pipeline.export_markdown import export_all_markdown
+        
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            c_dir = os.path.join(tmp_dir, "content")
+            out_dir = os.path.join(tmp_dir, "out")
+            r_dir = os.path.join(c_dir, "retellings")
+            com_dir = os.path.join(c_dir, "commentaries")
+            os.makedirs(r_dir, exist_ok=True)
+            os.makedirs(com_dir, exist_ok=True)
+            os.makedirs(out_dir, exist_ok=True)
+            
+            # 1. 评论单元引用了不存在的复述单元 R_NON_EXISTENT
+            bad_commentary = """
+schema_version: '1.0'
+id: C_BAD
+retelling_ref: R_NON_EXISTENT
+title: 测试坏评论
+learning:
+  recap_facts: [事实1, 事实2]
+  questions: [问题1, 问题2]
+  viewpoints:
+    - id: v1
+      claim: 观点1
+      evidence: 证据1
+    - id: v2
+      claim: 观点2
+      evidence: 证据2
+  reasoning_lessons: []
+speech:
+  selected_viewpoint_ids: [v1, v2]
+  main_claim: 总观点
+  body:
+    - id: b1
+      claim: 分论点1
+      paragraphs: [分论点1内容]
+    - id: b2
+      claim: 分论点2
+      paragraphs: [分论点2内容]
+  closing: 结尾
+teaching:
+  spine: 骨架
+  deconstruction:
+    - target: 目标
+      instruction: 指导
+"""
+            with open(os.path.join(com_dir, "C_BAD.yaml"), "w", encoding="utf-8") as f:
+                f.write(bad_commentary)
+                
+            # 执行 export_all_markdown，断言其由于缺少复述引用而抛出 ValueError
+            with self.assertRaises(ValueError) as ctx:
+                export_all_markdown(c_dir, out_dir, edition="teacher")
+            self.assertIn("未在有效复述材料列表中找到", str(ctx.exception))
+            
+            # 断言 out_dir 下未残留任何 C_BAD.md
+            self.assertFalse(os.path.exists(os.path.join(out_dir, "C_BAD.md")))
+
 if __name__ == "__main__":
     unittest.main()
