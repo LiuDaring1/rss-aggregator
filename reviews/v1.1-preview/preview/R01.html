@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>口语周刊 · 单元预览 [R01] 女童从三楼阳台坠落，路人楚亮伸手接住后发帖“求点赞”</title>
+  <style>
+/* 口语素材周刊 标准印刷样式表 (A4 黑白; Jinja2 模块化排版) */
+@page {
+  size: A4;
+  margin: 14mm 14mm 15mm 14mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-print-color-adjust: exact;
+}
+
+body {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 10.5pt;
+  line-height: 1.66;
+  color: #000;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .anshead, .pb-cap, .badge {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------- 页面分割控制 ---------- */
+.page-break {
+  page-break-after: always;
+  break-after: page;
+}
+
+.avoid-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ---------- 封面（仅刊名/期号/署名） ---------- */
+.cover {
+  text-align: center;
+  padding-top: 62mm;
+  page-break-after: always;
+  break-after: page;
+}
+.cover .kicker {
+  font-size: 11pt;
+  letter-spacing: 0.35em;
+  color: #333;
+}
+.cover h1 {
+  font-size: 36pt;
+  letter-spacing: 0.18em;
+  margin: 10mm 0 5mm;
+}
+.cover .issue {
+  font-size: 13pt;
+}
+
+/* ---------- 目录 + 陪练指令 ---------- */
+.tocpage {
+  page-break-after: always;
+  break-after: page;
+}
+.toc-h {
+  font-size: 17pt;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 2mm;
+}
+.toc-cols {
+  display: flex;
+  gap: 7mm;
+  margin-top: 4mm;
+}
+.toc-col {
+  flex: 1;
+}
+.toc-sec {
+  font-size: 12.5pt;
+  font-weight: 700;
+  border-bottom: 0.9pt solid #000;
+  margin: 2mm 0 2mm;
+  padding-bottom: 1mm;
+}
+.toc-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1.6mm;
+  margin: 1.35mm 0;
+  font-size: 9.3pt;
+  line-height: 1.42;
+}
+.toc-item.toc-sub {
+  border-top: 0.6pt dashed #666;
+  padding-top: 1.5mm;
+  font-weight: 700;
+}
+.toc-t {
+  flex: 1;
+}
+.toc-p {
+  flex-shrink: 0;
+  font-family: "PingFang SC", sans-serif;
+}
+.toc-append {
+  margin-top: 3mm;
+  font-size: 9.5pt;
+  border-top: 0.6pt solid #000;
+  padding-top: 1.6mm;
+}
+.tag {
+  display: inline-block;
+  border: 0.9pt solid #000;
+  font-size: 8.5pt;
+  padding: 0 1.6mm;
+  flex-shrink: 0;
+}
+.tag-hot {
+  background: #000;
+  color: #fff;
+}
+.tag-warm {
+  background: #fff;
+  color: #000;
+}
+
+.promptbox-aftertoc {
+  margin-top: 4mm;
+  border: 1pt solid #000;
+  padding: 2.5mm 3.5mm;
+}
+.pb-cap {
+  font-weight: 700;
+  font-size: 9.5pt;
+  margin-bottom: 1.2mm;
+}
+.pb-text {
+  white-space: pre-wrap;
+  font-family: "Songti SC", serif;
+  font-size: 8.1pt;
+  line-height: 1.52;
+  margin: 0;
+}
+
+/* ---------- 模块一：复述两页 ---------- */
+.rp {
+  page-break-after: always;
+  break-after: page;
+}
+.rhead {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-bottom: 2mm;
+}
+.rhead h3 {
+  font-size: 15.5pt;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+.rno {
+  display: inline-block;
+  border: 1.4pt solid #000;
+  font-weight: 700;
+  font-size: 11pt;
+  padding: 0.5mm 2.2mm;
+}
+.rmat .dateline {
+  font-family: "PingFang SC", sans-serif;
+  font-size: 11pt;
+  border-bottom: 0.9pt solid #000;
+  padding-bottom: 2mm;
+  margin-bottom: 5mm;
+}
+.matbody {
+  font-size: 16.5pt;
+  line-height: 1.92;
+  margin: 0 0 5.5mm;
+  text-align: justify;
+}
+.src {
+  font-size: 9pt;
+  color: #333;
+}
+.rmat .src {
+  font-size: 9.5pt;
+  margin-top: 4mm;
+}
+.aifoot {
+  margin-top: 8mm;
+  border: 0.9pt dashed #555;
+  padding: 2.5mm 3.5mm;
+  font-size: 9.5pt;
+  color: #333;
+  font-family: "PingFang SC", sans-serif;
+}
+
+.rhint .hint-blk {
+  margin: 0 0 3mm;
+}
+.hint-cap {
+  font-size: 11pt;
+  font-weight: 700;
+  margin: 1.5mm 0 1mm;
+}
+.hint-blk svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.illhold {
+  border: 1.4pt dashed #000;
+  min-height: 42mm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ill-no {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+}
+.ill-note {
+  font-size: 9.5pt;
+  color: #333;
+  margin-top: 1.5mm;
+}
+
+/* ---------- 集中参考答案 ---------- */
+.refsec {
+  break-before: page;
+  page-break-before: always;
+  margin-bottom: 3mm;
+}
+.refsec h2 {
+  font-size: 18pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 2mm;
+  margin: 0;
+}
+.ans {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 3mm 0;
+}
+.anshead {
+  display: flex;
+  align-items: baseline;
+  gap: 2.5mm;
+  margin-bottom: 1.2mm;
+}
+.ans-t {
+  font-weight: 700;
+  font-size: 10.5pt;
+  flex: 1;
+}
+.backref {
+  font-size: 9pt;
+  color: #333;
+  font-family: "PingFang SC", sans-serif;
+  flex-shrink: 0;
+}
+.ans .refbody {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 11.5pt;
+  line-height: 1.8;
+  margin: 1mm 0;
+  text-align: justify;
+}
+.mapkey {
+  font-size: 8.8pt;
+  color: #333;
+  border-top: 0.6pt dashed #999;
+  padding-top: 1mm;
+  font-family: "Kaiti SC", "STKaiti", serif;
+}
+
+/* ---------- 模块二：评论三页制 ---------- */
+.cq, .cview, .cscript {
+  break-before: page;
+  page-break-before: always;
+}
+.cuhead {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-bottom: 2.5mm;
+}
+.cuhead h3 {
+  font-size: 14pt;
+  margin: 0;
+  flex: 1;
+  line-height: 1.45;
+}
+.cu-blk {
+  margin: 3mm 0;
+}
+.cu-blk .lbl {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+  border-left: 2.4pt solid #000;
+  padding-left: 2.5mm;
+  margin-bottom: 1.2mm;
+}
+ul.recap {
+  margin: 0;
+  padding-left: 7mm;
+}
+ul.recap li {
+  margin: 1mm 0;
+  font-size: 10.5pt;
+}
+ol.qs {
+  margin: 0;
+  padding-left: 7mm;
+}
+ol.qs li {
+  margin: 1.6mm 0 0.8mm;
+  font-size: 10.8pt;
+}
+.qs .wl {
+  border-bottom: 0.6pt dotted #555;
+  height: 7mm;
+  margin: 0.8mm 0 1.6mm;
+}
+.baseline {
+  font-size: 10.5pt;
+  color: #333;
+  margin-bottom: 1.5mm;
+}
+ul.views {
+  margin: 0;
+  padding-left: 2mm;
+  list-style: none;
+}
+ul.views li {
+  margin: 2mm 0;
+  font-size: 10.8pt;
+  padding-left: 5mm;
+  text-indent: -5mm;
+  line-height: 1.6;
+}
+ul.views li::before {
+  content: "◆ ";
+  font-size: 8pt;
+}
+.views .how {
+  font-size: 9.5pt;
+  color: #444;
+  margin-top: 0.5mm;
+  text-indent: 0;
+  padding-left: 0;
+}
+.ctx {
+  font-size: 10.4pt;
+  margin: 0.8mm 0;
+  text-align: justify;
+  line-height: 1.72;
+}
+.ctx b {
+  font-family: "PingFang SC", sans-serif;
+}
+.reason {
+  font-size: 10.6pt;
+  line-height: 1.85;
+}
+.reason-title {
+  font-weight: 700;
+  font-size: 10.5pt;
+  margin-bottom: 1mm;
+}
+
+.cu-script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12pt;
+  line-height: 1.95;
+  border: 1pt solid #000;
+  padding: 4mm 5.5mm;
+  margin: 1mm 0;
+}
+.cu-script p {
+  margin: 1.6mm 0;
+  text-indent: 2em;
+}
+
+.decon-list {
+  margin-top: 1mm;
+}
+.decon-item {
+  margin-bottom: 2mm;
+}
+.decon-target {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 10pt;
+  color: #111;
+  margin-bottom: 0.5mm;
+}
+
+/* ---------- 模块三：原文拆解 ---------- */
+.fu {
+  break-before: page;
+  page-break-before: always;
+}
+.fu .cuhead h3 {
+  font-size: 13.5pt;
+}
+.fragtext {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12.5pt;
+  line-height: 1.92;
+  margin: 2.5mm 0;
+}
+.fragtext p {
+  margin: 1.4mm 0;
+  text-indent: 2em;
+}
+.modhead-inline {
+  margin-bottom: 3.5mm;
+}
+.modhead-inline h2 {
+  font-size: 18pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 2mm;
+  margin: 0 0 2.5mm;
+}
+
+/* ---------- 示范独立块 ---------- */
+.demoblock {
+  margin: 3mm 0 1mm;
+  padding: 3mm 4.5mm;
+  background: #f5f5f5;
+  border-top: 0.8pt solid #000;
+  border-bottom: 0.8pt solid #000;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.demo-cap {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 10.5pt;
+  margin-bottom: 1.2mm;
+}
+.demo-text {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 11.8pt;
+  line-height: 1.9;
+  margin: 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* ---------- 附录 ---------- */
+.appendix {
+  break-before: page;
+  page-break-before: always;
+}
+.appendix h2 {
+  font-size: 16pt;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 2mm;
+  margin-top: 0;
+}
+.appendix .prompt {
+  border: 1pt solid #000;
+  padding: 4mm 5mm;
+  margin-top: 4mm;
+}
+.appendix .prompt p {
+  font-size: 11pt;
+  line-height: 1.9;
+  margin: 1.5mm 0;
+}
+
+/* ---------- 预览标识条 ---------- */
+.preview-header {
+  border-bottom: 1px dashed #666;
+  padding-bottom: 2mm;
+  margin-bottom: 4mm;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9pt;
+  color: #666;
+  font-family: "PingFang SC", sans-serif;
+}
+
+  </style>
+</head>
+<body>
+<section class="rp rmat">
+  <div class="preview-header">
+    <span>【单单元预览】复述单元 · R01</span>
+    <span>类别：社会热点</span>
+  </div>
+  <div class="rhead">
+    <span class="rno">R01</span>
+    <span class="tag tag-hot">社会热点</span>
+    <h3>女童从三楼阳台坠落，路人楚亮伸手接住后发帖“求点赞”</h3>
+  </div>
+  <div class="dateline">事发 2026 年 8 月 21 日 · 安徽亳州</div>
+  <p class="matbody">8 月 21 日，安徽亳州，39 岁的楚亮在买饭途中听到有人大喊“接住小孩”。他抬头看见一名幼童悬在三楼阳台外，立即跑上前伸出双手。孩子坠落后落在他的胳膊上，再滑到地面，楚亮也因此多处疼痛。</p>
+  <p class="matbody">事后，他在网上发帖，请大家给自己点点赞、夸一夸。帖子获得超过九万人次点赞，一些网友还提出给他寄家乡特产。他的行为也获得了公益奖励。面对孩子家人的感谢，他表示，照顾好孩子最重要。</p>
+  <div class="src">来源：合肥晚报 2026-08-24（合新闻）</div>
+  <div class="aifoot">AI 陪练提示：把本页拍给语音 AI 当复述听众，说完“我复述完毕”再听反馈（完整指令见目录页）。</div>
+</section>
+
+<section class="rp rhint">
+  <div class="rhead">
+    <span class="rno">R01</span>
+    <h3>女童从三楼阳台坠落，路人楚亮伸手接住后发帖“求点赞” · 提示页</h3>
+  </div>
+  <div class="hint-blk">
+    <div class="hint-cap">关键词网络</div>
+    <svg viewBox="0 0 720 235" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="720" height="235" fill="#fff"/><line x1="360" y1="117" x2="128" y2="38" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="592" y2="38" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="70" y2="117" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="650" y2="117" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="128" y2="196" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="592" y2="196" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><rect x="83" y="22" width="90" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="128.0" y="43" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">39岁的楚亮</text><rect x="529" y="22" width="126" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="592.0" y="43" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">幼童悬在三楼阳台外</text><rect x="21" y="101" width="98" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="70.0" y="122" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">跑上前·伸双手</text><rect x="574" y="101" width="140" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="644.0" y="122" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">落在胳膊上·多处疼痛</text><rect x="72" y="180" width="112" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="128.0" y="201" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">求点赞·超九万次</text><rect x="536" y="180" width="112" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="592.0" y="201" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">寄特产·公益奖励</text><rect x="282" y="98" width="155" height="38" fill="#fff" stroke="#000" stroke-width="1.8"/><text x="360.0" y="123" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="14.5" font-weight="700" text-anchor="middle" fill="#000">坠楼瞬间的救援与回应</text></svg>
+  </div>
+  <div class="hint-blk">
+    <div class="hint-cap">思维导图（虚线待补写）</div>
+    <svg viewBox="0 0 720 363" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="720" height="363" fill="#fff"/><rect x="350" y="14" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="30" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">时间地点</text><rect x="350" y="63" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="79" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">谁在喊·看见了什么</text><rect x="350" y="112" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="128" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">他的动作</text><rect x="350" y="161" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="177" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">孩子落在哪·他的伤</text><rect x="350" y="210" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="226" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">他请网友做什么</text><rect x="350" y="259" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="275" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">网友与奖励</text><rect x="350" y="308" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="324" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">他说了什么</text><text x="256" y="64.5" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#000">事发</text><path d="M 310 59.5 H 342 V 60 H 348" stroke="#000" stroke-width="1" fill="none"/><text x="256" y="162.5" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#000">行动与结果</text><path d="M 310 157.5 H 342 V 158 H 348" stroke="#000" stroke-width="1" fill="none"/><text x="256" y="260.5" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#000">发帖与回应</text><path d="M 310 255.5 H 342 V 256 H 348" stroke="#000" stroke-width="1" fill="none"/><text x="256" y="334.0" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#000">对家人</text><path d="M 310 329.0 H 342 V 329 H 348" stroke="#000" stroke-width="1" fill="none"/><text x="20" y="186.5" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#000">坠楼瞬间的救援与回应</text><path d="M 108 181.5 H 196" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 60 V 329" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 60 H 208" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 158 H 208" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 256 H 208" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 329 H 208" stroke="#000" stroke-width="1.2" fill="none"/><text x="714" y="360" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="9.5" font-weight="normal" text-anchor="end" fill="#555">虚线框＝待补写（要点见「复述参考」导图参照）</text></svg>
+  </div>
+  <div class="hint-blk">
+    <div class="hint-cap">插画</div>
+    <div class="illhold">
+      <div class="ill-no">插画位 ILL-R01 · 插画待回传</div>
+      <div class="ill-note">黑白报刊式叙事插画（对应 女童从三楼阳台坠落，路人楚亮伸手接住后发帖“求点赞”）</div>
+    </div>
+  </div>
+</section></body>
+</html>

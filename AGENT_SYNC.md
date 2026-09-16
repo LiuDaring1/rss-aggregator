@@ -5,78 +5,59 @@
 > - **Reviewer Agent**：主编与架构指导 Agent（依据教师要求与教学规范审阅产物，输出评审意见与下阶段任务书）
 > 
 > **当前协作分支**：`antigravity-dev`  
-> **本次修订基线**：响应《00_审核结论与补正清单.md》（针对 Commit `8692416` 审计结论的全项补正）  
+> **本次修订基线**：响应《00_2290d2c_复审回单.md》（针对 Commit `2290d2c` 复审意见与教学写作小样的全面落实）  
 > **历史基线保护**：`weekly/sample-01-rev5/sample.pdf`（SHA-256 `fee4266e34a46e786858426049619efb0f67a7b33a8982aceb657a3499324a1e`）保持 100% 原始只读，未受任何修改。
 
 ---
 
 ## 🚦 三态验收总看板（状态分离，拒绝虚标）
 
-根据主编审计要求，本系统绝不用单一的“全部完成”模糊进度，严格区分三种状态：
+根据主编与教师核心指导（*“工程环境先稳定下来，写作单独做小样比较。我们下一次真正要争取的……是得到一篇你读完后觉得‘这篇终于懂我的课了，而且不用我大改’的稿子”*），本看板严格区分三种验收状态：
 
 | 维度 | 当前状态 | 验收说明 |
 | :--- | :---: | :--- |
-| **1. 工程自动化校验 (Engineering Test)** | **✅ 全部通过** | • Node 单元测试 20/20 全部通过（含 S0-1~S0-5 健壮性测试）<br/>• Python 单元测试 9/9 全部通过（含独立 Claim 字数、YAML重复键、跨文件引用、教学自夸筛查）<br/>• 全量 22 个单元 YAML Schema 校验 100% 通过（0 错误，0 警告）<br/>• CLI `preview`（单单元 HTML/PDF/PNG）与 `build`（45页整刊）均可离线确定性构建成功 |
-| **2. 编辑内部自查 (Editorial Internal)** | **✅ 定向修正完成** | • 7 篇评论（C01~C06 及单脚鞋）严格按《审核结论》表 §6 逐题精修<br/>• 剔除未核对事实、删除绝对化推论与夸张险情、纠正动机净化与自相矛盾、统一术语<br/>• 彻底清理学生面 `teaching.deconstruction` 中的工程汇报与自夸词汇<br/>• 同步生成同源 Markdown 审阅文件（`outputs/markdown/`） |
-| **3. 教师终审认可 (Teacher Sign-off)** | **⏳ 尚未定稿 (待教师审阅)** | • 单脚鞋及六篇评论仍属于新范式重构稿，尚未获得业务教师内容终审定稿<br/>• `legacy_unreviewed: false` 仅代表已完成结构化解耦与内部编辑自查，不代表教师最终验收 |
+| **1. 工程自动化校验 (Engineering Test)** | **✅ 全部通过** | • **Node 单元测试 23/23 全部通过**（新增 `config.js` 统一模式解析，修复 `fetchSource` 未定义变量异常，`store.js` 统一拦截落盘，新增 `server-mode.test.mjs`）<br/>• **Python 单元测试 12/12 全部通过**（包含 YAML 重复键阻断、跨文件引用防御、纯汉字与非空白字符区分统计、双版本 Markdown 差异化导出）<br/>• **全量 22 个单元 YAML Schema 校验 100% 通过**（0 错误，0 警告）<br/>• **管线守门机制全面生效**：`preview`、`build`、`export-md` 遇到重复键或非法结构均严格拒绝并终止构建 |
+| **2. 编辑内部自查 (Editorial Internal)** | **✅ 定向精修完成** | • **彻底解决 GitHub 404**：正式建立 Git 跟踪的公开审阅目录 [`reviews/v1.1-preview/`](reviews/v1.1-preview/)，产物无需解压直接在 GitHub 在线查阅<br/>• **分类与事实纠错**：修正 `R01~R05.yaml` 标签为“社会热点”；修正 `R02.yaml` 删去未经证实的推论，示范复述实现 **100% 中立客观叙述**，剔除主观评论词；`C02.yaml` 教学拆解聚焦指导学生拆解“答非所问、偷换概念”<br/>• **同源双版本 Markdown**：生成 22 篇学生练习版（留白、无答案、无备课备注）与 22 篇教师审阅版（含导图答案、因果推演与备课备注） |
+| **3. 教师终审认可 (Teacher Sign-off)** | **⏳ 待教师定稿** | • 《单脚鞋银行》《楚亮求点赞》《椰子水掺水》已按教师授课逻辑精修小样，交付教师评估比较，尚未获得教师最终定稿 |
 
 ---
 
-## 🧭 审阅快速入口指南（Reviewer 专用）
+## 🧭 公开审阅快速入口指南（Reviewer 专属 · 绝无 404）
 
-为免除 Reviewer 在各个历史目录与 YAML 文件之间猜疑最新版本，请统一使用以下入口：
+所有产物均已纳入 Git 仓库并同步推送，Reviewer 在 GitHub 仓库页面点击即可直接阅读：
 
-### 1. 学生/教师同源 Markdown 在线审阅入口（最推荐）
-由 `python3 publishing/weekly_pipeline/cli.py export-md` 基于最新 Pydantic 数据自动导出：
-- 📄 **单脚鞋完整示范单元**：[`outputs/markdown/c-dan-jiao-xie.md`](outputs/markdown/c-dan-jiao-xie.md) 及其对应复述材料 [`outputs/markdown/R-dan-jiao-xie.md`](outputs/markdown/R-dan-jiao-xie.md)
-- 📄 **重构评论六篇**：
-  - [`outputs/markdown/C01.md`](outputs/markdown/C01.md)（楚亮求点赞）
-  - [`outputs/markdown/C02.md`](outputs/markdown/C02.md)（刁蛮病历）
-  - [`outputs/markdown/C03.md`](outputs/markdown/C03.md)（100%椰子水）
-  - [`outputs/markdown/C04.md`](outputs/markdown/C04.md)（葫芦爷爷的小院）
-  - [`outputs/markdown/C05.md`](outputs/markdown/C05.md)（惠东海中救人）
-  - [`outputs/markdown/C06.md`](outputs/markdown/C06.md)（深夜无声警报）
-- 📄 **复述与拆解单元**：`outputs/markdown/R01.md` ~ `R08.md`，`outputs/markdown/F01.md` ~ `F06.md`
+### 1. 审阅总看板
+- 📋 **完整审阅看板说明**：[`reviews/v1.1-preview/README.md`](reviews/v1.1-preview/README.md)
 
-### 2. 印刷级渲染快照（HTML / PDF / PNG 页面）
-- **单单元三页精细预览**：
-  - 单脚鞋：`outputs/preview/c-dan-jiao-xie.pdf`，页面快照 `c-dan-jiao-xie_p01.png` ~ `p03.png`
-  - 单脚鞋复述：`outputs/preview/R-dan-jiao-xie.pdf`，页面快照 `R-dan-jiao-xie_p01.png` ~ `p02.png`
-  - C01 ~ C06 评论快照：`outputs/preview/C01_p01.png` ~ `C06_p03.png`
-  - 原文拆解快照：`outputs/preview/F01_p01.png`
-- **整刊 45 页构建成品**：
-  - PDF 文件：`outputs/sample-01-rev5.pdf`
-  - 全套 45 页 PNG 快照：`outputs/sample-01-rev5_pages/sample-01-rev5_p01.png` ~ `p45.png`
+### 2. 核心写作小样（三题对比）
 
-### 3. 数据与规范源文件
-- **评论单元 YAML**：`content/commentaries/`
-- **复述单元 YAML**：`content/retellings/`
-- **原文拆解 YAML**：`content/excerpts/`
-- **刊期清单**：`issues/sample-01-rev5/issue.yaml`
+| 选题名称 | 单元类型与 ID | 学生版 Markdown (留白练习) | 教师审阅版 Markdown (推演与备课) | 印刷 PDF | 页面 PNG 预览 |
+|---|---|---|---|---|---|
+| **“单脚鞋银行”** | 评论 `c-dan-jiao-xie` | [学生版](reviews/v1.1-preview/markdown/student/c-dan-jiao-xie.md) | [教师版](reviews/v1.1-preview/markdown/teacher/c-dan-jiao-xie.md) | [PDF](reviews/v1.1-preview/preview/c-dan-jiao-xie.pdf) | [P1](reviews/v1.1-preview/preview/c-dan-jiao-xie_p01.png) · [P2](reviews/v1.1-preview/preview/c-dan-jiao-xie_p02.png) · [P3](reviews/v1.1-preview/preview/c-dan-jiao-xie_p03.png) |
+| **“单脚鞋银行”** | 复述 `R-dan-jiao-xie` | [学生版](reviews/v1.1-preview/markdown/student/R-dan-jiao-xie.md) | [教师版](reviews/v1.1-preview/markdown/teacher/R-dan-jiao-xie.md) | [PDF](reviews/v1.1-preview/preview/R-dan-jiao-xie.pdf) | [P1](reviews/v1.1-preview/preview/R-dan-jiao-xie_p01.png) · [P2](reviews/v1.1-preview/preview/R-dan-jiao-xie_p02.png) |
+| **楚亮求点赞** | 评论 `C01` | [学生版](reviews/v1.1-preview/markdown/student/C01.md) | [教师版](reviews/v1.1-preview/markdown/teacher/C01.md) | [PDF](reviews/v1.1-preview/preview/C01.pdf) | [P1](reviews/v1.1-preview/preview/C01_p01.png) · [P2](reviews/v1.1-preview/preview/C01_p02.png) · [P3](reviews/v1.1-preview/preview/C01_p03.png) |
+| **楚亮救人** | 复述 `R01` | [学生版](reviews/v1.1-preview/markdown/student/R01.md) | [教师版](reviews/v1.1-preview/markdown/teacher/R01.md) | [PDF](reviews/v1.1-preview/preview/R01.pdf) | [P1](reviews/v1.1-preview/preview/R01_p01.png) · [P2](reviews/v1.1-preview/preview/R01_p02.png) |
+| **“刁蛮”病历** | 评论 `C02` | [学生版](reviews/v1.1-preview/markdown/student/C02.md) | [教师版](reviews/v1.1-preview/markdown/teacher/C02.md) | [PDF](reviews/v1.1-preview/preview/C02.pdf) | [P1](reviews/v1.1-preview/preview/C02_p01.png) · [P2](reviews/v1.1-preview/preview/C02_p02.png) · [P3](reviews/v1.1-preview/preview/C02_p03.png) |
+| **“刁蛮”病历** | 复述 `R02` | [学生版](reviews/v1.1-preview/markdown/student/R02.md) | [教师版](reviews/v1.1-preview/markdown/teacher/R02.md) | [PDF](reviews/v1.1-preview/preview/R02.pdf) | [P1](reviews/v1.1-preview/preview/R02_p01.png) · [P2](reviews/v1.1-preview/preview/R02_p02.png) |
+| **椰子水掺水** | 评论 `C03` | [学生版](reviews/v1.1-preview/markdown/student/C03.md) | [教师版](reviews/v1.1-preview/markdown/teacher/C03.md) | [PDF](reviews/v1.1-preview/preview/C03.pdf) | [P1](reviews/v1.1-preview/preview/C03_p01.png) · [P2](reviews/v1.1-preview/preview/C03_p02.png) · [P3](reviews/v1.1-preview/preview/C03_p03.png) |
+| **近期精选原文拆解** | 拆解 `F01` | [学生版](reviews/v1.1-preview/markdown/student/F01.md) | [教师版](reviews/v1.1-preview/markdown/teacher/F01.md) | [PDF](reviews/v1.1-preview/preview/F01.pdf) | [P1](reviews/v1.1-preview/preview/F01_p01.png) |
 
 ---
 
-## 📝 《00_审核结论与补正清单》全项落实对照表
+## 📝 针对《00_2290d2c_复审回单.md》补正落实清单
 
-| 编号 | 审核发现问题 | 补正落实方案与修复位置 | 验证结果 |
-| :--- | :--- | :--- | :--- |
-| **P0-01** | `agent-sync.sh` 硬编码学生姓名、整文件豁免、拉取失败盲目继续、不支持 worktree | 升级为 v1.2：彻底剥离硬编码姓名，改为从未跟踪配置文件动态读取（不存在则使用公共规则）；仅扫描暂存增量 `^\+[^+]`，取消自豁免；增加 `git rev-parse --is-inside-work-tree`；阻断 fetch 失败。 | `./agent-sync.sh status` 验证通过，无泄露警告 |
-| **P1-02** | 敏感词误报删除行、输出口吻过度绝对 | 正则改为 `^\+[^+]`；扫描无命中时输出“未发现所配置规则的命中”。 | 增删敏感配置行均准确定位且不误报 |
-| **P1-03** | `aggr-site` 离线断网不彻底，仍有隐式外部 fetch | `aggr-site/server.js` 中 `fetchSource` 增加 `if (IS_OFFLINE)` 拦截，缓存未命中时抛错，坚决阻断外网连接。 | 离线测试无网络请求外溢 |
-| **P1-04** | `initStore` 失败污染全局目录，`flushNow` 覆写损坏库 | `aggr-site/wenwen/store.js` 采用局部变量原子初始化，校验通过才切换全局变量；增加只读守卫。新增 `S0-5` 专门回归测试。 | `npm test` 20/20 项全部通过 |
-| **P1-05** | `MindmapLeaf` 语义污染、假段落号、叶子ID冲突 | `legacy_adapter.py` 重构：从 `mapkey` 智能拆出各叶子真实 `answer`；叶子 ID 递增全局唯一；`fact_refs` 诚信标记为 `["待核对"]`。 | 重新迁移后 R01~R08 导图无 ID 冲突，语义清晰 |
-| **P1-06** | 迁移脚本无条件覆盖已有手工审阅单元 | `legacy_adapter.py` 增加 `_should_skip_write` 校验：已存在且未指定 `--overwrite/--force`，或标记 `legacy_unreviewed: false` 时阻止覆盖。 | 默认执行 0 覆写，已保护 C01~C06 与新单元 |
-| **P1-07** | 口语正文拼装公式不一致，独立 claim 漏计 | `CommentaryUnit` 新增 `get_spoken_paragraphs()` 与 `get_full_spoken_text()`；Jinja2、Markdown 导出与校验器字数统计完全同源。 | `test_models.py` 覆盖独立 claim 用例通过 |
-| **P1-08** | `render.py::preview_unit` 仅在 html 不存在时写入，产生陈旧 PDF | 改为无论何时均强制写入最新 `html_content` 到 `html_file`。 | 修改 YAML 重跑 preview 100% 刷新 PDF/PNG |
-| **P1-09** | YAML 重复键被 Python 静默覆盖 | `validation.py` 引入 `UniqueKeyLoader` 与 `load_yaml_safely`，发现重复键立即抛出异常。 | `test_models.py` 重复键用例通过 |
-| **P1-10** | 单脚鞋缺乏真实复述材料，packet 链断裂 | 新增 `content/retellings/R-dan-jiao-xie.yaml`（严格基于 `ttzl-45288.json` 真实素材提炼）；完善跨文件引用校验。 | 来源链闭环，全量校验 0 错误 |
-| **§6-C01** | 求赞净化动机、重合观点、人次写成人、最好方式绝对化 | 承认求认可人之常情；整合观点并引入公益奖励与托底维度；明确九万人次；收准“最好方式”为“温暖回响”。 | 表达真实贴切，字数 440 字符 |
-| **§6-C02** | “跟一辈子/跨医院都能看”超出材料、“唯一路径”绝对化 | 严格遵循材料中“供后续接诊调阅的医疗档案”；将“唯一路径”改为“关键一步”；清除学生拆解中自评。 | 争点清晰，字数 437 字符 |
-| **§6-C03** | 立案等同于震慑已达成、椰子水/椰汁称呼混乱、开头与主体不对应 | 统一称“椰子水”；保留行动目标与预期效果的区别；总观点严格统领主体一（为什么）与主体二（怎么办）。 | 逻辑严密，字数 435 字符 |
-| **§6-C04** | 游客自觉轻声未核对、自断无杂念、学生拆解含“纠正旧版” | 修正为来客应有的克制准则与倡导；保留人物真诚而不做绝对断言；彻底清除学生页工程词。 | 分寸清晰，字数 414 字符 |
-| **§6-C05** | “最理智/最高智慧/确保不沉”夸大、成功个案写成通用教程 | 剔除绝对化词汇与补写的心理冲动；不输出未成年施救教程，强调量力而行与专业力量接力。 | 安全导向稳固，字数 457 字符 |
-| **§6-C06** | 两段重复无增量、虚设普通人对比、“做成才是交代”过激 | 主体二转向聋哑青年克服自身沟通生理局限的道德坚韧（独立增量）；删除陪衬对比；重写结尾收束。 | 立意层次分明，字数 463 字符 |
-| **§6-单脚鞋** | v4尊严金钱自相矛盾、年份与累计混同、早期志愿者主观贬低 | v4修正为参与感与自立信心；区分9年累计超2万只与2025年30只；删除对早期志愿者的臆测性评价。 | 逻辑自洽，字数 459 字符 |
+| 审阅发现问题 | 补正落实方案与修复位置 | 验证结果 |
+| :--- | :--- | :--- |
+| **1. 产物 404 问题** | 上一轮产物置于被 gitignore 的 `outputs/` 中导致远端 404。本轮在仓库中正式建立已跟踪的 [`reviews/v1.1-preview/`](reviews/v1.1-preview/)，放入全量双版 Markdown、重点单元 PDF/PNG。 | GitHub 页面直接可点可读，无 404 |
+| **2. 离线模式未定义变量** | `aggr-site/server.js` 中 `fetchSource` 引用未定义的 `IS_OFFLINE`。新建 `config.js` 统一解析 `isOfflineMode()` 与 `isReadOnlyMode()`，并支持复合模式。 | 新增测试用例 `server-mode.test.mjs`，`npm test` 23/23 项全部通过 |
+| **3. 只读模式配置不一致** | `store.js` 原硬编码仅识别 `AGGR_READONLY=on`。统一改为通过 `config.isReadOnlyMode()` 判断，无论是 `AGGR_MODE=readonly` 还是 `AGGR_READONLY=on` 均全面阻断写入。 | 模式测试验证通过，无任何未授权文件写入 |
+| **4. YAML 解析与校验防御** | `cli.py`、`export_markdown.py`、`legacy_adapter.py` 仍存在裸 `yaml.safe_load`；preview/build 缺少前置重复键校验。统一采用 `load_yaml_safely` 并在各子命令前置执行 `validate_file`。 | `test_models.py` 补充重复键前置拦截测试，全部通过 |
+| **5. 标签映射与 R01~R05 分类错误** | 旧版 `content5.py` 中标签为中文 `"热点"`，旧适配器匹配 `"hot"` 导致 R01~R05 误划为“暖文”。修复映射逻辑并修正 `R01.yaml ~ R05.yaml` 分类为“社会热点”。 | 单元 Schema 校验 22/22 通过，分类正确显示为社会热点 |
+| **6. R02 事实边界与复述去评论化** | R02 删去未经证实的“后续医生接诊时都能看到”，修正为客观记录家长切身担忧；重写 `ref_retelling`，彻底剔除“让很多人气愤”等主观评论词，实现 100% 中立事实复述；C02 教学拆解聚焦指导学生识别答非所问。 | 复述中立事实，拆解紧扣修辞逻辑 |
+| **7. 单脚鞋小样深度精修** | 摆脱概念倒推套路，讲透两层具体因果（第一层供需错位把单只鞋接起来，第二层顺着农活处境给下地的大叔换运动鞋）；剔除“凭直觉/只图体面”等臆测性措辞；字数精确核定为 428 汉字（478 字符）。 | 观点池 5 个方向，范本严格 2 个主体，口语节奏自然流畅 |
+| **8. 楚亮求点赞小样深度精修** | 深入推导救人事实与承受身体伤痛代价在瞬间成立，大方求夸是正常光明的情感期待，不应受道德绑架；清晰区分九万人次点赞（情感温度）与专项奖励（机制托底）；字数核定为 420 汉字（459 字符）。 | 叙事与说理紧密贴合材料事实，破除道德苛责 |
+| **9. 椰子水掺水小样深度精修** | 用货架前消费者的真实信任契约替代空泛的商业伦理术语；讲透算清违法账如何打破“造假成本低、守法吃亏”的侥幸；字数核定为 443 汉字（501 字符）。 | 论述层层递进，口语表达干脆有力 |
+| **10. 字符统计精准度与双版导出** | 严格区分“纯汉字数”与“非空白字符数”，在 Markdown 导出与模型中规范标注；`export-md` 支持导出学生练习版与教师审阅版。 | `test_models.py` 自动化测试通过 |
 
 ---
 

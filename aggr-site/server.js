@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { XMLParser } from 'fast-xml-parser';
 import { mountWenwen } from './wenwen/routes.js';
 import { startWenwenScheduler } from './wenwen/scheduler.js';
+import { isReadOnlyMode, isOfflineMode } from './config.js';
 
 const PORT = Number(process.env.PORT || 3000);
 const CACHE_TTL = Number(process.env.CACHE_TTL || 5 * 60 * 1000); // 源抓取缓存 5 分钟
@@ -119,11 +120,11 @@ function stripHtml(html) {
 
 const cache = new Map(); // sourceId -> { at, ok, items, error }
 
-async function fetchSource(source, { force = false } = {}) {
+export async function fetchSource(source, { force = false } = {}) {
   const hit = cache.get(source.id);
   if (!force && hit && Date.now() - hit.at < CACHE_TTL) return hit;
 
-  if (IS_OFFLINE) {
+  if (isOfflineMode()) {
     if (hit) return hit;
     return { at: Date.now(), ok: false, items: [], error: 'offline: 离线模式已阻断外部网络抓取' };
   }
@@ -428,8 +429,8 @@ const server = http.createServer(async (req, res) => {
       );
       return;
     }
-    const isReadonly = process.env.AGGR_READONLY === 'on' || (process.env.AGGR_MODE || '').includes('readonly');
-    const isOffline = process.env.AGGR_OFFLINE === 'on' || (process.env.AGGR_MODE || '').includes('offline');
+    const isReadonly = isReadOnlyMode();
+    const isOffline = isOfflineMode();
 
     if (url.pathname === '/api/health') {
       const sources = await loadSources();
@@ -475,27 +476,32 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', async () => {
-  const sources = await loadSources();
-  const isReadonly = process.env.AGGR_READONLY === 'on' || (process.env.AGGR_MODE || '').includes('readonly');
-  const isOffline = process.env.AGGR_OFFLINE === 'on' || (process.env.AGGR_MODE || '').includes('offline');
+export { server };
 
-  console.log(`[aggr-site] 聚合站点已启动: http://127.0.0.1:${PORT} (显式绑定 127.0.0.1)`);
-  console.log(`[aggr-site] 已配置 ${sources.length} 个信息源`);
-  if (isReadonly) console.log('[aggr-site] AGGR_READONLY=on：已启用只读模式，拒绝所有写操作');
-  if (isOffline) console.log('[aggr-site] AGGR_OFFLINE=on：已启用离线模式，禁止外网抓取与模型调用');
+const isMainModule = process.argv[1] && (path.resolve(process.argv[1]) === fileURLToPath(import.meta.url));
+if (isMainModule) {
+  server.listen(PORT, '127.0.0.1', async () => {
+    const sources = await loadSources();
+    const isReadonly = isReadOnlyMode();
+    const isOffline = isOfflineMode();
 
-  // 交接与离线适配：若设 AGGR_AUTOTASKS=off 或处于只读/离线模式，跳过 AI 预热与调度
-  if (process.env.AGGR_AUTOTASKS === 'off' || isReadonly || isOffline) {
-    console.log('[aggr-site] 已跳过 AI 热点预热与暖文雷达调度（只读/离线/交接模式）');
-  } else {
-    // 后台预热 AI 热点归纳（72h / 7d），用户点开时大概率已有缓存
-    for (const h of [72, 168]) {
-      getTopics(h, false)
-        .then(() => console.log(`[aggr-site] AI 热点预热完成（${h}h）`))
-        .catch((e) => console.log(`[aggr-site] AI 热点预热失败（${h}h）: ${e.message}`));
+    console.log(`[aggr-site] 聚合站点已启动: http://127.0.0.1:${PORT} (显式绑定 127.0.0.1)`);
+    console.log(`[aggr-site] 已配置 ${sources.length} 个信息源`);
+    if (isReadonly) console.log('[aggr-site] AGGR_READONLY=on：已启用只读模式，拒绝所有写操作');
+    if (isOffline) console.log('[aggr-site] AGGR_OFFLINE=on：已启用离线模式，禁止外网抓取与模型调用');
+
+    // 交接与离线适配：若设 AGGR_AUTOTASKS=off 或处于只读/离线模式，跳过 AI 预热与调度
+    if (process.env.AGGR_AUTOTASKS === 'off' || isReadonly || isOffline) {
+      console.log('[aggr-site] 已跳过 AI 热点预热与暖文雷达调度（只读/离线/交接模式）');
+    } else {
+      // 后台预热 AI 热点归纳（72h / 7d），用户点开时大概率已有缓存
+      for (const h of [72, 168]) {
+        getTopics(h, false)
+          .then(() => console.log(`[aggr-site] AI 热点预热完成（${h}h）`))
+          .catch((e) => console.log(`[aggr-site] AI 热点预热失败（${h}h）: ${e.message}`));
+      }
+      // 暖文雷达：启动采集/分析调度
+      await startWenwenScheduler();
     }
-    // 暖文雷达：启动采集/分析调度
-    await startWenwenScheduler();
-  }
-});
+  });
+}

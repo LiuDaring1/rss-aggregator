@@ -79,9 +79,17 @@ def migrate_retellings(retells: list) -> List[RetellingUnit]:
                 leaves=leaves
             ))
 
+        raw_tag = r.get("tag", "")
+        if raw_tag in ("hot", "热点", "社会热点"):
+            category = "社会热点"
+        elif raw_tag in ("warm", "暖文"):
+            category = "暖文"
+        else:
+            category = "社会热点"
+
         unit = RetellingUnit(
             id=uid,
-            category="社会热点" if r.get("tag") == "hot" else "暖文",
+            category=category,
             packet_ref=f"pkt-legacy-{uid.lower()}",
             title=r["title"],
             date_label=r.get("dateline", ""),
@@ -224,8 +232,9 @@ def _should_skip_write(target_path: str, overwrite: bool) -> bool:
         return False
     # 存在且未指定 overwrite：检查是否有人工审阅或现有内容保护
     try:
+        from weekly_pipeline.validation import load_yaml_safely
         with open(target_path, "r", encoding="utf-8") as fp:
-            data = yaml.safe_load(fp)
+            data = load_yaml_safely(fp.read())
             if isinstance(data, dict) and data.get("legacy_unreviewed") is False:
                 print(f"  🛡️  [已人工审阅保护] {target_path} legacy_unreviewed=False，阻止自动覆盖！")
                 return True

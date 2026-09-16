@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>口语周刊 · 单元预览 [c-dan-jiao-xie] “单脚鞋银行”：解开被忽视的真实需求</title>
+  <style>
+/* 口语素材周刊 标准印刷样式表 (A4 黑白; Jinja2 模块化排版) */
+@page {
+  size: A4;
+  margin: 14mm 14mm 15mm 14mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-print-color-adjust: exact;
+}
+
+body {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 10.5pt;
+  line-height: 1.66;
+  color: #000;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .anshead, .pb-cap, .badge {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------- 页面分割控制 ---------- */
+.page-break {
+  page-break-after: always;
+  break-after: page;
+}
+
+.avoid-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ---------- 封面（仅刊名/期号/署名） ---------- */
+.cover {
+  text-align: center;
+  padding-top: 62mm;
+  page-break-after: always;
+  break-after: page;
+}
+.cover .kicker {
+  font-size: 11pt;
+  letter-spacing: 0.35em;
+  color: #333;
+}
+.cover h1 {
+  font-size: 36pt;
+  letter-spacing: 0.18em;
+  margin: 10mm 0 5mm;
+}
+.cover .issue {
+  font-size: 13pt;
+}
+
+/* ---------- 目录 + 陪练指令 ---------- */
+.tocpage {
+  page-break-after: always;
+  break-after: page;
+}
+.toc-h {
+  font-size: 17pt;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 2mm;
+}
+.toc-cols {
+  display: flex;
+  gap: 7mm;
+  margin-top: 4mm;
+}
+.toc-col {
+  flex: 1;
+}
+.toc-sec {
+  font-size: 12.5pt;
+  font-weight: 700;
+  border-bottom: 0.9pt solid #000;
+  margin: 2mm 0 2mm;
+  padding-bottom: 1mm;
+}
+.toc-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1.6mm;
+  margin: 1.35mm 0;
+  font-size: 9.3pt;
+  line-height: 1.42;
+}
+.toc-item.toc-sub {
+  border-top: 0.6pt dashed #666;
+  padding-top: 1.5mm;
+  font-weight: 700;
+}
+.toc-t {
+  flex: 1;
+}
+.toc-p {
+  flex-shrink: 0;
+  font-family: "PingFang SC", sans-serif;
+}
+.toc-append {
+  margin-top: 3mm;
+  font-size: 9.5pt;
+  border-top: 0.6pt solid #000;
+  padding-top: 1.6mm;
+}
+.tag {
+  display: inline-block;
+  border: 0.9pt solid #000;
+  font-size: 8.5pt;
+  padding: 0 1.6mm;
+  flex-shrink: 0;
+}
+.tag-hot {
+  background: #000;
+  color: #fff;
+}
+.tag-warm {
+  background: #fff;
+  color: #000;
+}
+
+.promptbox-aftertoc {
+  margin-top: 4mm;
+  border: 1pt solid #000;
+  padding: 2.5mm 3.5mm;
+}
+.pb-cap {
+  font-weight: 700;
+  font-size: 9.5pt;
+  margin-bottom: 1.2mm;
+}
+.pb-text {
+  white-space: pre-wrap;
+  font-family: "Songti SC", serif;
+  font-size: 8.1pt;
+  line-height: 1.52;
+  margin: 0;
+}
+
+/* ---------- 模块一：复述两页 ---------- */
+.rp {
+  page-break-after: always;
+  break-after: page;
+}
+.rhead {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-bottom: 2mm;
+}
+.rhead h3 {
+  font-size: 15.5pt;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+.rno {
+  display: inline-block;
+  border: 1.4pt solid #000;
+  font-weight: 700;
+  font-size: 11pt;
+  padding: 0.5mm 2.2mm;
+}
+.rmat .dateline {
+  font-family: "PingFang SC", sans-serif;
+  font-size: 11pt;
+  border-bottom: 0.9pt solid #000;
+  padding-bottom: 2mm;
+  margin-bottom: 5mm;
+}
+.matbody {
+  font-size: 16.5pt;
+  line-height: 1.92;
+  margin: 0 0 5.5mm;
+  text-align: justify;
+}
+.src {
+  font-size: 9pt;
+  color: #333;
+}
+.rmat .src {
+  font-size: 9.5pt;
+  margin-top: 4mm;
+}
+.aifoot {
+  margin-top: 8mm;
+  border: 0.9pt dashed #555;
+  padding: 2.5mm 3.5mm;
+  font-size: 9.5pt;
+  color: #333;
+  font-family: "PingFang SC", sans-serif;
+}
+
+.rhint .hint-blk {
+  margin: 0 0 3mm;
+}
+.hint-cap {
+  font-size: 11pt;
+  font-weight: 700;
+  margin: 1.5mm 0 1mm;
+}
+.hint-blk svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.illhold {
+  border: 1.4pt dashed #000;
+  min-height: 42mm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ill-no {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+}
+.ill-note {
+  font-size: 9.5pt;
+  color: #333;
+  margin-top: 1.5mm;
+}
+
+/* ---------- 集中参考答案 ---------- */
+.refsec {
+  break-before: page;
+  page-break-before: always;
+  margin-bottom: 3mm;
+}
+.refsec h2 {
+  font-size: 18pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 2mm;
+  margin: 0;
+}
+.ans {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 3mm 0;
+}
+.anshead {
+  display: flex;
+  align-items: baseline;
+  gap: 2.5mm;
+  margin-bottom: 1.2mm;
+}
+.ans-t {
+  font-weight: 700;
+  font-size: 10.5pt;
+  flex: 1;
+}
+.backref {
+  font-size: 9pt;
+  color: #333;
+  font-family: "PingFang SC", sans-serif;
+  flex-shrink: 0;
+}
+.ans .refbody {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 11.5pt;
+  line-height: 1.8;
+  margin: 1mm 0;
+  text-align: justify;
+}
+.mapkey {
+  font-size: 8.8pt;
+  color: #333;
+  border-top: 0.6pt dashed #999;
+  padding-top: 1mm;
+  font-family: "Kaiti SC", "STKaiti", serif;
+}
+
+/* ---------- 模块二：评论三页制 ---------- */
+.cq, .cview, .cscript {
+  break-before: page;
+  page-break-before: always;
+}
+.cuhead {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-bottom: 2.5mm;
+}
+.cuhead h3 {
+  font-size: 14pt;
+  margin: 0;
+  flex: 1;
+  line-height: 1.45;
+}
+.cu-blk {
+  margin: 3mm 0;
+}
+.cu-blk .lbl {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+  border-left: 2.4pt solid #000;
+  padding-left: 2.5mm;
+  margin-bottom: 1.2mm;
+}
+ul.recap {
+  margin: 0;
+  padding-left: 7mm;
+}
+ul.recap li {
+  margin: 1mm 0;
+  font-size: 10.5pt;
+}
+ol.qs {
+  margin: 0;
+  padding-left: 7mm;
+}
+ol.qs li {
+  margin: 1.6mm 0 0.8mm;
+  font-size: 10.8pt;
+}
+.qs .wl {
+  border-bottom: 0.6pt dotted #555;
+  height: 7mm;
+  margin: 0.8mm 0 1.6mm;
+}
+.baseline {
+  font-size: 10.5pt;
+  color: #333;
+  margin-bottom: 1.5mm;
+}
+ul.views {
+  margin: 0;
+  padding-left: 2mm;
+  list-style: none;
+}
+ul.views li {
+  margin: 2mm 0;
+  font-size: 10.8pt;
+  padding-left: 5mm;
+  text-indent: -5mm;
+  line-height: 1.6;
+}
+ul.views li::before {
+  content: "◆ ";
+  font-size: 8pt;
+}
+.views .how {
+  font-size: 9.5pt;
+  color: #444;
+  margin-top: 0.5mm;
+  text-indent: 0;
+  padding-left: 0;
+}
+.ctx {
+  font-size: 10.4pt;
+  margin: 0.8mm 0;
+  text-align: justify;
+  line-height: 1.72;
+}
+.ctx b {
+  font-family: "PingFang SC", sans-serif;
+}
+.reason {
+  font-size: 10.6pt;
+  line-height: 1.85;
+}
+.reason-title {
+  font-weight: 700;
+  font-size: 10.5pt;
+  margin-bottom: 1mm;
+}
+
+.cu-script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12pt;
+  line-height: 1.95;
+  border: 1pt solid #000;
+  padding: 4mm 5.5mm;
+  margin: 1mm 0;
+}
+.cu-script p {
+  margin: 1.6mm 0;
+  text-indent: 2em;
+}
+
+.decon-list {
+  margin-top: 1mm;
+}
+.decon-item {
+  margin-bottom: 2mm;
+}
+.decon-target {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 10pt;
+  color: #111;
+  margin-bottom: 0.5mm;
+}
+
+/* ---------- 模块三：原文拆解 ---------- */
+.fu {
+  break-before: page;
+  page-break-before: always;
+}
+.fu .cuhead h3 {
+  font-size: 13.5pt;
+}
+.fragtext {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12.5pt;
+  line-height: 1.92;
+  margin: 2.5mm 0;
+}
+.fragtext p {
+  margin: 1.4mm 0;
+  text-indent: 2em;
+}
+.modhead-inline {
+  margin-bottom: 3.5mm;
+}
+.modhead-inline h2 {
+  font-size: 18pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 2mm;
+  margin: 0 0 2.5mm;
+}
+
+/* ---------- 示范独立块 ---------- */
+.demoblock {
+  margin: 3mm 0 1mm;
+  padding: 3mm 4.5mm;
+  background: #f5f5f5;
+  border-top: 0.8pt solid #000;
+  border-bottom: 0.8pt solid #000;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.demo-cap {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 10.5pt;
+  margin-bottom: 1.2mm;
+}
+.demo-text {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 11.8pt;
+  line-height: 1.9;
+  margin: 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* ---------- 附录 ---------- */
+.appendix {
+  break-before: page;
+  page-break-before: always;
+}
+.appendix h2 {
+  font-size: 16pt;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 2mm;
+  margin-top: 0;
+}
+.appendix .prompt {
+  border: 1pt solid #000;
+  padding: 4mm 5mm;
+  margin-top: 4mm;
+}
+.appendix .prompt p {
+  font-size: 11pt;
+  line-height: 1.9;
+  margin: 1.5mm 0;
+}
+
+/* ---------- 预览标识条 ---------- */
+.preview-header {
+  border-bottom: 1px dashed #666;
+  padding-bottom: 2mm;
+  margin-bottom: 4mm;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9pt;
+  color: #666;
+  font-family: "PingFang SC", sans-serif;
+}
+
+  </style>
+</head>
+<body>
+<section class="cq">
+  <div class="preview-header">
+    <span>【单单元预览】评论单元 · c-dan-jiao-xie</span>
+    <span>对应复述：R-dan-jiao-xie</span>
+  </div>
+  <div class="cuhead">
+    <span class="rno">c-dan-jiao-xie</span>
+    <h3>“单脚鞋银行”：解开被忽视的真实需求</h3>
+    <span class="backref">对应复述·R-dan-jiao-xie 材料页</span>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">回想材料</div>
+    <ul class="recap">
+      <li>市场上的鞋成双售卖，单脚残疾人士买一双往往只能扔一只；而在鞋都温州，鞋企每年展示后会销毁约40万只单只样品鞋。</li>
+      <li>2017年温州大学师生发起“单脚鞋银行”，对接鞋企与各地残联，9年间累计免费寄出超2万只单脚鞋，辐射13个省份。</li>
+      <li>团队最初每人发一两只，回访发现单脚走路三个月就磨坏鞋底，改为一次发四到六只；有受助者在农村务农不能穿皮鞋，团队特意挑选防滑耐磨的运动鞋。</li>
+      <li>随着假肢普及与生活改善，2025年单脚鞋年需求降至30只；团队继续留守的同时，教残障人士制作手工艺品义卖，并尝试用编程开发生活助手。</li>
+    </ul>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">思考问题</div>
+    <ol class="qs">
+      <li>
+        鞋企每年销毁大量单只样品鞋，单脚人士却长年买一双扔一只，这种错位说明了什么？
+        <div class="wl"></div>
+      </li>
+      <li>
+        为什么把寄鞋数量增加到四至六只？为什么把皮鞋换成防滑运动鞋？
+        <div class="wl"></div>
+      </li>
+      <li>
+        当2025年寄送量减少到三十只时，有人觉得可以结束了，团队为什么坚持开下去？
+        <div class="wl"></div>
+      </li>
+      <li>
+        组织义卖手工艺品和开发生活助手，给受助者带来了哪些送鞋之外的改变？
+        <div class="wl"></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="cview">
+  <div class="cuhead">
+    <span class="rno">c-dan-jiao-xie</span>
+    <h3>“单脚鞋银行”：解开被忽视的真实需求 · 观点与推演</h3>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">观点参考（多元思考方向）</div>
+    <div class="baseline">初步感受：大学生很有爱心，善于利用身边的资源做好事。（如果只讲爱心和奉献，就容易落入套话，忽略了这件事情里最见功力的观察与调整。）</div>
+    <ul class="views">
+      <li>
+        <b>常规市场往往只考虑大多数人的通用规则，公益首先要看见被忽略的少数人。</b>
+        <div class="how">
+          依据与来源：鞋企按双售卖并销毁单只样品鞋，单脚群体买一双扔一只；团队将两端对接，让闲置资源对准了真实困难。
+          ；说明：问题的根源往往不是物资绝对短缺，而是通行的交易规则难以照顾到特殊的少数需求。
+        </div>
+      </li>
+      <li>
+        <b>真正的帮助不仅在于心意，更在于给得合用。</b>
+        <div class="how">
+          依据与来源：受助者在农村要下地劳作，皮鞋不仅容易摔倒还不耐磨，换成防滑耐磨运动鞋才能真正解决生活难题。
+          ；说明：关切他人的处境不能只停留在纸面上的主观设想，只有深入了解对方具体的生活场景，帮助才能真正起作用。
+        </div>
+      </li>
+      <li>
+        <b>年帮扶数量的下降反映了社会保障的改善，而公益的坚守在于不让剩下的少数人掉队。</b>
+        <div class="how">
+          依据与来源：假肢普及让2025年单只鞋需求降至三十只；团队坚持“只要还有一个人需要就做下去”。
+          ；说明：需求减少反映了假肢技术与保障水平的提升，但不能把数字变小当成放弃留守的理由。
+        </div>
+      </li>
+      <li>
+        <b>组织参与劳动与义卖，能为受助者带来被需要的参与感与自立的信心。</b>
+        <div class="how">
+          依据与来源：团队组织残障人士制作永生花和手工艺品，十六岁女孩通过义卖劳动第一次获得几十元报酬。
+          ；说明：除了接受物资馈赠，通过自己的双手付出劳动并获得社会认可，能让人感受到实实在在的成就感与生活信心。
+        </div>
+      </li>
+      <li>
+        <b>把青年学生的专业所长融入日常帮扶，能让善意走得更远、更扎实。</b>
+        <div class="how">
+          依据与来源：电气与计算机专业学生尝试将编程、在线平台和语音助手应用到日常帮扶中。
+          ；说明：志愿服务不仅靠一时的热情，更需要用专业知识解决具体问题。
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">怎么想到的：从两处细节看善意的分寸</div>
+    <p class="ctx reason">读这则材料，最打动人的不是单纯“送了多少只鞋”，而是团队顺着受助者的生活处境完成的两次细致调整。第一次是根据损耗速度调整数量：起初按常态寄送一两只，回访得知单脚着力磨损极快、三个月就会穿坏，于是将配额提高到四至六只；第二次是根据生活场景调整鞋型：得知受助者在乡下下地劳作，皮鞋不仅容易打滑且极不耐磨，团队便特意在分拣时挑选防滑耐磨的运动鞋。把这两处细节放在一起看，就能推导出一个朴素的道理：帮助他人不能只停留在“把东西送出去”的初衷，而必须深入到对方的具体日子里。只有看清受助者真实的行走场景与损耗规律，善意才能真正合脚、管用。</p>
+  </div>
+</section>
+
+<section class="cscript">
+  <div class="cuhead">
+    <span class="rno">c-dan-jiao-xie</span>
+    <h3>“单脚鞋银行”：解开被忽视的真实需求 · 口语范本与拆解</h3>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">口语范本（双主体展开 · 约 2 分钟）</div>
+    <div class="cu-script">
+      <p>“单脚鞋银行”之所以打动人心，不仅在于帮单脚人士找到了鞋，更在于九年来，志愿者始终顺着受助者的真实生活去调整办法。落到实处的善意，既要打破常规看见被忽略的痛点，更要在具体日子里懂得体贴与合用。</p>
+      <p>首先，发现痛点需要打破思维惯性，看见少数人的真实难处。 常规市场上鞋子成双出售，单脚人士买一双扔一只；而在温州，鞋企每年却有数十万只单只样品鞋被销毁。大学生们没有视而不见，而是主动搭桥，把闲置样品与特殊需求连在一起。帮助别人的第一步，往往就是打破大多数人的交易惯性，看清那些被遗忘的日常困境。</p>
+      <p>其次，真正的善意要在具体生活场景中不断调整，给得合用。 送鞋听起来简单，做起来全在细节。起初团队寄送一两只，回访得知单脚着力磨损极快，便增加到四至六只；得知受助者在农村要下地劳作，皮鞋容易打滑磨损，志愿者又特意挑出防滑耐磨的运动鞋。这说明，关切他人不能停留在送出手，更要看对方用得顺不顺手。顺着对方的处境调整，善意才能真正成为生活的支撑。</p>
+      <p>从最初的“找鞋”到后来的“换鞋”，“单脚鞋银行”告诉我们：做好一件好事，不仅需要出发时的热情，更需要把他人放在心上的细致、尊重与长久耐心。</p>
+    </div>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">全文主线</div>
+    <p class="ctx">开头（明确总观点：不仅看见痛点，更顺着真实生活不断调整）→ 主体一（打破常规，看见被忽略的少数人难处）→ 主体二（贴近处境，在生活细节中把善意给得合用）→ 结尾（收束到做好事的细致与耐心）。</p>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">教学拆解</div>
+    <div class="decon-list">
+      <div class="decon-item">
+        <p class="ctx"><b>【开头确立统领】</b>　用清晰两句话立住总判断，直接点明这件事情的两个关键侧面——既看见被忽略的痛点，又顺着具体生活调整方法，为后文两个主体段搭建稳固骨架。</p>
+      </div>
+      <div class="decon-item">
+        <p class="ctx"><b>【主体一段：破除惯性】</b>　首句亮出分论点，抓住“市场上成双卖”与“鞋企销毁单只鞋”的强烈对比展开，有力论证为什么发现痛点首先需要打破交易惯性。</p>
+      </div>
+      <div class="decon-item">
+        <p class="ctx"><b>【主体二段：因果递进】</b>　推进到行动纵深，从小观点“给得合用”切入，用下地干活换运动鞋、单脚磨损增配鞋量两处扎实事实支持，讲透善意如何避免悬空、落地生根。</p>
+      </div>
+      <div class="decon-item">
+        <p class="ctx"><b>【结尾收束归纳】</b>　用提炼性的“找鞋与换鞋”收拢前后两段论证，将思考升华为对细致、尊重与长久耐心的认同，完成两分钟口语表达闭环。</p>
+      </div>
+    </div>
+  </div>
+</section></body>
+</html>

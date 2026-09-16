@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>口语周刊 · 单元预览 [R-dan-jiao-xie] 温州大学师生创办“单脚鞋银行”：9年送出2万只单脚鞋，随需而变拓展帮扶</title>
+  <style>
+/* 口语素材周刊 标准印刷样式表 (A4 黑白; Jinja2 模块化排版) */
+@page {
+  size: A4;
+  margin: 14mm 14mm 15mm 14mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-print-color-adjust: exact;
+}
+
+body {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 10.5pt;
+  line-height: 1.66;
+  color: #000;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .anshead, .pb-cap, .badge {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------- 页面分割控制 ---------- */
+.page-break {
+  page-break-after: always;
+  break-after: page;
+}
+
+.avoid-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ---------- 封面（仅刊名/期号/署名） ---------- */
+.cover {
+  text-align: center;
+  padding-top: 62mm;
+  page-break-after: always;
+  break-after: page;
+}
+.cover .kicker {
+  font-size: 11pt;
+  letter-spacing: 0.35em;
+  color: #333;
+}
+.cover h1 {
+  font-size: 36pt;
+  letter-spacing: 0.18em;
+  margin: 10mm 0 5mm;
+}
+.cover .issue {
+  font-size: 13pt;
+}
+
+/* ---------- 目录 + 陪练指令 ---------- */
+.tocpage {
+  page-break-after: always;
+  break-after: page;
+}
+.toc-h {
+  font-size: 17pt;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 2mm;
+}
+.toc-cols {
+  display: flex;
+  gap: 7mm;
+  margin-top: 4mm;
+}
+.toc-col {
+  flex: 1;
+}
+.toc-sec {
+  font-size: 12.5pt;
+  font-weight: 700;
+  border-bottom: 0.9pt solid #000;
+  margin: 2mm 0 2mm;
+  padding-bottom: 1mm;
+}
+.toc-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1.6mm;
+  margin: 1.35mm 0;
+  font-size: 9.3pt;
+  line-height: 1.42;
+}
+.toc-item.toc-sub {
+  border-top: 0.6pt dashed #666;
+  padding-top: 1.5mm;
+  font-weight: 700;
+}
+.toc-t {
+  flex: 1;
+}
+.toc-p {
+  flex-shrink: 0;
+  font-family: "PingFang SC", sans-serif;
+}
+.toc-append {
+  margin-top: 3mm;
+  font-size: 9.5pt;
+  border-top: 0.6pt solid #000;
+  padding-top: 1.6mm;
+}
+.tag {
+  display: inline-block;
+  border: 0.9pt solid #000;
+  font-size: 8.5pt;
+  padding: 0 1.6mm;
+  flex-shrink: 0;
+}
+.tag-hot {
+  background: #000;
+  color: #fff;
+}
+.tag-warm {
+  background: #fff;
+  color: #000;
+}
+
+.promptbox-aftertoc {
+  margin-top: 4mm;
+  border: 1pt solid #000;
+  padding: 2.5mm 3.5mm;
+}
+.pb-cap {
+  font-weight: 700;
+  font-size: 9.5pt;
+  margin-bottom: 1.2mm;
+}
+.pb-text {
+  white-space: pre-wrap;
+  font-family: "Songti SC", serif;
+  font-size: 8.1pt;
+  line-height: 1.52;
+  margin: 0;
+}
+
+/* ---------- 模块一：复述两页 ---------- */
+.rp {
+  page-break-after: always;
+  break-after: page;
+}
+.rhead {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-bottom: 2mm;
+}
+.rhead h3 {
+  font-size: 15.5pt;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+.rno {
+  display: inline-block;
+  border: 1.4pt solid #000;
+  font-weight: 700;
+  font-size: 11pt;
+  padding: 0.5mm 2.2mm;
+}
+.rmat .dateline {
+  font-family: "PingFang SC", sans-serif;
+  font-size: 11pt;
+  border-bottom: 0.9pt solid #000;
+  padding-bottom: 2mm;
+  margin-bottom: 5mm;
+}
+.matbody {
+  font-size: 16.5pt;
+  line-height: 1.92;
+  margin: 0 0 5.5mm;
+  text-align: justify;
+}
+.src {
+  font-size: 9pt;
+  color: #333;
+}
+.rmat .src {
+  font-size: 9.5pt;
+  margin-top: 4mm;
+}
+.aifoot {
+  margin-top: 8mm;
+  border: 0.9pt dashed #555;
+  padding: 2.5mm 3.5mm;
+  font-size: 9.5pt;
+  color: #333;
+  font-family: "PingFang SC", sans-serif;
+}
+
+.rhint .hint-blk {
+  margin: 0 0 3mm;
+}
+.hint-cap {
+  font-size: 11pt;
+  font-weight: 700;
+  margin: 1.5mm 0 1mm;
+}
+.hint-blk svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.illhold {
+  border: 1.4pt dashed #000;
+  min-height: 42mm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ill-no {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+}
+.ill-note {
+  font-size: 9.5pt;
+  color: #333;
+  margin-top: 1.5mm;
+}
+
+/* ---------- 集中参考答案 ---------- */
+.refsec {
+  break-before: page;
+  page-break-before: always;
+  margin-bottom: 3mm;
+}
+.refsec h2 {
+  font-size: 18pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 2mm;
+  margin: 0;
+}
+.ans {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 3mm 0;
+}
+.anshead {
+  display: flex;
+  align-items: baseline;
+  gap: 2.5mm;
+  margin-bottom: 1.2mm;
+}
+.ans-t {
+  font-weight: 700;
+  font-size: 10.5pt;
+  flex: 1;
+}
+.backref {
+  font-size: 9pt;
+  color: #333;
+  font-family: "PingFang SC", sans-serif;
+  flex-shrink: 0;
+}
+.ans .refbody {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 11.5pt;
+  line-height: 1.8;
+  margin: 1mm 0;
+  text-align: justify;
+}
+.mapkey {
+  font-size: 8.8pt;
+  color: #333;
+  border-top: 0.6pt dashed #999;
+  padding-top: 1mm;
+  font-family: "Kaiti SC", "STKaiti", serif;
+}
+
+/* ---------- 模块二：评论三页制 ---------- */
+.cq, .cview, .cscript {
+  break-before: page;
+  page-break-before: always;
+}
+.cuhead {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-bottom: 2.5mm;
+}
+.cuhead h3 {
+  font-size: 14pt;
+  margin: 0;
+  flex: 1;
+  line-height: 1.45;
+}
+.cu-blk {
+  margin: 3mm 0;
+}
+.cu-blk .lbl {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+  border-left: 2.4pt solid #000;
+  padding-left: 2.5mm;
+  margin-bottom: 1.2mm;
+}
+ul.recap {
+  margin: 0;
+  padding-left: 7mm;
+}
+ul.recap li {
+  margin: 1mm 0;
+  font-size: 10.5pt;
+}
+ol.qs {
+  margin: 0;
+  padding-left: 7mm;
+}
+ol.qs li {
+  margin: 1.6mm 0 0.8mm;
+  font-size: 10.8pt;
+}
+.qs .wl {
+  border-bottom: 0.6pt dotted #555;
+  height: 7mm;
+  margin: 0.8mm 0 1.6mm;
+}
+.baseline {
+  font-size: 10.5pt;
+  color: #333;
+  margin-bottom: 1.5mm;
+}
+ul.views {
+  margin: 0;
+  padding-left: 2mm;
+  list-style: none;
+}
+ul.views li {
+  margin: 2mm 0;
+  font-size: 10.8pt;
+  padding-left: 5mm;
+  text-indent: -5mm;
+  line-height: 1.6;
+}
+ul.views li::before {
+  content: "◆ ";
+  font-size: 8pt;
+}
+.views .how {
+  font-size: 9.5pt;
+  color: #444;
+  margin-top: 0.5mm;
+  text-indent: 0;
+  padding-left: 0;
+}
+.ctx {
+  font-size: 10.4pt;
+  margin: 0.8mm 0;
+  text-align: justify;
+  line-height: 1.72;
+}
+.ctx b {
+  font-family: "PingFang SC", sans-serif;
+}
+.reason {
+  font-size: 10.6pt;
+  line-height: 1.85;
+}
+.reason-title {
+  font-weight: 700;
+  font-size: 10.5pt;
+  margin-bottom: 1mm;
+}
+
+.cu-script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12pt;
+  line-height: 1.95;
+  border: 1pt solid #000;
+  padding: 4mm 5.5mm;
+  margin: 1mm 0;
+}
+.cu-script p {
+  margin: 1.6mm 0;
+  text-indent: 2em;
+}
+
+.decon-list {
+  margin-top: 1mm;
+}
+.decon-item {
+  margin-bottom: 2mm;
+}
+.decon-target {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 10pt;
+  color: #111;
+  margin-bottom: 0.5mm;
+}
+
+/* ---------- 模块三：原文拆解 ---------- */
+.fu {
+  break-before: page;
+  page-break-before: always;
+}
+.fu .cuhead h3 {
+  font-size: 13.5pt;
+}
+.fragtext {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12.5pt;
+  line-height: 1.92;
+  margin: 2.5mm 0;
+}
+.fragtext p {
+  margin: 1.4mm 0;
+  text-indent: 2em;
+}
+.modhead-inline {
+  margin-bottom: 3.5mm;
+}
+.modhead-inline h2 {
+  font-size: 18pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 2mm;
+  margin: 0 0 2.5mm;
+}
+
+/* ---------- 示范独立块 ---------- */
+.demoblock {
+  margin: 3mm 0 1mm;
+  padding: 3mm 4.5mm;
+  background: #f5f5f5;
+  border-top: 0.8pt solid #000;
+  border-bottom: 0.8pt solid #000;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.demo-cap {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 10.5pt;
+  margin-bottom: 1.2mm;
+}
+.demo-text {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 11.8pt;
+  line-height: 1.9;
+  margin: 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* ---------- 附录 ---------- */
+.appendix {
+  break-before: page;
+  page-break-before: always;
+}
+.appendix h2 {
+  font-size: 16pt;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 2mm;
+  margin-top: 0;
+}
+.appendix .prompt {
+  border: 1pt solid #000;
+  padding: 4mm 5mm;
+  margin-top: 4mm;
+}
+.appendix .prompt p {
+  font-size: 11pt;
+  line-height: 1.9;
+  margin: 1.5mm 0;
+}
+
+/* ---------- 预览标识条 ---------- */
+.preview-header {
+  border-bottom: 1px dashed #666;
+  padding-bottom: 2mm;
+  margin-bottom: 4mm;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9pt;
+  color: #666;
+  font-family: "PingFang SC", sans-serif;
+}
+
+  </style>
+</head>
+<body>
+<section class="rp rmat">
+  <div class="preview-header">
+    <span>【单单元预览】复述单元 · R-dan-jiao-xie</span>
+    <span>类别：暖文</span>
+  </div>
+  <div class="rhead">
+    <span class="rno">R-dan-jiao-xie</span>
+    <span class="tag tag-warm">暖文</span>
+    <h3>温州大学师生创办“单脚鞋银行”：9年送出2万只单脚鞋，随需而变拓展帮扶</h3>
+  </div>
+  <div class="dateline">2026 年 7 月 · 浙江温州</div>
+  <p class="matbody">市场上的鞋通常成双售卖，单脚残障人士买一双往往只能扔掉一只；而在“中国鞋都”温州，鞋企每年制作的样品鞋约有40余万只，大多成单展示后即被销毁。2017年，温州大学电气与电子工程学院师生发起“单脚鞋银行”项目，对接本地十多家鞋企与各地残联，9年间累计向全国13个省份免费寄出超2万只单只鞋。</p>
+  <p class="matbody">志愿服务过程中，团队不断顺应受助者的实际处境调整办法：最初每人配发一两只，回访发现单脚走路磨损极快，三个月就磨穿鞋底，团队便将寄送量提高到四至六只；有农村受助者提出下地干活没法穿皮鞋，志愿者便专门去鞋企样品库细致挑选轻便、防滑、耐磨的运动鞋，并在换季时主动跟进询问。</p>
+  <p class="matbody">随着假肢技术普及与生活改善，单脚鞋的年需求量降至2025年的30只。面对帮扶群体缩小的现实，团队秉持“只要还有一个人需要就开下去”的初衷继续留守仓库；同时，团队指导残障人士制作永生花等手工艺品开展义卖增收，并结合计算机专业技能，开发集在线申请、手工网课与方言语音交互于一体的智能生活助手。</p>
+  <div class="src">来源：潮新闻·浙江日报（2026-07-08）</div>
+  <div class="aifoot">AI 陪练提示：把本页拍给语音 AI 当复述听众，说完“我复述完毕”再听反馈（完整指令见目录页）。</div>
+</section>
+
+<section class="rp rhint">
+  <div class="rhead">
+    <span class="rno">R-dan-jiao-xie</span>
+    <h3>温州大学师生创办“单脚鞋银行”：9年送出2万只单脚鞋，随需而变拓展帮扶 · 提示页</h3>
+  </div>
+  <div class="hint-blk">
+    <div class="hint-cap">关键词网络</div>
+    <svg viewBox="0 0 720 235" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="720" height="235" fill="#fff"/><line x1="360" y1="117" x2="128" y2="38" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="592" y2="38" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="70" y2="117" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="650" y2="117" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="128" y2="196" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><line x1="360" y1="117" x2="592" y2="196" stroke="#000" stroke-width="1" stroke-dasharray="3,3"/><rect x="79" y="22" width="98" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="128.0" y="43" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">温大单脚鞋银行</text><rect x="543" y="22" width="98" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="592.0" y="43" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">样品鞋精准对接</text><rect x="14" y="101" width="112" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="70.0" y="122" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">9年送出超2万只</text><rect x="574" y="101" width="140" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="644.0" y="122" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">顺应生活调至4-6只</text><rect x="65" y="180" width="126" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="128.0" y="201" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">选防滑鞋·留守初衷</text><rect x="529" y="180" width="126" height="34" fill="#fff" stroke="#000" stroke-width="1.1"/><text x="592.0" y="201" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="12.5" font-weight="600" text-anchor="middle" fill="#000">义卖增收·技术赋能</text><rect x="260" y="98" width="201" height="38" fill="#fff" stroke="#000" stroke-width="1.8"/><text x="360.0" y="123" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="14.5" font-weight="700" text-anchor="middle" fill="#000">“单脚鞋银行”的缘起与坚守</text></svg>
+  </div>
+  <div class="hint-blk">
+    <div class="hint-cap">思维导图（虚线待补写）</div>
+    <svg viewBox="0 0 720 314" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="720" height="314" fill="#fff"/><rect x="350" y="14" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="30" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">错位事实</text><rect x="350" y="63" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="79" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">帮扶规模</text><rect x="350" y="112" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="128" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">数量调整</text><rect x="350" y="161" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="177" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">款式调整</text><rect x="350" y="210" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="226" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">需求变化</text><rect x="350" y="259" width="362" height="42" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/><text x="359" y="275" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="11" font-weight="normal" text-anchor="start" fill="#555">新的形式</text><text x="256" y="64.5" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#000">痛点与对接</text><path d="M 310 59.5 H 342 V 60 H 348" stroke="#000" stroke-width="1" fill="none"/><text x="256" y="162.5" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#000">细节调整</text><path d="M 310 157.5 H 342 V 158 H 348" stroke="#000" stroke-width="1" fill="none"/><text x="256" y="236.0" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#000">留守初衷</text><path d="M 310 231.0 H 342 V 231 H 348" stroke="#000" stroke-width="1" fill="none"/><text x="256" y="285.0" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="13" font-weight="700" text-anchor="middle" fill="#000">拓展帮扶</text><path d="M 310 280.0 H 342 V 280 H 348" stroke="#000" stroke-width="1" fill="none"/><text x="20" y="162.0" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="14" font-weight="700" text-anchor="start" fill="#000">“单脚鞋银行”的缘起与坚守</text><path d="M 132 157.0 H 196" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 60 V 280" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 60 H 208" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 158 H 208" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 231 H 208" stroke="#000" stroke-width="1.2" fill="none"/><path d="M 196 280 H 208" stroke="#000" stroke-width="1.2" fill="none"/><text x="714" y="311" font-family="PingFang SC, Hiragino Sans GB, sans-serif" font-size="9.5" font-weight="normal" text-anchor="end" fill="#555">虚线框＝待补写（要点见「复述参考」导图参照）</text></svg>
+  </div>
+  <div class="hint-blk">
+    <div class="hint-cap">插画</div>
+    <div class="illhold">
+      <div class="ill-no">插画位 ILL-R-dan-jiao-xie · 插画待回传</div>
+      <div class="ill-note">黑白报刊式叙事插画：大学生志愿者在地下车库整理清点各类单只鞋，细致分类登记</div>
+    </div>
+  </div>
+</section></body>
+</html>

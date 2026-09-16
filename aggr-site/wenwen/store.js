@@ -15,6 +15,7 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { isReadOnlyMode } from '../config.js';
 
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
 export const DEFAULT_DATA_DIR = path.resolve(MODULE_DIR, '../data/wenwen');
@@ -42,7 +43,7 @@ export async function initStore({ dataDir, reset = false } = {}) {
   const targetRawDir = path.join(targetDir, 'raw');
   const targetDbFile = path.join(targetDir, 'db.json');
 
-  const isReadOnly = (process.env.AGGR_READONLY === 'on' || process.env.AGGR_READONLY === '1');
+  const isReadOnly = isReadOnlyMode();
   if (isReadOnly && !fs.existsSync(targetDir)) {
     throw new Error(`[wenwen] 只读模式下拒绝新建不存在的数据目录: ${targetDir}`);
   }
@@ -93,7 +94,7 @@ export function dataDir() {
 
 /** 防抖落盘（原子写：tmp + rename，进程中断不会损坏旧文件） */
 export function scheduleFlush(delayMs = 2000) {
-  const isReadOnly = (process.env.AGGR_READONLY === 'on' || process.env.AGGR_READONLY === '1');
+  const isReadOnly = isReadOnlyMode();
   if (isReadOnly) return;
   if (flushTimer) return;
   flushTimer = setTimeout(() => flushNow(), delayMs);
@@ -101,7 +102,7 @@ export function scheduleFlush(delayMs = 2000) {
 
 export async function flushNow() {
   if (!db) return;
-  const isReadOnly = (process.env.AGGR_READONLY === 'on' || process.env.AGGR_READONLY === '1');
+  const isReadOnly = isReadOnlyMode();
   if (isReadOnly) {
     console.warn('[wenwen] 只读模式生效中，阻断 flushNow 写入');
     return;
@@ -119,7 +120,7 @@ export async function flushNow() {
 
 /** 原始文章留档 */
 export async function saveRaw(article) {
-  const isReadOnly = (process.env.AGGR_READONLY === 'on' || process.env.AGGR_READONLY === '1');
+  const isReadOnly = isReadOnlyMode();
   if (isReadOnly) {
     throw new Error(`[wenwen] 只读模式下拒绝写入文章留档: ${article.id}`);
   }

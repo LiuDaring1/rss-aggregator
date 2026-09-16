@@ -3,19 +3,31 @@
 同源 Markdown 导出工具 (Markdown Exporter)
 将 Pydantic 结构化单元导出为学生/教师易读的 Markdown 审阅文件，
 确保文本与印刷版 HTML/PDF 100% 同源一致。
+支持学生练习版 (student) 与 教师/审阅版 (teacher)。
 """
 import os
 import sys
+import re
 from typing import Dict, Any, List, Optional
-import yaml
 
 from weekly_pipeline.models import (
     RetellingUnit, CommentaryUnit, ExcerptUnit, IssueManifest
 )
+from weekly_pipeline.validation import load_yaml_safely, validate_file
 
-def export_retelling_markdown(unit: RetellingUnit) -> str:
+def count_chinese_chars(text: str) -> int:
+    """统计纯汉字数"""
+    return len(re.findall(r'[\u4e00-\u9fff]', text))
+
+def count_non_whitespace_chars(text: str) -> int:
+    """统计非空白字符数（含标点）"""
+    return len(re.sub(r'\s+', '', text))
+
+def export_retelling_markdown(unit: RetellingUnit, edition: str = "teacher") -> str:
     lines = []
-    lines.append(f"# 【复述训练】{unit.id} · {unit.title}")
+    is_student = (edition == "student")
+    title_suffix = "（学生练习版）" if is_student else "（教师审阅版）"
+    lines.append(f"# 【复述训练】{unit.id} · {unit.title} {title_suffix}")
     lines.append(f"**分类**：{unit.category} | **时间地点**：{unit.date_label} | **出处**：{unit.source_label}")
     lines.append("")
     lines.append("## 一、原始材料事实")
@@ -29,17 +41,22 @@ def export_retelling_markdown(unit: RetellingUnit) -> str:
     for br in unit.mindmap_tree.branches:
         lines.append(f"- **{br.name}**")
         for lf in br.leaves:
-            ans_str = f" → [参考答案: {lf.answer}]" if lf.answer else ""
-            lines.append(f"  - [{lf.id}] {lf.hint}{ans_str}")
+            if is_student:
+                lines.append(f"  - [{lf.id}] {lf.hint}（____）")
+            else:
+                ans_str = f" → [参考答案: {lf.answer}]" if lf.answer else ""
+                lines.append(f"  - [{lf.id}] {lf.hint}{ans_str}")
     lines.append("")
     lines.append("## 三、口语复述示范文本")
     lines.append(f"> {unit.ref_retelling}")
     lines.append("")
     return "\n".join(lines)
 
-def export_commentary_markdown(unit: CommentaryUnit) -> str:
+def export_commentary_markdown(unit: CommentaryUnit, edition: str = "teacher") -> str:
     lines = []
-    lines.append(f"# 【评论演练】{unit.id} · {unit.title}")
+    is_student = (edition == "student")
+    title_suffix = "（学生练习版）" if is_student else "（教师审阅版）"
+    lines.append(f"# 【评论演练】{unit.id} · {unit.title} {title_suffix}")
     lines.append(f"**对应复述材料**：{unit.retelling_ref} | **数据包**：{unit.packet_ref}")
     lines.append("")
     lines.append("## 一、事实梳理与提问")
@@ -64,34 +81,49 @@ def export_commentary_markdown(unit: CommentaryUnit) -> str:
         lines.append(f"### 推演示例：{lesson.title} (关联观点: {', '.join(lesson.target_viewpoint_ids)})")
         lines.append(f"> {lesson.deduction_text}")
         lines.append("")
-    lines.append("## 三、两分钟口语范本")
-    lines.append(f"**主论点（开头）**：{unit.speech.main_claim}")
-    lines.append("")
-    for b in unit.speech.body:
-        lines.append(f"### 主体段 {b.id}：{b.claim}")
-        for p in b.paragraphs:
-            # 避免如果 claim 已经包含在段落开头时的冗余输出
-            lines.append(f"> {p}")
+    
+    # 口语范本：直接输出规范的 4 个口语段落
+    spoken_paras = unit.get_spoken_paragraphs()
+    lines.append("## 三、两分钟口语范本（正文 4 段）")
+    if len(spoken_paras) >= 4:
+        lines.append("### 【开头·总论点】")
+        lines.append(f"> {spoken_paras[0]}")
         lines.append("")
-    lines.append(f"**收束总结（结尾）**：{unit.speech.closing}")
-    lines.append("")
+        lines.append("### 【主体段一·分论点一】")
+        lines.append(f"> {spoken_paras[1]}")
+        lines.append("")
+        lines.append("### 【主体段二·分论点二】")
+        lines.append(f"> {spoken_paras[2]}")
+        lines.append("")
+        lines.append("### 【结尾·收束总结】")
+        lines.append(f"> {spoken_paras[3]}")
+        lines.append("")
+    else:
+        for p in spoken_paras:
+            lines.append(f"> {p}")
+            lines.append("")
+            
     spoken_text = unit.get_full_spoken_text()
-    lines.append(f"**口语文本总字数**：{len(spoken_text.replace(' ', ''))} 汉字（适宜朗读时长约 1.5 - 2 分钟）")
+    cn_len = count_chinese_chars(spoken_text)
+    total_len = count_non_whitespace_chars(spoken_text)
+    lines.append(f"**字数与朗读建议**：正文汉字数 {cn_len} 汉字 | 总字符数（含标点） {total_len} 字符（适宜中速口语表达约 1.5 - 2 分钟）")
     lines.append("")
-    lines.append("## 四、教学拆解与备课备注")
+    lines.append("## 四、教学拆解与修辞指南")
     lines.append(f"**论述骨架**：{unit.teaching.spine}")
     lines.append("")
     lines.append("### 表达拆解教学指南")
     for d in unit.teaching.deconstruction:
         lines.append(f"- **{d.target}**：{d.instruction}")
-    if unit.teaching.editor_notes:
+    if not is_student and unit.teaching.editor_notes:
         lines.append("")
         lines.append(f"**内部备课/审阅备注**：{unit.teaching.editor_notes}")
     return "\n".join(lines)
 
-def export_excerpt_markdown(unit: ExcerptUnit) -> str:
+def export_excerpt_markdown(unit: ExcerptUnit, edition: str = "teacher") -> str:
     lines = []
-    lines.append(f"# 【原文拆解】{unit.id} · {unit.topic}")
+    is_student = (edition == "student")
+    title_suffix = "（学生练习版）" if is_student else "（教师审阅版）"
+    lines.append(f"# 【原文拆解】{unit.id} · {unit.topic} {title_suffix}")
     lines.append(f"**来源出处**：{unit.source_name} ({unit.source_date})")
     lines.append("")
     lines.append("## 一、文章语境")
@@ -112,8 +144,8 @@ def export_excerpt_markdown(unit: ExcerptUnit) -> str:
     lines.append(f"> {unit.demo_text}")
     return "\n".join(lines)
 
-def export_all_markdown(content_dir: str, out_dir: str) -> List[str]:
-    os.makedirs(out_dir, exist_ok=True)
+def _export_edition(content_dir: str, target_dir: str, edition: str) -> List[str]:
+    os.makedirs(target_dir, exist_ok=True)
     generated = []
     
     # 导出 retellings
@@ -121,10 +153,14 @@ def export_all_markdown(content_dir: str, out_dir: str) -> List[str]:
     if os.path.exists(r_dir):
         for fn in sorted(os.listdir(r_dir)):
             if fn.endswith(".yaml"):
+                val_res = validate_file(os.path.join(r_dir, fn))
+                if not val_res.is_valid:
+                    print(f"⚠️ 跳过校验未通过文件: {fn}")
+                    continue
                 with open(os.path.join(r_dir, fn), "r", encoding="utf-8") as fp:
-                    u = RetellingUnit.model_validate(yaml.safe_load(fp))
-                md = export_retelling_markdown(u)
-                out_path = os.path.join(out_dir, f"{u.id}.md")
+                    u = RetellingUnit.model_validate(load_yaml_safely(fp.read()))
+                md = export_retelling_markdown(u, edition=edition)
+                out_path = os.path.join(target_dir, f"{u.id}.md")
                 with open(out_path, "w", encoding="utf-8") as fp:
                     fp.write(md)
                 generated.append(out_path)
@@ -134,10 +170,14 @@ def export_all_markdown(content_dir: str, out_dir: str) -> List[str]:
     if os.path.exists(c_dir):
         for fn in sorted(os.listdir(c_dir)):
             if fn.endswith(".yaml"):
+                val_res = validate_file(os.path.join(c_dir, fn))
+                if not val_res.is_valid:
+                    print(f"⚠️ 跳过校验未通过文件: {fn}")
+                    continue
                 with open(os.path.join(c_dir, fn), "r", encoding="utf-8") as fp:
-                    u = CommentaryUnit.model_validate(yaml.safe_load(fp))
-                md = export_commentary_markdown(u)
-                out_path = os.path.join(out_dir, f"{u.id}.md")
+                    u = CommentaryUnit.model_validate(load_yaml_safely(fp.read()))
+                md = export_commentary_markdown(u, edition=edition)
+                out_path = os.path.join(target_dir, f"{u.id}.md")
                 with open(out_path, "w", encoding="utf-8") as fp:
                     fp.write(md)
                 generated.append(out_path)
@@ -147,12 +187,27 @@ def export_all_markdown(content_dir: str, out_dir: str) -> List[str]:
     if os.path.exists(f_dir):
         for fn in sorted(os.listdir(f_dir)):
             if fn.endswith(".yaml"):
+                val_res = validate_file(os.path.join(f_dir, fn))
+                if not val_res.is_valid:
+                    print(f"⚠️ 跳过校验未通过文件: {fn}")
+                    continue
                 with open(os.path.join(f_dir, fn), "r", encoding="utf-8") as fp:
-                    u = ExcerptUnit.model_validate(yaml.safe_load(fp))
-                md = export_excerpt_markdown(u)
-                out_path = os.path.join(out_dir, f"{u.id}.md")
+                    u = ExcerptUnit.model_validate(load_yaml_safely(fp.read()))
+                md = export_excerpt_markdown(u, edition=edition)
+                out_path = os.path.join(target_dir, f"{u.id}.md")
                 with open(out_path, "w", encoding="utf-8") as fp:
                     fp.write(md)
                 generated.append(out_path)
                 
+    return generated
+
+def export_all_markdown(content_dir: str, out_dir: str, edition: str = "both") -> List[str]:
+    generated = []
+    if edition == "both":
+        student_dir = os.path.join(out_dir, "student")
+        teacher_dir = os.path.join(out_dir, "teacher")
+        generated.extend(_export_edition(content_dir, student_dir, "student"))
+        generated.extend(_export_edition(content_dir, teacher_dir, "teacher"))
+    else:
+        generated.extend(_export_edition(content_dir, out_dir, edition))
     return generated

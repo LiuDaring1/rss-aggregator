@@ -228,5 +228,85 @@ learning:
         self.assertTrue(res.is_valid) # 警告不阻断工程编译
         self.assertTrue(any("教学拆解属于面向学生的印刷内容，不应包含工程执行评述" in w for w in res.warnings))
 
+    def test_chinese_char_counting_vs_non_whitespace(self):
+        """测试字符统计严格区分纯汉字与非空白字符"""
+        sample_str = "单脚鞋银行 100%！"
+        # 汉字：单脚鞋银行 (5)
+        # 非空白字符：单脚鞋银行100%！ (10)
+        self.assertEqual(count_chinese_chars(sample_str), 5)
+        self.assertEqual(count_non_whitespace_chars(sample_str), 10)
+
+    def test_markdown_export_dual_editions(self):
+        """测试学生版与教师审阅版 Markdown 导出的差异性"""
+        from weekly_pipeline.export_markdown import (
+            export_retelling_markdown, export_commentary_markdown
+        )
+        from weekly_pipeline.models import MindmapTree, MindmapBranch, MindmapLeaf, RetellingUnit
+        
+        # 1. 复述单元测试
+        ru = RetellingUnit(
+            id="R_TEST",
+            category="社会热点",
+            packet_ref="pkt-test",
+            title="测试复述",
+            date_label="2026年9月",
+            source_label="测试来源",
+            material_paragraphs=["材料段落"],
+            keywords=["关键词1"],
+            mindmap_tree=MindmapTree(
+                center="核心",
+                branches=[
+                    MindmapBranch(name="分支1", leaves=[
+                        MindmapLeaf(id="leaf-01", hint="提示线索", answer="绝密答案")
+                    ])
+                ]
+            ),
+            mapkey="绝密答案",
+            ref_retelling="示范复述"
+        )
+        md_student_r = export_retelling_markdown(ru, edition="student")
+        md_teacher_r = export_retelling_markdown(ru, edition="teacher")
+        self.assertIn("学生练习版", md_student_r)
+        self.assertNotIn("绝密答案", md_student_r) # 学生版隐藏答案
+        self.assertIn("（____）", md_student_r)
+        self.assertIn("教师审阅版", md_teacher_r)
+        self.assertIn("绝密答案", md_teacher_r) # 教师版显示答案
+        
+        # 2. 评论单元测试
+        cu = create_sample_commentary(viewpoint_count=3, body_count=2)
+        cu.teaching.editor_notes = "内部机密备课备注：仅限教研团队使用"
+        md_student_c = export_commentary_markdown(cu, edition="student")
+        md_teacher_c = export_commentary_markdown(cu, edition="teacher")
+        self.assertIn("学生练习版", md_student_c)
+        self.assertNotIn("内部机密备课备注", md_student_c) # 学生版隐藏内部备注
+        self.assertIn("教师审阅版", md_teacher_c)
+        self.assertIn("内部机密备课备注", md_teacher_c) # 教师版展示内部备注
+        self.assertIn("正文汉字数", md_student_c)
+        self.assertIn("总字符数（含标点）", md_student_c)
+
+    def test_validate_file_aborts_on_duplicate_keys(self):
+        """测试 validate_file 遇到重复键直接判定无效并返回明确错误"""
+        import tempfile
+        from weekly_pipeline.validation import validate_file
+        
+        dup_yaml = """
+schema_version: '1.0'
+id: C_DUP
+title: 重复键测试
+category: 社会热点
+category: 重复的社会热点
+"""
+        with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as tf:
+            tf.write(dup_yaml)
+            tf_path = tf.name
+            
+        try:
+            val_res = validate_file(tf_path)
+            self.assertFalse(val_res.is_valid)
+            self.assertTrue(any("发现重复的 YAML 键 'category'" in err for err in val_res.errors))
+        finally:
+            if os.path.exists(tf_path):
+                os.remove(tf_path)
+
 if __name__ == "__main__":
     unittest.main()

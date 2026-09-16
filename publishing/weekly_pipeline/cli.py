@@ -19,7 +19,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 from weekly_pipeline.models import (
     RetellingUnit, CommentaryUnit, ExcerptUnit, IssueManifest
 )
-from weekly_pipeline.validation import validate_content_directory, validate_file
+from weekly_pipeline.validation import (
+    validate_content_directory, validate_file, load_yaml_safely
+)
 from weekly_pipeline.render import (
     find_chrome_binary, preview_unit, render_issue_html,
     render_html_to_pdf, render_pdf_to_pngs
@@ -106,8 +108,16 @@ def cmd_preview(args):
         target = found
         
     print(f"正在预览单元: {target}...")
+    # 严格前置校验：重复键或非法结构拒绝渲染
+    val_res = validate_file(target)
+    if not val_res.is_valid:
+        print(f"❌ 单元前置校验失败，拒绝渲染预览: {target}")
+        for err in val_res.errors:
+            print(f"   - {err}")
+        sys.exit(1)
+        
     with open(target, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+        data = load_yaml_safely(f.read())
         
     if "speech" in data:
         unit = CommentaryUnit.model_validate(data)
@@ -145,17 +155,23 @@ def cmd_build(args):
         
     print(f"正在构建期刊: {issue_id} (配置文件: {issue_yaml})...")
     with open(issue_yaml, "r", encoding="utf-8") as f:
-        manifest = IssueManifest.model_validate(yaml.safe_load(f))
+        manifest = IssueManifest.model_validate(load_yaml_safely(f.read()))
         
-    # 加载 units
+    # 加载 units (带严格前置校验与安全解析)
     retellings = []
     for rid in manifest.retelling_ids:
         yp = os.path.join("content", "retellings", f"{rid}.yaml")
         if not os.path.exists(yp):
             print(f"❌ 缺少复述单元文件: {yp}")
             sys.exit(1)
+        val_res = validate_file(yp)
+        if not val_res.is_valid:
+            print(f"❌ 单元前置校验失败，终止构建: {yp}")
+            for err in val_res.errors:
+                print(f"   - {err}")
+            sys.exit(1)
         with open(yp, "r", encoding="utf-8") as fp:
-            retellings.append(RetellingUnit.model_validate(yaml.safe_load(fp)))
+            retellings.append(RetellingUnit.model_validate(load_yaml_safely(fp.read())))
             
     commentaries = []
     for cid in manifest.commentary_ids:
@@ -163,8 +179,14 @@ def cmd_build(args):
         if not os.path.exists(yp):
             print(f"❌ 缺少评论单元文件: {yp}")
             sys.exit(1)
+        val_res = validate_file(yp)
+        if not val_res.is_valid:
+            print(f"❌ 单元前置校验失败，终止构建: {yp}")
+            for err in val_res.errors:
+                print(f"   - {err}")
+            sys.exit(1)
         with open(yp, "r", encoding="utf-8") as fp:
-            commentaries.append(CommentaryUnit.model_validate(yaml.safe_load(fp)))
+            commentaries.append(CommentaryUnit.model_validate(load_yaml_safely(fp.read())))
             
     excerpts = []
     for fid in manifest.excerpt_ids:
@@ -172,8 +194,14 @@ def cmd_build(args):
         if not os.path.exists(yp):
             print(f"❌ 缺少原文拆解单元文件: {yp}")
             sys.exit(1)
+        val_res = validate_file(yp)
+        if not val_res.is_valid:
+            print(f"❌ 单元前置校验失败，终止构建: {yp}")
+            for err in val_res.errors:
+                print(f"   - {err}")
+            sys.exit(1)
         with open(yp, "r", encoding="utf-8") as fp:
-            excerpts.append(ExcerptUnit.model_validate(yaml.safe_load(fp)))
+            excerpts.append(ExcerptUnit.model_validate(load_yaml_safely(fp.read())))
             
     # 计算页码布局 (静态页码规则：
     # 封面: 第 1 页
@@ -230,8 +258,9 @@ def cmd_export_md(args):
     from weekly_pipeline.export_markdown import export_all_markdown
     c_dir = args.content_dir
     out_dir = args.outdir
-    print(f"正在导出同源 Markdown 审阅文件: {c_dir} -> {out_dir}...")
-    files = export_all_markdown(c_dir, out_dir)
+    edition = getattr(args, "edition", "both")
+    print(f"正在导出同源 Markdown 审阅文件 ({edition}): {c_dir} -> {out_dir}...")
+    files = export_all_markdown(c_dir, out_dir, edition=edition)
     print(f"  ✅ 导出完成: 共生成 {len(files)} 个 Markdown 审阅文件在 {out_dir}")
 
 def main():
@@ -276,6 +305,7 @@ def main():
     p_md = subparsers.add_parser("export-md", help="导出同源 Markdown 审阅文件")
     p_md.add_argument("--content-dir", default="content")
     p_md.add_argument("--outdir", default="outputs/markdown")
+    p_md.add_argument("--edition", choices=["both", "student", "teacher"], default="both", help="导出版本: student/teacher/both")
     p_md.set_defaults(func=cmd_export_md)
     
     args = parser.parse_args()

@@ -11,6 +11,7 @@ import { rebuildRegistry } from './mediaName.js';
 import { probeMedia } from './probe.js';
 import { collectSources } from './collector.js';
 import { runCollect, runAnalyze } from './scheduler.js';
+import { isReadOnlyMode } from '../config.js';
 
 const USE_PRIORITY = { 完整加工: 0, 优先补搜: 1, 短复述或案例: 2, 继续观察: 3, 暂时不用: 4 };
 
@@ -121,7 +122,7 @@ async function buildDataHealth() {
 /* ---------------- 路由挂载 ---------------- */
 
 export async function mountWenwen(req, res, url) {
-  const isReadonly = process.env.AGGR_READONLY === 'on' || process.env.AGGR_MODE === 'readonly' || (process.env.AGGR_MODE || '').includes('readonly');
+  const isReadonly = isReadOnlyMode();
   if (isReadonly && req.method === 'POST') {
     return sendJson(res, 403, { ok: false, error: '系统处于只读模式（AGGR_READONLY=on），已拒绝写操作' });
   }

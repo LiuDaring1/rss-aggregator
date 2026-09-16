@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>口语周刊 · 单元预览 [C01] “想被夸夸”：大方求赞，真诚给赞</title>
+  <style>
+/* 口语素材周刊 标准印刷样式表 (A4 黑白; Jinja2 模块化排版) */
+@page {
+  size: A4;
+  margin: 14mm 14mm 15mm 14mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-print-color-adjust: exact;
+}
+
+body {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 10.5pt;
+  line-height: 1.66;
+  color: #000;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .anshead, .pb-cap, .badge {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------- 页面分割控制 ---------- */
+.page-break {
+  page-break-after: always;
+  break-after: page;
+}
+
+.avoid-break {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ---------- 封面（仅刊名/期号/署名） ---------- */
+.cover {
+  text-align: center;
+  padding-top: 62mm;
+  page-break-after: always;
+  break-after: page;
+}
+.cover .kicker {
+  font-size: 11pt;
+  letter-spacing: 0.35em;
+  color: #333;
+}
+.cover h1 {
+  font-size: 36pt;
+  letter-spacing: 0.18em;
+  margin: 10mm 0 5mm;
+}
+.cover .issue {
+  font-size: 13pt;
+}
+
+/* ---------- 目录 + 陪练指令 ---------- */
+.tocpage {
+  page-break-after: always;
+  break-after: page;
+}
+.toc-h {
+  font-size: 17pt;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 2mm;
+}
+.toc-cols {
+  display: flex;
+  gap: 7mm;
+  margin-top: 4mm;
+}
+.toc-col {
+  flex: 1;
+}
+.toc-sec {
+  font-size: 12.5pt;
+  font-weight: 700;
+  border-bottom: 0.9pt solid #000;
+  margin: 2mm 0 2mm;
+  padding-bottom: 1mm;
+}
+.toc-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1.6mm;
+  margin: 1.35mm 0;
+  font-size: 9.3pt;
+  line-height: 1.42;
+}
+.toc-item.toc-sub {
+  border-top: 0.6pt dashed #666;
+  padding-top: 1.5mm;
+  font-weight: 700;
+}
+.toc-t {
+  flex: 1;
+}
+.toc-p {
+  flex-shrink: 0;
+  font-family: "PingFang SC", sans-serif;
+}
+.toc-append {
+  margin-top: 3mm;
+  font-size: 9.5pt;
+  border-top: 0.6pt solid #000;
+  padding-top: 1.6mm;
+}
+.tag {
+  display: inline-block;
+  border: 0.9pt solid #000;
+  font-size: 8.5pt;
+  padding: 0 1.6mm;
+  flex-shrink: 0;
+}
+.tag-hot {
+  background: #000;
+  color: #fff;
+}
+.tag-warm {
+  background: #fff;
+  color: #000;
+}
+
+.promptbox-aftertoc {
+  margin-top: 4mm;
+  border: 1pt solid #000;
+  padding: 2.5mm 3.5mm;
+}
+.pb-cap {
+  font-weight: 700;
+  font-size: 9.5pt;
+  margin-bottom: 1.2mm;
+}
+.pb-text {
+  white-space: pre-wrap;
+  font-family: "Songti SC", serif;
+  font-size: 8.1pt;
+  line-height: 1.52;
+  margin: 0;
+}
+
+/* ---------- 模块一：复述两页 ---------- */
+.rp {
+  page-break-after: always;
+  break-after: page;
+}
+.rhead {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-bottom: 2mm;
+}
+.rhead h3 {
+  font-size: 15.5pt;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+.rno {
+  display: inline-block;
+  border: 1.4pt solid #000;
+  font-weight: 700;
+  font-size: 11pt;
+  padding: 0.5mm 2.2mm;
+}
+.rmat .dateline {
+  font-family: "PingFang SC", sans-serif;
+  font-size: 11pt;
+  border-bottom: 0.9pt solid #000;
+  padding-bottom: 2mm;
+  margin-bottom: 5mm;
+}
+.matbody {
+  font-size: 16.5pt;
+  line-height: 1.92;
+  margin: 0 0 5.5mm;
+  text-align: justify;
+}
+.src {
+  font-size: 9pt;
+  color: #333;
+}
+.rmat .src {
+  font-size: 9.5pt;
+  margin-top: 4mm;
+}
+.aifoot {
+  margin-top: 8mm;
+  border: 0.9pt dashed #555;
+  padding: 2.5mm 3.5mm;
+  font-size: 9.5pt;
+  color: #333;
+  font-family: "PingFang SC", sans-serif;
+}
+
+.rhint .hint-blk {
+  margin: 0 0 3mm;
+}
+.hint-cap {
+  font-size: 11pt;
+  font-weight: 700;
+  margin: 1.5mm 0 1mm;
+}
+.hint-blk svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.illhold {
+  border: 1.4pt dashed #000;
+  min-height: 42mm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ill-no {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+}
+.ill-note {
+  font-size: 9.5pt;
+  color: #333;
+  margin-top: 1.5mm;
+}
+
+/* ---------- 集中参考答案 ---------- */
+.refsec {
+  break-before: page;
+  page-break-before: always;
+  margin-bottom: 3mm;
+}
+.refsec h2 {
+  font-size: 18pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 2mm;
+  margin: 0;
+}
+.ans {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 3mm 0;
+}
+.anshead {
+  display: flex;
+  align-items: baseline;
+  gap: 2.5mm;
+  margin-bottom: 1.2mm;
+}
+.ans-t {
+  font-weight: 700;
+  font-size: 10.5pt;
+  flex: 1;
+}
+.backref {
+  font-size: 9pt;
+  color: #333;
+  font-family: "PingFang SC", sans-serif;
+  flex-shrink: 0;
+}
+.ans .refbody {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 11.5pt;
+  line-height: 1.8;
+  margin: 1mm 0;
+  text-align: justify;
+}
+.mapkey {
+  font-size: 8.8pt;
+  color: #333;
+  border-top: 0.6pt dashed #999;
+  padding-top: 1mm;
+  font-family: "Kaiti SC", "STKaiti", serif;
+}
+
+/* ---------- 模块二：评论三页制 ---------- */
+.cq, .cview, .cscript {
+  break-before: page;
+  page-break-before: always;
+}
+.cuhead {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-bottom: 2.5mm;
+}
+.cuhead h3 {
+  font-size: 14pt;
+  margin: 0;
+  flex: 1;
+  line-height: 1.45;
+}
+.cu-blk {
+  margin: 3mm 0;
+}
+.cu-blk .lbl {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+  border-left: 2.4pt solid #000;
+  padding-left: 2.5mm;
+  margin-bottom: 1.2mm;
+}
+ul.recap {
+  margin: 0;
+  padding-left: 7mm;
+}
+ul.recap li {
+  margin: 1mm 0;
+  font-size: 10.5pt;
+}
+ol.qs {
+  margin: 0;
+  padding-left: 7mm;
+}
+ol.qs li {
+  margin: 1.6mm 0 0.8mm;
+  font-size: 10.8pt;
+}
+.qs .wl {
+  border-bottom: 0.6pt dotted #555;
+  height: 7mm;
+  margin: 0.8mm 0 1.6mm;
+}
+.baseline {
+  font-size: 10.5pt;
+  color: #333;
+  margin-bottom: 1.5mm;
+}
+ul.views {
+  margin: 0;
+  padding-left: 2mm;
+  list-style: none;
+}
+ul.views li {
+  margin: 2mm 0;
+  font-size: 10.8pt;
+  padding-left: 5mm;
+  text-indent: -5mm;
+  line-height: 1.6;
+}
+ul.views li::before {
+  content: "◆ ";
+  font-size: 8pt;
+}
+.views .how {
+  font-size: 9.5pt;
+  color: #444;
+  margin-top: 0.5mm;
+  text-indent: 0;
+  padding-left: 0;
+}
+.ctx {
+  font-size: 10.4pt;
+  margin: 0.8mm 0;
+  text-align: justify;
+  line-height: 1.72;
+}
+.ctx b {
+  font-family: "PingFang SC", sans-serif;
+}
+.reason {
+  font-size: 10.6pt;
+  line-height: 1.85;
+}
+.reason-title {
+  font-weight: 700;
+  font-size: 10.5pt;
+  margin-bottom: 1mm;
+}
+
+.cu-script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12pt;
+  line-height: 1.95;
+  border: 1pt solid #000;
+  padding: 4mm 5.5mm;
+  margin: 1mm 0;
+}
+.cu-script p {
+  margin: 1.6mm 0;
+  text-indent: 2em;
+}
+
+.decon-list {
+  margin-top: 1mm;
+}
+.decon-item {
+  margin-bottom: 2mm;
+}
+.decon-target {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 10pt;
+  color: #111;
+  margin-bottom: 0.5mm;
+}
+
+/* ---------- 模块三：原文拆解 ---------- */
+.fu {
+  break-before: page;
+  page-break-before: always;
+}
+.fu .cuhead h3 {
+  font-size: 13.5pt;
+}
+.fragtext {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12.5pt;
+  line-height: 1.92;
+  margin: 2.5mm 0;
+}
+.fragtext p {
+  margin: 1.4mm 0;
+  text-indent: 2em;
+}
+.modhead-inline {
+  margin-bottom: 3.5mm;
+}
+.modhead-inline h2 {
+  font-size: 18pt;
+  border-bottom: 2pt solid #000;
+  padding-bottom: 2mm;
+  margin: 0 0 2.5mm;
+}
+
+/* ---------- 示范独立块 ---------- */
+.demoblock {
+  margin: 3mm 0 1mm;
+  padding: 3mm 4.5mm;
+  background: #f5f5f5;
+  border-top: 0.8pt solid #000;
+  border-bottom: 0.8pt solid #000;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.demo-cap {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 10.5pt;
+  margin-bottom: 1.2mm;
+}
+.demo-text {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 11.8pt;
+  line-height: 1.9;
+  margin: 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* ---------- 附录 ---------- */
+.appendix {
+  break-before: page;
+  page-break-before: always;
+}
+.appendix h2 {
+  font-size: 16pt;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 2mm;
+  margin-top: 0;
+}
+.appendix .prompt {
+  border: 1pt solid #000;
+  padding: 4mm 5mm;
+  margin-top: 4mm;
+}
+.appendix .prompt p {
+  font-size: 11pt;
+  line-height: 1.9;
+  margin: 1.5mm 0;
+}
+
+/* ---------- 预览标识条 ---------- */
+.preview-header {
+  border-bottom: 1px dashed #666;
+  padding-bottom: 2mm;
+  margin-bottom: 4mm;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9pt;
+  color: #666;
+  font-family: "PingFang SC", sans-serif;
+}
+
+  </style>
+</head>
+<body>
+<section class="cq">
+  <div class="preview-header">
+    <span>【单单元预览】评论单元 · C01</span>
+    <span>对应复述：R01</span>
+  </div>
+  <div class="cuhead">
+    <span class="rno">C01</span>
+    <h3>“想被夸夸”：大方求赞，真诚给赞</h3>
+    <span class="backref">对应复述·R01 材料页</span>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">回想材料</div>
+    <ul class="recap">
+      <li>亳州美食街，幼童从三楼阳台外坠落，楚亮在买饭途中跑上前伸手接住，孩子滑落地面，楚亮多处疼痛；</li>
+      <li>事后他在网上发帖，请大家给自己“点点赞、夸一夸”；</li>
+      <li>帖子收获超过九万人次点赞，网友提出寄家乡特产，他的行为也获得了公益奖励；面对孩子家长的感谢，他表示照顾好孩子最重要。</li>
+    </ul>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">思考问题</div>
+    <ol class="qs">
+      <li>
+        楚亮伸手救人后在网上大方求夸，这种“求点赞”的心态该如何理解？
+        <div class="wl"></div>
+      </li>
+      <li>
+        面对赶来致谢的孩子家人，他嘱咐“照顾好孩子最重要”，这种态度说明了什么？
+        <div class="wl"></div>
+      </li>
+      <li>
+        为什么说做好事坦率表达被认可的愿望，与传统美德并不冲突？
+        <div class="wl"></div>
+      </li>
+      <li>
+        超过九万人次点赞、寄送特产以及公益奖励，这些回应给行善者带来了什么？
+        <div class="wl"></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="cview">
+  <div class="cuhead">
+    <span class="rno">C01</span>
+    <h3>“想被夸夸”：大方求赞，真诚给赞 · 观点与推演</h3>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">观点参考（多元思考方向）</div>
+    <div class="baseline">初步感受：救人很勇敢，发帖求赞很可爱。（不能只停留在“很可爱”的表面印象，要讲清楚大方求赞为何合情合理，以及社会给予真诚回应为何重要。）</div>
+    <ul class="views">
+      <li>
+        <b>挺身救人之后大方求赞，是坦率表达被认可愿望的正常心理，不会让善行贬值。</b>
+        <div class="how">
+          依据与来源：楚亮伸手接住坠楼幼童并承受多处疼痛，事后发帖请大家夸一夸自己。
+          ；说明：行善本身需要勇气与付出，希望自己的辛苦被社会看见和肯定，是合情合理的人之常情。
+        </div>
+      </li>
+      <li>
+        <b>公众真诚给赞与肯定，能够让行善者的付出得到温暖的回响。</b>
+        <div class="how">
+          依据与来源：帖子获得超过九万人次点赞，网友热情留言并提出寄送家乡特产。
+          ；说明：及时的善意反馈能够让施救者感受到被尊重与珍惜，形成良性互动的社会氛围。
+        </div>
+      </li>
+      <li>
+        <b>体谅受助家庭的难处，体现了不给对方增添心理负担的体贴。</b>
+        <div class="how">
+          依据与来源：面对赶来感谢的孩子家人，他嘱咐“照顾好孩子最重要”，把注意力放在孩子安危上。
+          ；说明：救人之后不把恩情变成对方的心理包袱，是对受助者处境的细致体恤。
+        </div>
+      </li>
+      <li>
+        <b>社会公益奖励与舆论正面支持，共同构成了对普通人见义勇为的切实鼓励。</b>
+        <div class="how">
+          依据与来源：楚亮的行为不仅收获了网友的大量点赞，也获得了公益机构颁发的专项奖励。
+          ；说明：对见义勇为的呵护，既需要大众的情感共鸣，也需要社会机制给予实质性的肯定与托底。
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">怎么想到的：在双向互动中看善意流转</div>
+    <p class="ctx reason">读这则材料，最关键的是把楚亮的行动与心理放在时间先后顺序中审视。第一阶段是突发危险中的生死一瞬：跑上前伸出双手接住孩子，自己承受多处疼痛，救人的事实与付出的代价在瞬间已经实实在在地成立；第二阶段是脱离危险后的情感表达：发帖请大家夸夸我。把这两个阶段厘清，逻辑一目了然：事后求夸丝毫不会改变先前舍身救人的英勇；面对巨大的惊险与伤痛，渴望被看见、被肯定，是坦荡光明的人之常情，绝不能用脱离人性的道德洁癖去贬低。再看外部回应，既有九万人次点赞的情感温度，又有公益机构专项奖励的机制托底。两者结合，就清晰勾勒出了善意良性循环的完整闭环。</p>
+  </div>
+</section>
+
+<section class="cscript">
+  <div class="cuhead">
+    <span class="rno">C01</span>
+    <h3>“想被夸夸”：大方求赞，真诚给赞 · 口语范本与拆解</h3>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">口语范本（双主体展开 · 约 2 分钟）</div>
+    <div class="cu-script">
+      <p>救人之后，楚亮在网上发帖大方求夸，这份坦率同样让人感到温暖。做好事的人可以光明磊落求赞，看到好事的人也不妨真诚给赞。善意走出了一步，理应得到社会温暖而坚定的回响。</p>
+      <p>首先，大方求夸丝毫不会让舍身救人的价值打折。 在危急时刻，楚亮跑上前伸出双手接住幼童，自己承受了多处疼痛，救人的事实与付出的代价在瞬间已经实实在在地成立。面对巨大的风险与伤痛，希望自己的付出被看见、被肯定，是合情合理的人之常情。我们不该用苛刻的道德条框要求行善者只能默默奉献，坦荡表达对认可的期待，同样光明磊落，值得被真诚尊重。</p>
+      <p>其次，社会的真诚回馈让行善者的付出有了温暖的回音。 面对楚亮的求赞帖，网友们没有挑剔审判，而是用超过九万人次真诚的点赞与留言给予肯定；公益机构也及时送上了专项奖励。这种回响，既有公众舆论的情感温度，也有社会机制的实质托底。它让行善者感到付出被深深珍惜，也向全社会表明：每一次挺身而出，都绝不会被冷落与辜负。</p>
+      <p>愿意求赞的人不必难为情，愿意给赞的人也不必吝惜掌声。当真实的勇敢总能迎来温暖的回应，善良才会在人与人之间传递得更踏实、更长远。</p>
+    </div>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">全文主线</div>
+    <p class="ctx">开头（大方求赞与真诚给赞并立）→ 主体一（救人事实成立，求赞不让善行贬值）→ 主体二（情感肯定与机制托底让善意长青）→ 结尾（总结呼吁：良性互动守护勇敢）。</p>
+  </div>
+  <div class="cu-blk">
+    <div class="lbl">教学拆解</div>
+    <div class="decon-list">
+      <div class="decon-item">
+        <p class="ctx"><b>【开头破题】</b>　开门见山亮明核心判断，把求赞与给赞放在平等平视的双重视角下，迅速搭建互促共赢的立论框架。</p>
+      </div>
+      <div class="decon-item">
+        <p class="ctx"><b>【主体一段：因果拆解】</b>　先立足瞬间救人的实锤代价，再推导事后求赞的合理心理，有力破除‘做好事只能默默无闻’的虚妄苛求。</p>
+      </div>
+      <div class="decon-item">
+        <p class="ctx"><b>【主体二段：双维深化】</b>　区分大众九万人次点赞（情感温度）与公益机构奖励（机制托底）两个维度，拓宽论证格局与深度。</p>
+      </div>
+      <div class="decon-item">
+        <p class="ctx"><b>【结尾收束归纳】</b>　自然收拢到人际交往与社会心理层面，指出唯有回应温厚，勇敢方能长存，完成两分钟口语闭环。</p>
+      </div>
+    </div>
+  </div>
+</section></body>
+</html>
