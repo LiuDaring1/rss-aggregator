@@ -12,11 +12,10 @@ BRANCH="antigravity-dev"
 
 ACTION="${1:-status}"
 
-# 安全自检：严禁泄露密钥与私密数据
 security_check() {
     echo "🔍 正在进行前置安全审查..."
     
-    # 1. 检查是否意外暂存敏感文件
+    # 1. 检查是否有敏感文件准备提交
     SENSITIVE_PATTERNS=("ai.json" "config.yaml" "teaching-private" ".env" "token" "password")
     for pattern in "${SENSITIVE_PATTERNS[@]}"; do
         if git status --porcelain | grep -i "$pattern" | grep -v "agent-sync.sh" > /dev/null; then
@@ -61,20 +60,20 @@ case "$ACTION" in
         echo "📦 正在暂存合规变动..."
         git add .
 
-        echo "🔄 检查远端最新提交并 rebase..."
-        git fetch origin "$BRANCH" 2>/dev/null || true
-        if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
-            git pull --rebase origin "$BRANCH"
-        fi
-
         echo "✍️ 正在提交..."
         git commit -m "$MSG" || echo "工作区无新增变动可提交"
+
+        echo "🔄 检查远端最新提交..."
+        git fetch origin "$BRANCH" 2>/dev/null || true
+        if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
+            git rebase "origin/$BRANCH" || true
+        fi
 
         echo "🚀 正在推送到 GitHub (origin/$BRANCH)..."
         git push -u origin "$BRANCH"
 
         echo "🎉 成功推送到 GitHub 远端分支: origin/$BRANCH"
-        echo "💡 后续 Agent 可通过 'git checkout $BRANCH && git pull' 同步进度与看板 AGENT_SYNC.md。"
+        echo "💡 Reviewer Agent 可直接通过看板 AGENT_SYNC.md 开展评审。"
         ;;
     *)
         echo "用法: ./agent-sync.sh [status|push '说明']"
