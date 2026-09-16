@@ -35,19 +35,45 @@ let db = null;
 let flushTimer = null;
 
 export async function initStore({ dataDir, reset = false } = {}) {
-  if (dataDir) DATA_DIR = dataDir;
-  fs.mkdirSync(RAW_DIR(), { recursive: true });
-  if (db && !reset) return db;
+  const targetDir = dataDir ? path.resolve(dataDir) : DATA_DIR;
+  if (db && !reset && targetDir === DATA_DIR) {
+    return db;
+  }
+  const targetRawDir = path.join(targetDir, 'raw');
+  const targetDbFile = path.join(targetDir, 'db.json');
+
+  const isReadOnly = (process.env.AGGR_READONLY === 'on' || process.env.AGGR_READONLY === '1');
+  if (isReadOnly && !fs.existsSync(targetDir)) {
+    throw new Error(`[wenwen] 只读模式下拒绝新建不存在的数据目录: ${targetDir}`);
+  }
+
+  let loadedDb = null;
   try {
-    const raw = await fsp.readFile(DB_FILE(), 'utf8');
-    db = JSON.parse(raw);
+    const raw = await fsp.readFile(targetDbFile, 'utf8');
+    loadedDb = JSON.parse(raw);
   } catch (err) {
     if (err.code === 'ENOENT') {
-      db = {};
+      if (isReadOnly) {
+        throw new Error(`[wenwen] 只读模式下 db.json 不存在: ${targetDbFile}`);
+      }
+      loadedDb = {};
     } else {
       throw new Error(`[wenwen] db.json 损坏或读取失败，已阻断初始化以防空库覆盖: ${err.message}`);
     }
   }
+
+  // 只有校验成功才原子切换当前目录与内存状态，杜绝"旧db+新目录"
+  if (flushTimer) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
+  DATA_DIR = targetDir;
+  db = loadedDb;
+
+  if (!isReadOnly) {
+    fs.mkdirSync(RAW_DIR(), { recursive: true });
+  }
+
   db.events ||= {};
   db.registry ||= {};
   db.articleIndex ||= {};
@@ -67,12 +93,19 @@ export function dataDir() {
 
 /** 防抖落盘（原子写：tmp + rename，进程中断不会损坏旧文件） */
 export function scheduleFlush(delayMs = 2000) {
+  const isReadOnly = (process.env.AGGR_READONLY === 'on' || process.env.AGGR_READONLY === '1');
+  if (isReadOnly) return;
   if (flushTimer) return;
   flushTimer = setTimeout(() => flushNow(), delayMs);
 }
 
 export async function flushNow() {
   if (!db) return;
+  const isReadOnly = (process.env.AGGR_READONLY === 'on' || process.env.AGGR_READONLY === '1');
+  if (isReadOnly) {
+    console.warn('[wenwen] 只读模式生效中，阻断 flushNow 写入');
+    return;
+  }
   if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
   try {
     const tmp = DB_FILE() + '.tmp';
@@ -86,6 +119,10 @@ export async function flushNow() {
 
 /** 原始文章留档 */
 export async function saveRaw(article) {
+  const isReadOnly = (process.env.AGGR_READONLY === 'on' || process.env.AGGR_READONLY === '1');
+  if (isReadOnly) {
+    throw new Error(`[wenwen] 只读模式下拒绝写入文章留档: ${article.id}`);
+  }
   const file = path.join(RAW_DIR(), article.id + '.json');
   const tmp = file + '.tmp';
   await fsp.writeFile(tmp, JSON.stringify(article, null, 1));
@@ -101,7 +138,7 @@ export async function loadRaw(id) {
 }
 
 export async function listRawIds() {
-  fs.mkdirSync(RAW_DIR(), { recursive: true });
+  if (!fs.existsSync(RAW_DIR())) return [];
   return (await fsp.readdir(RAW_DIR())).filter((f) => f.endsWith('.json')).map((f) => f.replace('.json', ''));
 }
 

@@ -123,6 +123,11 @@ async function fetchSource(source, { force = false } = {}) {
   const hit = cache.get(source.id);
   if (!force && hit && Date.now() - hit.at < CACHE_TTL) return hit;
 
+  if (IS_OFFLINE) {
+    if (hit) return hit;
+    return { at: Date.now(), ok: false, items: [], error: 'offline: 离线模式已阻断外部网络抓取' };
+  }
+
   const entry = { at: Date.now(), ok: false, items: [], error: null };
   try {
     const ctrl = new AbortController();

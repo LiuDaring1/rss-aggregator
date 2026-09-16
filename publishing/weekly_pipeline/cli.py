@@ -59,8 +59,8 @@ def cmd_migrate_legacy(args):
     src = args.source
     out_c = args.out_content
     out_i = args.out_issues
-    print(f"正在从旧版迁移: {src} -> {out_c}, {out_i}...")
-    run_migration(src, out_c, out_i)
+    print(f"正在从旧版迁移: {src} -> {out_c}, {out_i} (overwrite={args.overwrite})...")
+    run_migration(src, out_c, out_i, overwrite=args.overwrite)
 
 def cmd_validate(args):
     print(f"正在校验内容目录: {args.content_dir}...")
@@ -226,6 +226,14 @@ def cmd_build(args):
             pngs = render_pdf_to_pngs(out_pdf, png_dir, prefix=f"{issue_id}")
             print(f"  ✅ PNG 页面快照完成 ({len(pngs)} 页): {png_dir}")
 
+def cmd_export_md(args):
+    from weekly_pipeline.export_markdown import export_all_markdown
+    c_dir = args.content_dir
+    out_dir = args.outdir
+    print(f"正在导出同源 Markdown 审阅文件: {c_dir} -> {out_dir}...")
+    files = export_all_markdown(c_dir, out_dir)
+    print(f"  ✅ 导出完成: 共生成 {len(files)} 个 Markdown 审阅文件在 {out_dir}")
+
 def main():
     parser = argparse.ArgumentParser(description="口语素材周刊 命令行工具")
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
@@ -240,6 +248,7 @@ def main():
     p_mig.add_argument("--source", default="weekly/sample-01-rev5/content5.py")
     p_mig.add_argument("--out-content", default="content")
     p_mig.add_argument("--out-issues", default="issues")
+    p_mig.add_argument("--overwrite", "--force", action="store_true", help="强制覆盖已存在文件")
     p_mig.add_argument("--offline", action="store_true", default=True)
     p_mig.set_defaults(func=cmd_migrate_legacy)
     
@@ -262,6 +271,12 @@ def main():
     p_bld.add_argument("--formats", default="html,pdf,png")
     p_bld.add_argument("--offline", action="store_true", default=True, help="离线构建模式")
     p_bld.set_defaults(func=cmd_build)
+    
+    # export-md
+    p_md = subparsers.add_parser("export-md", help="导出同源 Markdown 审阅文件")
+    p_md.add_argument("--content-dir", default="content")
+    p_md.add_argument("--outdir", default="outputs/markdown")
+    p_md.set_defaults(func=cmd_export_md)
     
     args = parser.parse_args()
     args.func(args)

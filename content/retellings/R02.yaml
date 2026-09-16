@@ -21,47 +21,47 @@ mindmap_tree:
   branches:
   - name: 人物与处境
     leaves:
-    - id: R02-leaf-1
+    - id: R02-leaf-01
       hint: 孩子的情况
-      answer: 孩子的情况
+      answer: 5 岁女孩全身过敏·脸眼肿胀
       fact_refs:
-      - 段落1
+      - 待核对
   - name: 发生了什么
     leaves:
-    - id: R02-leaf-1
+    - id: R02-leaf-02
       hint: 就诊时
-      answer: 就诊时
+      answer: 急诊夜班医生拒诊
       fact_refs:
-      - 段落1
-    - id: R02-leaf-2
+      - 待核对
+    - id: R02-leaf-03
       hint: 事后
-      answer: 事后
+      answer: 通过信息系统写下“刁蛮”等标注
       fact_refs:
-      - 段落2
+      - 待核对
   - name: 各方回应
     leaves:
-    - id: R02-leaf-1
+    - id: R02-leaf-04
       hint: 关于伤害
-      answer: 关于伤害
+      answer: “小事”“没造成身体伤害”
       fact_refs:
-      - 段落1
-    - id: R02-leaf-2
+      - 待核对
+    - id: R02-leaf-05
       hint: 关于维权
-      answer: 关于维权
+      answer: 维权是“对吴川整个地方抹黑”
       fact_refs:
-      - 段落2
+      - 待核对
   - name: 进展
     leaves:
-    - id: R02-leaf-1
+    - id: R02-leaf-06
       hint: 当地承认了什么
-      answer: 当地承认了什么
+      answer: “刁蛮”二字属实
       fact_refs:
-      - 段落1
-    - id: R02-leaf-2
+      - 待核对
+    - id: R02-leaf-07
       hint: 处理结果
-      answer: 处理结果
+      answer: 尚未公布
       fact_refs:
-      - 段落2
+      - 待核对
 ref_retelling: 上周，广东吴川的一件事让很多人气愤：一名 5 岁的小女孩全身过敏，脸和眼睛肿得很明显，家人带她去看急诊，夜班医生却拒绝接诊；事后，这位医生还在孩子的电子病历里写下“刁蛮”这样的字眼。家长担心这个记录一直留着，影响孩子以后看病，上网维权，得到的回应却是“这是小事”“没造成身体伤害”，甚至有人说，维权是“对吴川整个地方的抹黑”。目前当地医疗部门承认，“刁蛮”两个字确实是医生写的。病历是看病用的，不是谁发泄情绪的地方。
 mapkey: 5 岁女孩全身过敏·脸眼肿胀 / 急诊夜班医生拒诊 / 通过信息系统写下“刁蛮”等标注 / “小事”“没造成身体伤害” / 维权是“对吴川整个地方抹黑”
   / “刁蛮”二字属实 / 尚未公布

@@ -21,37 +21,37 @@ mindmap_tree:
   branches:
   - name: 现象
     leaves:
-    - id: R03-leaf-1
+    - id: R03-leaf-01
       hint: 气味与症状
-      answer: 气味与症状
+      answer: 气味刺鼻·头晕·流鼻血
       fact_refs:
-      - 段落1
-    - id: R03-leaf-2
+      - 待核对
+    - id: R03-leaf-02
       hint: 请假情况
-      answer: 请假情况
+      answer: 56 人班 41 人请假
       fact_refs:
-      - 段落2
+      - 待核对
   - name: 回应
     leaves:
-    - id: R03-leaf-1
+    - id: R03-leaf-03
       hint: 教体局的说法
-      answer: 教体局的说法
+      answer: 甲醛检测合格
       fact_refs:
-      - 段落1
+      - 待核对
   - name: 处理
     leaves:
-    - id: R03-leaf-1
+    - id: R03-leaf-04
       hint: 通报内容
-      answer: 通报内容
+      answer: 六年级全体迁回校本部
       fact_refs:
-      - 段落1
+      - 待核对
   - name: 未解
     leaves:
-    - id: R03-leaf-1
+    - id: R03-leaf-05
       hint: 评论追问
-      answer: 评论追问
+      answer: 气味是什么·原因仍需说清
       fact_refs:
-      - 段落1
+      - 待核对
 ref_retelling: 开学没多久，山东菏泽巨野县一所小学的新校区出了状况：家长反映教室里气味刺鼻，有孩子头晕、流鼻血，一个 56 人的班级，41 个孩子请了假。当地教体局回应说，甲醛检测是合格的；随后官方通报，已经把六年级全体学生迁回校本部。学生搬走了，疑问还没有散：检测合格，为什么孩子的身体反应这么多？刺鼻的气味到底是什么？家长想要的，是一个说得清的原因和一份让人放心的检测。
 mapkey: 气味刺鼻 / 头晕·流鼻血 / 56 人班 41 人请假 / 甲醛检测合格 / 六年级全体迁回校本部 / 气味是什么·原因仍需说清
 illustration_id: ILL-R03

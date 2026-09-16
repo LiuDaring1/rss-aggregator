@@ -20,37 +20,37 @@ mindmap_tree:
   branches:
   - name: 事发
     leaves:
-    - id: R05-leaf-1
+    - id: R05-leaf-01
       hint: 谁在哪儿做了什么
-      answer: 谁在哪儿做了什么
+      answer: 家长用塑料饮料杯给孩子接小便
       fact_refs:
-      - 段落1
+      - 待核对
   - name: 传播
     leaves:
-    - id: R05-leaf-1
+    - id: R05-leaf-02
       hint: 视频引来什么
-      answer: 视频引来什么
+      answer: 大量批评
       fact_refs:
-      - 段落1
+      - 待核对
   - name: 门店回应
     leaves:
-    - id: R05-leaf-1
+    - id: R05-leaf-03
       hint: 对区域
-      answer: 对区域
+      answer: 全面消杀
       fact_refs:
-      - 段落1
-    - id: R05-leaf-2
+      - 待核对
+    - id: R05-leaf-04
       hint: 对餐具
-      answer: 对餐具
+      answer: 接触餐具全部废弃
       fact_refs:
-      - 段落2
+      - 待核对
   - name: 家长
     leaves:
-    - id: R05-leaf-1
+    - id: R05-leaf-05
       hint: 道歉与赔偿
-      answer: 道歉与赔偿
+      answer: 公开道歉·愿赔偿
       fact_refs:
-      - 段落1
+      - 待核对
 ref_retelling: 北京的一家寿司郎门店里，发生了让人皱眉的一幕：一名家长带孩子在餐位就餐时，孩子在座位上想小便，家长顺手拿起一个塑料饮料杯，就在座位上给孩子接住了。这一幕被人拍下来传到网上，批评声很快涌来——餐厅是大家吃饭的地方，这不是小事。涉事门店回应说，已经全面消杀，孩子接触过的餐具全部废弃；家长也公开道歉，表示愿意赔偿。带孩子出门，大人要提前想好应急的办法；公共场所的规矩，要靠每一个用餐的人一起守。
 mapkey: 家长用塑料饮料杯给孩子接小便 / 大量批评 / 全面消杀 / 接触餐具全部废弃 / 公开道歉·愿赔偿
 illustration_id: ILL-R05

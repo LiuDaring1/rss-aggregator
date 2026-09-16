@@ -20,19 +20,59 @@ def load_legacy_module(path: str):
     spec.loader.exec_module(mod)
     return mod
 
+def extract_answers_from_mapkey(uid: str, mapkey: str, total_leaves: int) -> List[str]:
+    raw_chunks = [p.strip() for p in mapkey.split("/") if p.strip()]
+    if not raw_chunks:
+        return ["" for _ in range(total_leaves)]
+    
+    if uid == "R01" and len(raw_chunks) == 8 and total_leaves == 7:
+        return [
+            raw_chunks[0],
+            raw_chunks[1],
+            raw_chunks[2],
+            raw_chunks[3],
+            raw_chunks[4],
+            f"{raw_chunks[5]}·{raw_chunks[6]}",
+            raw_chunks[7]
+        ]
+    elif uid == "R03" and len(raw_chunks) == 6 and total_leaves == 5:
+        return [
+            f"{raw_chunks[0]}·{raw_chunks[1]}",
+            raw_chunks[2],
+            raw_chunks[3],
+            raw_chunks[4],
+            raw_chunks[5]
+        ]
+    elif len(raw_chunks) == total_leaves:
+        return raw_chunks
+    else:
+        res = list(raw_chunks[:total_leaves])
+        while len(res) < total_leaves:
+            res.append("")
+        return res
+
 def migrate_retellings(retells: list) -> List[RetellingUnit]:
     units = []
     for i, r in enumerate(retells):
         uid = f"R{i+1:02d}"
+        branches_raw = r.get("tree", {}).get("branches", [])
+        
+        # 统计总叶子数以对齐答案
+        total_leaves = sum(len(br.get("children", [])) for br in branches_raw)
+        answers = extract_answers_from_mapkey(uid, r.get("mapkey", ""), total_leaves)
+        
+        global_leaf_idx = 0
         branches = []
-        for br in r["tree"].get("branches", []):
+        for br in branches_raw:
             leaves = []
-            for j, ch in enumerate(br.get("children", [])):
+            for ch in br.get("children", []):
+                global_leaf_idx += 1
+                leaf_ans = answers[global_leaf_idx - 1] if global_leaf_idx - 1 < len(answers) else ""
                 leaves.append(MindmapLeaf(
-                    id=f"{uid}-leaf-{len(leaves)+1}",
+                    id=f"{uid}-leaf-{global_leaf_idx:02d}",
                     hint=ch.get("blank", ""),
-                    answer=ch.get("blank", ""), # 旧版无显式独立叶答案，用参照字段回填
-                    fact_refs=[f"段落{j+1}"]
+                    answer=leaf_ans,
+                    fact_refs=["待核对"]
                 ))
             branches.append(MindmapBranch(
                 name=br.get("label", ""),
@@ -177,7 +217,24 @@ def migrate_excerpts(fragments: list) -> List[ExcerptUnit]:
         units.append(unit)
     return units
 
-def run_migration(content5_path: str, output_content_dir: str, issues_dir: str):
+def _should_skip_write(target_path: str, overwrite: bool) -> bool:
+    if not os.path.exists(target_path):
+        return False
+    if overwrite:
+        return False
+    # 存在且未指定 overwrite：检查是否有人工审阅或现有内容保护
+    try:
+        with open(target_path, "r", encoding="utf-8") as fp:
+            data = yaml.safe_load(fp)
+            if isinstance(data, dict) and data.get("legacy_unreviewed") is False:
+                print(f"  🛡️  [已人工审阅保护] {target_path} legacy_unreviewed=False，阻止自动覆盖！")
+                return True
+    except Exception:
+        pass
+    print(f"  ⚠️  [跳过保护] {target_path} 已存在且未指定 --overwrite/--force，跳过写入。")
+    return True
+
+def run_migration(content5_path: str, output_content_dir: str, issues_dir: str, overwrite: bool = False):
     mod = load_legacy_module(content5_path)
     retellings = migrate_retellings(mod.RETELLS)
     
@@ -197,17 +254,30 @@ def run_migration(content5_path: str, output_content_dir: str, issues_dir: str):
     os.makedirs(c_dir, exist_ok=True)
     os.makedirs(f_dir, exist_ok=True)
 
+    written_r, written_c, written_f = 0, 0, 0
     for r in retellings:
-        with open(os.path.join(r_dir, f"{r.id}.yaml"), "w", encoding="utf-8") as fp:
+        path = os.path.join(r_dir, f"{r.id}.yaml")
+        if _should_skip_write(path, overwrite):
+            continue
+        with open(path, "w", encoding="utf-8") as fp:
             yaml.dump(r.model_dump(), fp, allow_unicode=True, sort_keys=False)
+        written_r += 1
 
     for c in commentaries:
-        with open(os.path.join(c_dir, f"{c.id}.yaml"), "w", encoding="utf-8") as fp:
+        path = os.path.join(c_dir, f"{c.id}.yaml")
+        if _should_skip_write(path, overwrite):
+            continue
+        with open(path, "w", encoding="utf-8") as fp:
             yaml.dump(c.model_dump(), fp, allow_unicode=True, sort_keys=False)
+        written_c += 1
 
     for f in excerpts:
-        with open(os.path.join(f_dir, f"{f.id}.yaml"), "w", encoding="utf-8") as fp:
+        path = os.path.join(f_dir, f"{f.id}.yaml")
+        if _should_skip_write(path, overwrite):
+            continue
+        with open(path, "w", encoding="utf-8") as fp:
             yaml.dump(f.model_dump(), fp, allow_unicode=True, sort_keys=False)
+        written_f += 1
 
     # 写入 issue.yaml
     manifest = IssueManifest(
@@ -222,15 +292,22 @@ def run_migration(content5_path: str, output_content_dir: str, issues_dir: str):
     )
     issue_dir = os.path.join(issues_dir, "sample-01-rev5")
     os.makedirs(issue_dir, exist_ok=True)
-    with open(os.path.join(issue_dir, "issue.yaml"), "w", encoding="utf-8") as fp:
-        yaml.dump(manifest.model_dump(), fp, allow_unicode=True, sort_keys=False)
+    manifest_path = os.path.join(issue_dir, "issue.yaml")
+    if not _should_skip_write(manifest_path, overwrite):
+        with open(manifest_path, "w", encoding="utf-8") as fp:
+            yaml.dump(manifest.model_dump(), fp, allow_unicode=True, sort_keys=False)
 
-    print(f"✅ 成功迁移: {len(retellings)} 则复述, {len(commentaries)} 篇评论, {len(excerpts)} 个原文拆解 -> {output_content_dir}")
-    print(f"✅ 成功生成期刊清单: {os.path.join(issue_dir, 'issue.yaml')}")
+    print(f"✅ 迁移处理完成: 写入/更新 {written_r}/{len(retellings)} 复述, {written_c}/{len(commentaries)} 评论, {written_f}/{len(excerpts)} 原文拆解 -> {output_content_dir}")
+    print(f"✅ 期刊清单路径: {manifest_path}")
     return retellings, commentaries, excerpts, manifest
 
 if __name__ == "__main__":
-    src_file = sys.argv[1] if len(sys.argv) > 1 else "weekly/sample-01-rev5/content5.py"
-    out_content = sys.argv[2] if len(sys.argv) > 2 else "content"
-    out_issues = sys.argv[3] if len(sys.argv) > 3 else "issues"
-    run_migration(src_file, out_content, out_issues)
+    import argparse
+    parser = argparse.ArgumentParser(description="旧刊例数据迁移适配器")
+    parser.add_argument("--source", default="weekly/sample-01-rev5/content5.py")
+    parser.add_argument("--out-content", default="content")
+    parser.add_argument("--out-issues", default="issues")
+    parser.add_argument("--overwrite", "--force", action="store_true", help="强制覆盖已存在文件")
+    args = parser.parse_args()
+    run_migration(args.source, args.out_content, args.out_issues, overwrite=args.overwrite)
+

@@ -175,6 +175,30 @@ class CommentaryUnit(BaseModel):
     teaching: TeachingBlock = Field(..., description="第3页拆解与教学指导")
     legacy_unreviewed: bool = Field(False, description="标记是否为旧版未经多观点重构的过渡稿")
 
+    def get_spoken_paragraphs(self) -> List[str]:
+        """返回规范化拼装的口语范本各段文本（开头总论、主体段落包含分论点、结尾独立收束）"""
+        paras = []
+        if self.speech.main_claim and self.speech.main_claim.strip():
+            paras.append(self.speech.main_claim.strip())
+        for b in self.speech.body:
+            claim_clean = b.claim.strip()
+            for idx, p in enumerate(b.paragraphs):
+                p_clean = p.strip()
+                if idx == 0:
+                    if not p_clean.startswith(claim_clean):
+                        paras.append(f"{claim_clean} {p_clean}")
+                    else:
+                        paras.append(p_clean)
+                else:
+                    paras.append(p_clean)
+        if self.speech.closing and self.speech.closing.strip():
+            paras.append(self.speech.closing.strip())
+        return paras
+
+    def get_full_spoken_text(self) -> str:
+        """返回用于口语字数统计与朗读评测的完整连续文本"""
+        return "".join(self.get_spoken_paragraphs())
+
 
 # ==============================================================================
 # 4. 原文拆解与积累单元模型 (ExcerptUnit)

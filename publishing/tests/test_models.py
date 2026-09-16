@@ -134,5 +134,99 @@ class PipelineModelTestCase(unittest.TestCase):
         han = count_chinese_chars(sample_text)
         self.assertEqual(han, 24)
 
+    def test_spoken_assembly_and_character_count_independent_claim(self):
+        """测试主体段 claim 独立写时，不会发生漏计或未拼接至口语流中的问题"""
+        # 创建一个 claim 独立、paragraphs[0] 不含 claim 的评论单元
+        body = [
+            SpeechBodyParagraph(
+                id="b1",
+                claim="分论点一：独立小观点。",
+                paragraphs=["这是正文，开头并没有重复小观点。"]
+            ),
+            SpeechBodyParagraph(
+                id="b2",
+                claim="分论点二：第二个小观点。",
+                paragraphs=["这是第二段正文，也没有重复小观点。"]
+            )
+        ]
+        cu = CommentaryUnit(
+            id="C_CLAIM_TEST",
+            retelling_ref="R01",
+            title="测试独立观点评论",
+            learning=LearningBlock(
+                recap_facts=["事实1", "事实2"],
+                questions=["问题1", "问题2"],
+                viewpoints=[
+                    ViewpointItem(id="v1", claim="观点1", evidence="证据1"),
+                    ViewpointItem(id="v2", claim="观点2", evidence="证据2"),
+                ],
+                reasoning_lessons=[
+                    ReasoningLesson(title="推演", target_viewpoint_ids=["v1"], deduction_text="推演文本")
+                ]
+            ),
+            speech=SpeechBlock(
+                selected_viewpoint_ids=["v1", "v2"],
+                main_claim="总观点开头。",
+                body=body,
+                closing="结尾收束。"
+            ),
+            teaching=TeachingBlock(
+                spine="结构",
+                deconstruction=[DeconstructionItem(target="【拆解】", instruction="讲解")]
+            )
+        )
+        
+        # 1. 验证 get_spoken_paragraphs 自动把 claim 拼接到段首
+        paras = cu.get_spoken_paragraphs()
+        self.assertEqual(len(paras), 4) # 开头, b1, b2, 结尾
+        self.assertTrue(paras[1].startswith("分论点一：独立小观点。 这是正文"))
+        self.assertTrue(paras[2].startswith("分论点二：第二个小观点。 这是第二段正文"))
+        
+        # 2. 验证 get_full_spoken_text 包含全部 claim 字符
+        full_text = cu.get_full_spoken_text()
+        self.assertIn("分论点一：独立小观点", full_text)
+        self.assertIn("分论点二：第二个小观点", full_text)
+        
+        # 3. 验证校验器采用统一公式计算字数
+        res = validate_commentary(cu.model_dump())
+        self.assertTrue(res.is_valid)
+
+    def test_yaml_duplicate_keys_detection(self):
+        """测试 YAML 重复键检测防御机制"""
+        from weekly_pipeline.validation import load_yaml_safely
+        yaml_with_dups = """
+id: C99
+title: 包含重复键的YAML
+learning:
+  questions:
+    - 问题1
+  questions:
+    - 问题2被重复覆盖
+"""
+        with self.assertRaises(ValueError) as ctx:
+            load_yaml_safely(yaml_with_dups)
+        self.assertIn("发现重复的 YAML 键 'questions'", str(ctx.exception))
+
+    def test_cross_file_retelling_reference_validation(self):
+        """测试跨文件引用校验：评论单元引用不存在的复述材料时应报错"""
+        cu = create_sample_commentary(viewpoint_count=3, body_count=2)
+        cu.retelling_ref = "R99_NON_EXISTENT"
+        
+        # 传入有效复述ID列表，R99 不在其中
+        available_r = {"R01", "R02", "R03"}
+        res = validate_commentary(cu.model_dump(), available_retellings=available_r)
+        self.assertFalse(res.is_valid)
+        self.assertTrue(any("未在有效复述材料列表中找到" in err for err in res.errors))
+
+    def test_deconstruction_engineering_praise_flagged(self):
+        """测试学生拆解中出现工程自夸词（如‘纠正旧版’）会被警告"""
+        cu = create_sample_commentary(viewpoint_count=3, body_count=2)
+        cu.teaching.deconstruction.append(
+            DeconstructionItem(target="【纠正旧版】", instruction="本段彻底修复了上一版的缺陷")
+        )
+        res = validate_commentary(cu.model_dump())
+        self.assertTrue(res.is_valid) # 警告不阻断工程编译
+        self.assertTrue(any("教学拆解属于面向学生的印刷内容，不应包含工程执行评述" in w for w in res.warnings))
+
 if __name__ == "__main__":
     unittest.main()

@@ -21,39 +21,39 @@ mindmap_tree:
   branches:
   - name: 发现
     leaves:
-    - id: R08-leaf-1
+    - id: R08-leaf-01
       hint: 时间地点·看见了什么
-      answer: 时间地点·看见了什么
+      answer: 7 月 21 日凌晨·两公里外火光
       fact_refs:
-      - 段落1
+      - 待核对
   - name: 先试
     leaves:
-    - id: R08-leaf-1
+    - id: R08-leaf-02
       hint: 办法与效果
-      answer: 办法与效果
+      answer: 喇叭·敲杂物·回应寥寥
       fact_refs:
-      - 段落1
+      - 待核对
   - name: 再做
     leaves:
-    - id: R08-leaf-1
+    - id: R08-leaf-03
       hint: 换用的办法
-      answer: 换用的办法
+      answer: 挨家挨户砸门示警
       fact_refs:
-      - 段落1
+      - 待核对
   - name: 结果
     leaves:
-    - id: R08-leaf-1
+    - id: R08-leaf-04
       hint: 撤离与伤亡
-      answer: 撤离与伤亡
+      answer: 9 名群众安全撤离·无人员伤亡
       fact_refs:
-      - 段落1
+      - 待核对
   - name: 人物
     leaves:
-    - id: R08-leaf-1
+    - id: R08-leaf-05
       hint: 他的情况
-      answer: 他的情况
+      answer: 33 岁聋哑·按摩手艺谋生
       fact_refs:
-      - 段落1
+      - 待核对
 ref_retelling: 7 月 21 日凌晨，四川阆中，33 岁的聋哑青年魏治立骑摩托车回家，远远看见两公里外的社区方向起了大火。他立刻调头赶去，先按响喇叭、敲打路边的杂物，想用声响惊醒熟睡的村民——可是深夜里，回应的人很少。于是他停下摩托车，挨家挨户地砸门。有村民回忆：开门看见他站在门口，脸涨得通红，手一个劲地往起火的方向指。因为示警及时，9
   名群众安全撤离，这场大火没有造成人员伤亡。他的世界是无声的，可在那天夜里，他敲出了整座村庄最响亮的声音。
 mapkey: 7 月 21 日凌晨·两公里外火光 / 喇叭·敲杂物·回应寥寥 / 挨家挨户砸门示警 / 9 名群众安全撤离·无人员伤亡 / 33 岁聋哑·按摩手艺谋生

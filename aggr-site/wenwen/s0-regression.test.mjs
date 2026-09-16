@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-import { initStore, getDb, upsertArticle } from './store.js';
+import { initStore, getDb, upsertArticle, flushNow, dataDir } from './store.js';
 import { prefilter } from './collector.js';
 import { rebuildRegistry } from './mediaName.js';
 import { mountWenwen } from './routes.js';
@@ -106,3 +106,34 @@ test('S0-4: AGGR_READONLY=on 模式下 POST 写入接口返回 403 阻断', asyn
 
   delete process.env.AGGR_READONLY;
 });
+
+/* 5. 存储层原子化与失败防御 (P1-04) */
+test('S0-5: 初始化失败时保持原状态，禁止切换到损坏目录并被 flushNow 覆盖', async () => {
+  const dirA = tmpDir();
+  const dirB = tmpDir();
+  
+  // 成功初始化 A
+  await initStore({ dataDir: dirA, reset: true });
+  const dbA = getDb();
+  dbA.articleIndex['art-A'] = { id: 'art-A', title: 'A文章' };
+  await flushNow();
+  assert.equal(fs.existsSync(path.join(dirA, 'db.json')), true);
+
+  // 损坏 B 的 db.json
+  const dbBFile = path.join(dirB, 'db.json');
+  fs.writeFileSync(dbBFile, '{ invalid json');
+
+  // 尝试重置并切换到 B，必须抛出异常
+  await assert.rejects(
+    async () => {
+      await initStore({ dataDir: dirB, reset: true });
+    },
+    /db\.json 损坏或读取失败/
+  );
+
+  // 关键验证：执行 flushNow 时，绝不能将 A 的数据刷入 B 的目录！
+  await flushNow();
+  assert.equal(fs.readFileSync(dbBFile, 'utf8'), '{ invalid json');
+  assert.notEqual(dataDir(), path.resolve(dirB));
+});
+

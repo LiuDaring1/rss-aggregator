@@ -300,17 +300,15 @@ def preview_unit(unit: Any, unit_type: str, out_dir: str,
     
     results: Dict[str, Any] = {"unit_id": unit_id, "unit_type": unit_type}
     
+    # 强制覆盖写入最新 HTML，确保无头浏览器打印的始终是最新内容
+    html_file = os.path.join(out_dir, f"{unit_id}.html")
+    with open(html_file, "w", encoding="utf-8") as f:
+        f.write(html_content)
+        
     if "html" in formats:
-        html_file = os.path.join(out_dir, f"{unit_id}.html")
-        with open(html_file, "w", encoding="utf-8") as f:
-            f.write(html_content)
         results["html"] = html_file
         
     if "pdf" in formats or "png" in formats:
-        html_file = os.path.join(out_dir, f"{unit_id}.html")
-        if not os.path.exists(html_file):
-            with open(html_file, "w", encoding="utf-8") as f:
-                f.write(html_content)
         pdf_file = os.path.join(out_dir, f"{unit_id}.pdf")
         render_html_to_pdf(html_file, pdf_file)
         results["pdf"] = pdf_file

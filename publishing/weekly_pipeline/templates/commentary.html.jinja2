@@ -79,21 +79,9 @@
   <div class="cu-blk">
     <div class="lbl">口语范本（双主体展开 · 约 2 分钟）</div>
     <div class="cu-script">
-      {% if unit.speech.main_claim %}
-      <p>{{ unit.speech.main_claim }}</p>
-      {% endif %}
-      {% for b in unit.speech.body %}
-        {% for p in b.paragraphs %}
-          {% if loop.first and not p.startswith(b.claim) %}
-          <p>{{ b.claim }} {{ p }}</p>
-          {% else %}
-          <p>{{ p }}</p>
-          {% endif %}
-        {% endfor %}
+      {% for p in unit.get_spoken_paragraphs() %}
+      <p>{{ p }}</p>
       {% endfor %}
-      {% if unit.speech.closing %}
-      <p>{{ unit.speech.closing }}</p>
-      {% endif %}
     </div>
   </div>
   {% if unit.teaching.spine %}
