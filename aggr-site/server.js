@@ -461,6 +461,10 @@ server.listen(PORT, async () => {
   const sources = await loadSources();
   console.log(`[aggr-site] 聚合站点已启动: http://127.0.0.1:${PORT}`);
   console.log(`[aggr-site] 已配置 ${sources.length} 个信息源`);
+  // 交接适配（仅本副本）：设 AGGR_AUTOTASKS=off 可禁用 AI 预热与暖文雷达定时采集/分析，避免写库与 API 调用
+  if (process.env.AGGR_AUTOTASKS === 'off') {
+    console.log('[aggr-site] AGGR_AUTOTASKS=off：已跳过 AI 热点预热与暖文雷达调度（交接验证模式）');
+  } else {
   // 后台预热 AI 热点归纳（72h / 7d），用户点开时大概率已有缓存
   for (const h of [72, 168]) {
     getTopics(h, false)
@@ -469,4 +473,5 @@ server.listen(PORT, async () => {
   }
   // 暖文雷达：启动采集/分析调度
   await startWenwenScheduler();
+  }
 });

@@ -1,0 +1,204 @@
+/* 口语素材周刊 · 新评论单元试写（单脚鞋银行）版式 */
+@page { size: A4; margin: 14mm 14mm 15mm 14mm; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; }
+
+body {
+  font-family: "Songti SC", "STSong", "SimSun", serif;
+  font-size: 10pt;
+  line-height: 1.58;
+  color: #000;
+  margin: 0;
+}
+
+h1, h2, h3, .sans, .lbl, .rno, .tag, .cuhead, .kicker, .tagline {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* 页面强分页 */
+.cq, .cview, .cscript {
+  page-break-before: always;
+  position: relative;
+  min-height: 255mm;
+}
+.cq:first-child {
+  page-break-before: avoid;
+}
+
+/* 单元标题栏 */
+.cuhead {
+  display: flex;
+  align-items: baseline;
+  gap: 3mm;
+  margin-bottom: 2.5mm;
+  border-bottom: 1.4pt solid #000;
+  padding-bottom: 1.6mm;
+}
+.cuhead h3 {
+  font-size: 14pt;
+  margin: 0;
+  flex: 1;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+}
+.rno {
+  display: inline-block;
+  border: 1.4pt solid #000;
+  font-weight: 700;
+  font-size: 10.5pt;
+  padding: 0.5mm 2mm;
+}
+.backref {
+  font-size: 8.8pt;
+  color: #333;
+  font-family: "PingFang SC", sans-serif;
+  flex-shrink: 0;
+}
+
+/* 内容功能块 */
+.cu-blk {
+  margin: 2.5mm 0;
+}
+.cu-blk .lbl {
+  font-weight: 700;
+  font-size: 10.5pt;
+  border-left: 2.5pt solid #000;
+  padding-left: 2.5mm;
+  margin-bottom: 1.2mm;
+}
+
+/* 回想材料 */
+ul.recap {
+  margin: 0;
+  padding-left: 5mm;
+}
+ul.recap li {
+  margin: 1.2mm 0;
+  font-size: 9.8pt;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+/* 思考问题 */
+ol.qs {
+  margin: 0;
+  padding-left: 5mm;
+}
+ol.qs li {
+  margin: 1.5mm 0 0.8mm;
+  font-size: 10pt;
+  line-height: 1.5;
+  text-align: justify;
+}
+.qs .wl {
+  border-bottom: 0.6pt dotted #888;
+  height: 7mm;
+  margin: 0.8mm 0 1.8mm;
+}
+
+/* 观点参考 */
+.baseline {
+  font-size: 9.5pt;
+  color: #333;
+  margin-bottom: 1.5mm;
+  background: #f7f7f7;
+  padding: 1.5mm 2.5mm;
+  border-left: 1.5pt solid #888;
+  line-height: 1.5;
+}
+ul.views {
+  margin: 0;
+  padding-left: 2mm;
+  list-style: none;
+}
+ul.views li {
+  margin: 1.5mm 0;
+  font-size: 9.6pt;
+  padding-left: 4.5mm;
+  text-indent: -4.5mm;
+  line-height: 1.5;
+  text-align: justify;
+}
+ul.views li::before {
+  content: "◆ ";
+  font-size: 7.5pt;
+}
+ul.views li strong {
+  font-family: "PingFang SC", sans-serif;
+  color: #111;
+}
+.views .how {
+  font-size: 8.8pt;
+  color: #444;
+  margin-top: 0.4mm;
+  text-indent: 0;
+  padding-left: 4.5mm;
+  line-height: 1.4;
+}
+
+/* 拆开讲：推演 */
+.reason-box {
+  border-top: 0.8pt dashed #888;
+  padding-top: 1.8mm;
+  margin-top: 2mm;
+}
+.ctx {
+  font-size: 9.5pt;
+  margin: 1mm 0;
+  text-align: justify;
+  line-height: 1.62;
+}
+.ctx.reason {
+  font-size: 9.5pt;
+  line-height: 1.62;
+}
+.ctx.reason p {
+  margin: 1mm 0;
+  text-indent: 2em;
+}
+
+/* 口语范本 */
+.cu-script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 11pt;
+  line-height: 1.78;
+  border: 1pt solid #000;
+  padding: 3mm 4.5mm;
+  margin: 1.2mm 0 2mm;
+}
+.cu-script p {
+  margin: 1.2mm 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* 全文主线与拆解 */
+.spine-box {
+  background: #f9f9f9;
+  border: 0.6pt solid #ccc;
+  padding: 1.5mm 3mm;
+  font-size: 9.2pt;
+  line-height: 1.48;
+  margin-bottom: 1.8mm;
+}
+.decon-list p {
+  font-size: 9.2pt;
+  line-height: 1.5;
+  margin: 0.8mm 0;
+  text-align: justify;
+}
+.decon-list b, .decon-list strong {
+  font-family: "PingFang SC", sans-serif;
+}
+
+/* 页脚批注 */
+.pagefoot {
+  margin-top: 4mm;
+  border-top: 0.5pt solid #bbb;
+  padding-top: 1.2mm;
+  font-size: 8.2pt;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  font-family: "PingFang SC", sans-serif;
+}
