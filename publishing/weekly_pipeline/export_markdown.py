@@ -112,7 +112,7 @@ def export_commentary_markdown(unit: CommentaryUnit, edition: str = "teacher") -
     spoken_text = unit.get_full_spoken_text()
     cn_len = count_chinese_chars(spoken_text)
     total_len = count_non_whitespace_chars(spoken_text)
-    lines.append(f"**字数与朗读建议**：正文汉字数 {cn_len} 汉字 | 总字符数（含标点） {total_len} 字符（适宜中速口语表达约 1.5 - 2 分钟）")
+    lines.append(f"**字数参考**：正文汉字数 {cn_len} 汉字 | 总字符数（含标点） {total_len} 字符（注：实际口语朗读时长需结合真人试读检验，非实测通过时长）")
     lines.append("")
     lines.append("## 四、教学拆解与修辞指南")
     lines.append(f"**论述骨架**：{unit.teaching.spine}")
@@ -152,12 +152,14 @@ def export_excerpt_markdown(unit: ExcerptUnit, edition: str = "teacher") -> str:
 
 def publish_directory_atomically(staging_dir: str, target_dir: str, _fault_after_backup: bool = False) -> None:
     """
-    将 staging_dir 原子发布至 target_dir，支持失败自动回滚。
+    将 staging_dir 发布至 target_dir。在单进程发布、可捕获异常且文件系统允许回滚的场景中，
+    通过备份切换与异常恢复保证上一版本保持完整。
     保证：
     1. 不逐个删除或覆盖仍在使用的当前版本文件；
     2. 新批次在独立暂存目录完整生成并就绪后，才触发切换；
-    3. 发生任何失败时（包括切换中途异常），上一版本 100% 完整保留（目录入口、文件列表与内容摘要不变）；
-    4. 切换成功后才清理旧版本备份。
+    3. 发生可捕获异常时（包括切换中途的系统错误），自动将备份目录恢复回目标目录；
+    4. 切换完全成功后才清理旧版本备份。
+    （注：两次 rename 之间存在短暂瞬时交替；不适用于未测试的断电、强制 kill -9 或并发写入场景）
     """
     target = Path(target_dir).resolve()
     staging = Path(staging_dir).resolve()
