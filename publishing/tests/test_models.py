@@ -466,5 +466,129 @@ teaching:
             self.assertIn("【草稿·未核验】", html_content)
             self.assertIn("（未核验）", html_content)
 
+    def test_publication_switch_fault_injection_preserves_old_output(self):
+        """测试发布末端原子切换与回滚：双版本均生成后注入故障，确保旧版本完整保留无损"""
+        import tempfile
+        from pathlib import Path
+        from weekly_pipeline.export_markdown import export_all_markdown, publish_directory_atomically
+
+        def snapshot(root: Path):
+            return {
+                str(p.relative_to(root)): p.read_text(encoding="utf-8")
+                for p in sorted(root.rglob("*.md"))
+            }
+
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            content_dir = root / "content"
+            published_dir = root / "published"
+            
+            # 准备合成的有效输入内容
+            (content_dir / "retellings").mkdir(parents=True)
+            for uid in ["R01", "R02"]:
+                retell_yaml = f"""schema_version: '1.0'
+id: {uid}
+category: 社会热点
+packet_ref: pkt-{uid}
+title: 测试复述{uid}
+date_label: 2026年9月
+source_label: 财经网
+material_paragraphs:
+  - 事实段落1
+keywords: [词1, 词2]
+mindmap_tree:
+  center: 核心
+  branches:
+    - name: 分支
+      leaves:
+        - id: L1
+          hint: 提示
+          answer: 答案
+ref_retelling: 这是示范文本
+mapkey: 答案1
+"""
+                (content_dir / "retellings" / f"{uid}.yaml").write_text(retell_yaml, encoding="utf-8")
+
+            # 准备已有旧版输出（含 student, teacher，以及已被淘汰的废弃文件 obsolete.md）
+            for sub in ["student", "teacher"]:
+                sub_dir = published_dir / sub
+                sub_dir.mkdir(parents=True)
+                (sub_dir / "R01.md").write_text(f"OLD_VERSION_{sub}_R01", encoding="utf-8")
+                (sub_dir / "obsolete.md").write_text(f"OLD_VERSION_{sub}_OBSOLETE", encoding="utf-8")
+
+            before_snapshot = snapshot(published_dir)
+            self.assertEqual(len(before_snapshot), 4)
+
+            # 场景 1: 双版本导出 —— 两个版本均在暂存区生成完毕后，在发布切换阶段注入故障
+            with self.assertRaises(OSError) as ctx:
+                export_all_markdown(str(content_dir), str(published_dir), edition="both", _fault_at_publish=True)
+            self.assertIn("INJECTED_FAULT", str(ctx.exception))
+
+            # 核心断言：发布切换失败后，旧发布目录的文件集合、路径与内容摘要 100% 保持未改变！
+            after_fault_snapshot = snapshot(published_dir)
+            self.assertEqual(before_snapshot, after_fault_snapshot)
+            self.assertTrue((published_dir / "student" / "obsolete.md").exists())
+            self.assertTrue((published_dir / "teacher" / "obsolete.md").exists())
+
+            # 场景 2: 正常发布 —— 两版本一起切换至新批次，旧废弃文件被清理
+            generated = export_all_markdown(str(content_dir), str(published_dir), edition="both")
+            self.assertEqual(len(generated), 4) # student: R01, R02; teacher: R01, R02
+            
+            self.assertTrue((published_dir / "student" / "R01.md").exists())
+            self.assertTrue((published_dir / "student" / "R02.md").exists())
+            self.assertTrue((published_dir / "teacher" / "R01.md").exists())
+            self.assertTrue((published_dir / "teacher" / "R02.md").exists())
+            # obsolete 文件在新版本中已被安全清除
+            self.assertFalse((published_dir / "student" / "obsolete.md").exists())
+            self.assertFalse((published_dir / "teacher" / "obsolete.md").exists())
+            # 记录了发布清单与文件摘要
+            self.assertTrue((published_dir / "_manifest.json").exists())
+
+            # 场景 3: 单版本导出 —— 同样具备发布末端失败回滚保护
+            single_published_dir = root / "single_published"
+            single_published_dir.mkdir(parents=True)
+            (single_published_dir / "R01.md").write_text("OLD_SINGLE_R01", encoding="utf-8")
+            (single_published_dir / "obsolete.md").write_text("OLD_SINGLE_OBSOLETE", encoding="utf-8")
+            
+            single_before = snapshot(single_published_dir)
+            with self.assertRaises(OSError):
+                export_all_markdown(str(content_dir), str(single_published_dir), edition="student", _fault_at_publish=True)
+            
+            single_after = snapshot(single_published_dir)
+            self.assertEqual(single_before, single_after)
+
+    def test_publish_directory_atomically_rename_exception_rollback(self):
+        """测试底层 publish_directory_atomically 在 rename 异常时的回滚保全能力"""
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        from weekly_pipeline.export_markdown import publish_directory_atomically
+
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            target = root / "published"
+            staging = root / "staging"
+            target.mkdir()
+            staging.mkdir()
+            (target / "old.txt").write_text("OLD_CONTENT", encoding="utf-8")
+            (staging / "new.txt").write_text("NEW_CONTENT", encoding="utf-8")
+
+            real_rename = os.rename
+            calls = []
+            def fake_rename(src, dst):
+                calls.append((src, dst))
+                # 第二次 rename 是将 staging 移到 target，此时模拟文件系统故障
+                if len(calls) == 2:
+                    raise OSError("Simulated filesystem rename failure")
+                return real_rename(src, dst)
+
+            with patch("os.rename", side_effect=fake_rename):
+                with self.assertRaises(OSError):
+                    publish_directory_atomically(str(staging), str(target))
+
+            # 断言 target 被安全回滚，旧文件与内容完好无损
+            self.assertTrue((target / "old.txt").exists())
+            self.assertEqual((target / "old.txt").read_text(encoding="utf-8"), "OLD_CONTENT")
+
 if __name__ == "__main__":
     unittest.main()

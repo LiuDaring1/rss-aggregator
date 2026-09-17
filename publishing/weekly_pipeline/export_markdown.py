@@ -8,6 +8,13 @@
 import os
 import sys
 import re
+import uuid
+import json
+import shutil
+import datetime
+import tempfile
+import hashlib
+from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 from weekly_pipeline.models import (
@@ -143,10 +150,83 @@ def export_excerpt_markdown(unit: ExcerptUnit, edition: str = "teacher") -> str:
     lines.append(f"> {unit.demo_text}")
     return "\n".join(lines)
 
-def _export_edition(content_dir: str, target_dir: str, edition: str, available_retellings: Optional[set] = None) -> List[str]:
-    import tempfile
-    import shutil
+def publish_directory_atomically(staging_dir: str, target_dir: str, _fault_after_backup: bool = False) -> None:
+    """
+    将 staging_dir 原子发布至 target_dir，支持失败自动回滚。
+    保证：
+    1. 不逐个删除或覆盖仍在使用的当前版本文件；
+    2. 新批次在独立暂存目录完整生成并就绪后，才触发切换；
+    3. 发生任何失败时（包括切换中途异常），上一版本 100% 完整保留（目录入口、文件列表与内容摘要不变）；
+    4. 切换成功后才清理旧版本备份。
+    """
+    target = Path(target_dir).resolve()
+    staging = Path(staging_dir).resolve()
     
+    if not staging.exists():
+        raise ValueError(f"暂存目录不存在: {staging}")
+
+    parent = target.parent
+    parent.mkdir(parents=True, exist_ok=True)
+    
+    # 目标目录尚不存在：直接原子重命名暂存目录
+    if not target.exists():
+        os.rename(staging, target)
+        return
+
+    # 目标目录已存在：先将当前 target 原子重命名为同父目录下的 backup 目录
+    backup_uuid = uuid.uuid4().hex[:8]
+    backup_dir = parent / f".backup_{target.name}_{backup_uuid}"
+    
+    # 步骤 1: 移走 target 到 backup
+    os.rename(target, backup_dir)
+    
+    # 故障注入点（供边界失败回滚测试）：target 已被移走为 backup，新批次尚未就位
+    if _fault_after_backup:
+        try:
+            raise OSError("INJECTED_FAULT: failure during publication swap")
+        except Exception as e:
+            if target.exists():
+                shutil.rmtree(target, ignore_errors=True)
+            if backup_dir.exists():
+                os.rename(backup_dir, target)
+            raise e
+
+    # 步骤 2: 移入 staging 到 target，若失败立即回滚
+    try:
+        os.rename(staging, target)
+    except Exception as e:
+        # 回滚：如果 target 存在残留则先清除，再将 backup 恢复回 target
+        if target.exists():
+            shutil.rmtree(target, ignore_errors=True)
+        if backup_dir.exists():
+            os.rename(backup_dir, target)
+        raise e
+    else:
+        # 步骤 3: 切换完全成功，清理 backup
+        shutil.rmtree(backup_dir, ignore_errors=True)
+
+def _generate_publish_manifest(staging_root: str, edition: str) -> dict:
+    manifest = {
+        "published_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "edition": edition,
+        "files": {}
+    }
+    for root, _, files in os.walk(staging_root):
+        for fn in sorted(files):
+            if fn == "_manifest.json":
+                continue
+            fp = os.path.join(root, fn)
+            rel = os.path.relpath(fp, staging_root)
+            with open(fp, "rb") as f:
+                h = hashlib.sha256(f.read()).hexdigest()
+            manifest["files"][rel] = h
+    manifest["total_files"] = len(manifest["files"])
+    manifest_path = os.path.join(staging_root, "_manifest.json")
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+    return manifest
+
+def _write_edition_files(content_dir: str, dest_dir: str, edition: str, available_retellings: Optional[set] = None) -> List[str]:
     # 0. 检查输入目录是否存在
     if not os.path.exists(content_dir):
         raise ValueError(f"内容输入目录不存在: {content_dir}")
@@ -209,94 +289,91 @@ def _export_edition(content_dir: str, target_dir: str, edition: str, available_r
     if not r_files and not c_files and not f_files:
         raise ValueError(f"内容输入目录中未找到任何有效单元文件: {content_dir}")
 
-    # 3. 在临时目录中渲染写入，成功后原子同步至 target_dir，防止残留旧文件
+    os.makedirs(dest_dir, exist_ok=True)
     generated = []
-    with tempfile.TemporaryDirectory() as tmp_out:
-        for fp in r_files:
-            with open(fp, "r", encoding="utf-8") as f:
-                u = RetellingUnit.model_validate(load_yaml_safely(f.read()))
-            md = export_retelling_markdown(u, edition=edition)
-            out_file = os.path.join(tmp_out, f"{u.id}.md")
-            with open(out_file, "w", encoding="utf-8") as f:
-                f.write(md)
-            generated.append(os.path.join(target_dir, f"{u.id}.md"))
-            
-        for fp in c_files:
-            with open(fp, "r", encoding="utf-8") as f:
-                u = CommentaryUnit.model_validate(load_yaml_safely(f.read()))
-            md = export_commentary_markdown(u, edition=edition)
-            out_file = os.path.join(tmp_out, f"{u.id}.md")
-            with open(out_file, "w", encoding="utf-8") as f:
-                f.write(md)
-            generated.append(os.path.join(target_dir, f"{u.id}.md"))
-            
-        for fp in f_files:
-            with open(fp, "r", encoding="utf-8") as f:
-                u = ExcerptUnit.model_validate(load_yaml_safely(f.read()))
-            md = export_excerpt_markdown(u, edition=edition)
-            out_file = os.path.join(tmp_out, f"{u.id}.md")
-            with open(out_file, "w", encoding="utf-8") as f:
-                f.write(md)
-            generated.append(os.path.join(target_dir, f"{u.id}.md"))
-            
-        # 全量生成完毕，清空目标目录并同步写入
-        os.makedirs(target_dir, exist_ok=True)
-        # 清理旧的 .md 文件防止陈旧坏稿残留
-        for old_fn in os.listdir(target_dir):
-            if old_fn.endswith(".md"):
-                os.remove(os.path.join(target_dir, old_fn))
-        for tmp_fn in os.listdir(tmp_out):
-            shutil.copy2(os.path.join(tmp_out, tmp_fn), os.path.join(target_dir, tmp_fn))
-            
+
+    for fp in r_files:
+        with open(fp, "r", encoding="utf-8") as f:
+            u = RetellingUnit.model_validate(load_yaml_safely(f.read()))
+        md = export_retelling_markdown(u, edition=edition)
+        out_file = os.path.join(dest_dir, f"{u.id}.md")
+        with open(out_file, "w", encoding="utf-8") as f:
+            f.write(md)
+        generated.append(out_file)
+        
+    for fp in c_files:
+        with open(fp, "r", encoding="utf-8") as f:
+            u = CommentaryUnit.model_validate(load_yaml_safely(f.read()))
+        md = export_commentary_markdown(u, edition=edition)
+        out_file = os.path.join(dest_dir, f"{u.id}.md")
+        with open(out_file, "w", encoding="utf-8") as f:
+            f.write(md)
+        generated.append(out_file)
+        
+    for fp in f_files:
+        with open(fp, "r", encoding="utf-8") as f:
+            u = ExcerptUnit.model_validate(load_yaml_safely(f.read()))
+        md = export_excerpt_markdown(u, edition=edition)
+        out_file = os.path.join(dest_dir, f"{u.id}.md")
+        with open(out_file, "w", encoding="utf-8") as f:
+            f.write(md)
+        generated.append(out_file)
+
     return generated
 
-def export_all_markdown(content_dir: str, out_dir: str, edition: str = "both", available_retellings: Optional[set] = None) -> List[str]:
-    import tempfile
-    import shutil
-    
+def _export_edition(content_dir: str, target_dir: str, edition: str, available_retellings: Optional[set] = None) -> List[str]:
+    target = Path(target_dir).resolve()
+    parent = target.parent
+    parent.mkdir(parents=True, exist_ok=True)
+    staging_dir = tempfile.mkdtemp(prefix=f".staging_{target.name}_", dir=parent)
+    try:
+        written = _write_edition_files(content_dir, staging_dir, edition, available_retellings=available_retellings)
+        publish_directory_atomically(staging_dir, target_dir)
+        return [os.path.join(target_dir, os.path.basename(p)) for p in written]
+    except Exception as e:
+        if os.path.exists(staging_dir):
+            shutil.rmtree(staging_dir, ignore_errors=True)
+        raise e
+
+def export_all_markdown(content_dir: str, out_dir: str, edition: str = "both", available_retellings: Optional[set] = None, _fault_at_publish: bool = False) -> List[str]:
     if not os.path.exists(content_dir):
         raise ValueError(f"内容输入目录不存在: {content_dir}")
         
-    generated = []
+    target = Path(out_dir).resolve()
+    parent = target.parent
+    parent.mkdir(parents=True, exist_ok=True)
+    
     if edition == "both":
-        # 核心发布保证：完整在暂存区生成双版本后，才原子更新审阅入口；中途任何失败均不触碰现有审阅目录
-        with tempfile.TemporaryDirectory() as tmp_root:
-            tmp_student = os.path.join(tmp_root, "student")
-            tmp_teacher = os.path.join(tmp_root, "teacher")
+        staging_root = tempfile.mkdtemp(prefix=f".staging_{target.name}_", dir=parent)
+        try:
+            staging_student = os.path.join(staging_root, "student")
+            staging_teacher = os.path.join(staging_root, "teacher")
             
-            # 先在暂存区完整导出学生版与教师版（任一失败立即抛错并丢弃暂存）
-            _export_edition(content_dir, tmp_student, "student", available_retellings=available_retellings)
-            _export_edition(content_dir, tmp_teacher, "teacher", available_retellings=available_retellings)
+            # 先在暂存区完整导出学生版与教师版（任一失败立即抛错并丢弃暂存，绝不触碰目标目录）
+            stud_files = _write_edition_files(content_dir, staging_student, "student", available_retellings=available_retellings)
+            teach_files = _write_edition_files(content_dir, staging_teacher, "teacher", available_retellings=available_retellings)
             
-            # 双版本均完整生成后，再同步更新至目标审阅目录
-            student_dir = os.path.join(out_dir, "student")
-            teacher_dir = os.path.join(out_dir, "teacher")
-            os.makedirs(student_dir, exist_ok=True)
-            os.makedirs(teacher_dir, exist_ok=True)
+            # 记录全量生成清单与校验摘要
+            _generate_publish_manifest(staging_root, edition="both")
             
-            for old_fn in os.listdir(student_dir):
-                if old_fn.endswith(".md"):
-                    os.remove(os.path.join(student_dir, old_fn))
-            for fn in os.listdir(tmp_student):
-                shutil.copy2(os.path.join(tmp_student, fn), os.path.join(student_dir, fn))
-                generated.append(os.path.join(student_dir, fn))
-                
-            for old_fn in os.listdir(teacher_dir):
-                if old_fn.endswith(".md"):
-                    os.remove(os.path.join(teacher_dir, old_fn))
-            for fn in os.listdir(tmp_teacher):
-                shutil.copy2(os.path.join(tmp_teacher, fn), os.path.join(teacher_dir, fn))
-                generated.append(os.path.join(teacher_dir, fn))
+            # 双版本均完整生成后，原子更新审阅目录；若切换失败则自动回滚恢复上一版
+            publish_directory_atomically(staging_root, out_dir, _fault_after_backup=_fault_at_publish)
+            
+            generated = [os.path.join(out_dir, "student", os.path.basename(p)) for p in stud_files] + \
+                        [os.path.join(out_dir, "teacher", os.path.basename(p)) for p in teach_files]
+            return generated
+        except Exception as e:
+            if os.path.exists(staging_root):
+                shutil.rmtree(staging_root, ignore_errors=True)
+            raise e
     else:
-        with tempfile.TemporaryDirectory() as tmp_root:
-            tmp_target = os.path.join(tmp_root, edition)
-            _export_edition(content_dir, tmp_target, edition, available_retellings=available_retellings)
-            os.makedirs(out_dir, exist_ok=True)
-            for old_fn in os.listdir(out_dir):
-                if old_fn.endswith(".md"):
-                    os.remove(os.path.join(out_dir, old_fn))
-            for fn in os.listdir(tmp_target):
-                shutil.copy2(os.path.join(tmp_target, fn), os.path.join(out_dir, fn))
-                generated.append(os.path.join(out_dir, fn))
-                
-    return generated
+        staging_root = tempfile.mkdtemp(prefix=f".staging_{target.name}_", dir=parent)
+        try:
+            files = _write_edition_files(content_dir, staging_root, edition, available_retellings=available_retellings)
+            _generate_publish_manifest(staging_root, edition=edition)
+            publish_directory_atomically(staging_root, out_dir, _fault_after_backup=_fault_at_publish)
+            return [os.path.join(out_dir, os.path.basename(p)) for p in files]
+        except Exception as e:
+            if os.path.exists(staging_root):
+                shutil.rmtree(staging_root, ignore_errors=True)
+            raise e
