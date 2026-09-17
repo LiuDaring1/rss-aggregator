@@ -64,7 +64,10 @@ def export_commentary_markdown(unit: CommentaryUnit, edition: str = "teacher") -
     is_student = (edition == "student")
     title_suffix = "（学生练习版）" if is_student else "（教师审阅版）"
     lines.append(f"# 【评论演练】{unit.id} · {unit.title} {title_suffix}")
-    lines.append(f"**对应复述材料**：{unit.retelling_ref} | **数据包**：{unit.packet_ref}")
+    if is_student:
+        lines.append(f"**关联材料**：{unit.retelling_ref}")
+    else:
+        lines.append(f"**对应复述材料**：{unit.retelling_ref} | **数据包**：{unit.packet_ref}")
     lines.append("")
     lines.append("## 一、事实梳理与提问")
     lines.append("### 1. 核心事实梳理")
@@ -90,7 +93,7 @@ def export_commentary_markdown(unit: CommentaryUnit, edition: str = "teacher") -
         lines.append("")
     
     # 口语范本：按开头、主体段一、主体段二、结尾语义组织，杜绝前四项数组硬切
-    lines.append("## 三、两分钟口语范本")
+    lines.append("## 三、口语范本（两段主体）")
     lines.append("### 【开头·总论点】")
     lines.append(f"> {unit.speech.main_claim.strip()}")
     lines.append("")

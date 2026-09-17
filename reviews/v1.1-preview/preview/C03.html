@@ -289,6 +289,35 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   break-before: page;
   page-break-before: always;
 }
+.page-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 8.8pt;
+  color: #555;
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  border-bottom: 0.6pt solid #bbb;
+  padding-bottom: 1.2mm;
+  margin-bottom: 3mm;
+}
+.page-meta .meta-left {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.page-meta .meta-right {
+  font-weight: 700;
+  color: #222;
+  letter-spacing: 0.08em;
+}
+.unverified-tag {
+  color: #c00;
+  margin-left: 6px;
+  font-weight: 700;
+}
+.unverified-backref {
+  color: #c00 !important;
+  font-weight: bold;
+}
 .cuhead {
   display: flex;
   align-items: baseline;
@@ -302,7 +331,7 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   line-height: 1.45;
 }
 .cu-blk {
-  margin: 3mm 0;
+  margin: 2.8mm 0;
 }
 .cu-blk .lbl {
   font-family: "PingFang SC", sans-serif;
@@ -310,56 +339,122 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   font-size: 11pt;
   border-left: 2.4pt solid #000;
   padding-left: 2.5mm;
-  margin-bottom: 1.2mm;
+  margin-bottom: 1.5mm;
 }
+
+/* Page 1: 回想材料与思考问题 */
 ul.recap {
   margin: 0;
-  padding-left: 7mm;
+  padding-left: 6.5mm;
 }
 ul.recap li {
-  margin: 1mm 0;
-  font-size: 10.5pt;
+  margin: 1.2mm 0;
+  font-size: 11.2pt;
+  line-height: 1.68;
 }
 ol.qs {
   margin: 0;
-  padding-left: 7mm;
+  padding-left: 6.5mm;
 }
 ol.qs li {
-  margin: 1.6mm 0 0.8mm;
-  font-size: 10.8pt;
+  margin: 1.8mm 0;
+  font-size: 11.2pt;
+  line-height: 1.65;
+}
+.qs .q-text {
+  font-weight: 500;
+  color: #000;
+}
+.qs .writing-area {
+  margin: 1.5mm 0 3mm;
 }
 .qs .wl {
-  border-bottom: 0.6pt dotted #555;
-  height: 7mm;
-  margin: 0.8mm 0 1.6mm;
+  border-bottom: 0.6pt dotted #888;
+  height: 8.5mm;
+  margin: 0;
 }
+
+/* Page 2: 观点池与推演 */
 .baseline {
-  font-size: 10.5pt;
+  font-size: 10pt;
   color: #333;
-  margin-bottom: 1.5mm;
+  margin-bottom: 1.2mm;
+  padding: 0.8mm 2mm;
+  background: #f7f7f7;
+  border-left: 1.5pt solid #888;
+  line-height: 1.45;
 }
 ul.views {
   margin: 0;
-  padding-left: 2mm;
+  padding-left: 0;
   list-style: none;
 }
-ul.views li {
-  margin: 2mm 0;
-  font-size: 10.8pt;
-  padding-left: 5mm;
-  text-indent: -5mm;
-  line-height: 1.6;
+ul.views li.view-item {
+  margin: 1.2mm 0 1.6mm;
+  padding: 0.8mm 2.2mm;
+  border-left: 1.8pt solid #222;
+  background: #fafafa;
 }
-ul.views li::before {
-  content: "◆ ";
-  font-size: 8pt;
+.view-claim {
+  font-size: 10.8pt;
+  line-height: 1.48;
+  color: #000;
+  margin-bottom: 0.5mm;
+}
+.view-claim b {
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-weight: 700;
 }
 .views .how {
-  font-size: 9.5pt;
-  color: #444;
-  margin-top: 0.5mm;
-  text-indent: 0;
-  padding-left: 0;
+  font-size: 10.2pt;
+  color: #1a1a1a;
+  line-height: 1.52;
+}
+.how-row {
+  margin: 0.4mm 0;
+  display: flex;
+  align-items: baseline;
+}
+.how-tag {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 9.4pt;
+  color: #333;
+  flex-shrink: 0;
+}
+.how-txt {
+  flex: 1;
+}
+
+.reason-blk {
+  margin-top: 2mm;
+}
+.reason-content p.reason {
+  font-size: 10.4pt;
+  line-height: 1.66;
+  margin: 1mm 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* Page 3: 口语范本与拆解 */
+.cu-script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12pt;
+  line-height: 1.95;
+  border: 1pt solid #000;
+  padding: 4mm 5.5mm;
+  margin: 1mm 0 3mm;
+}
+.cu-script p {
+  margin: 1.6mm 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+.cu-script b {
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-weight: 700;
+  color: #000;
 }
 .ctx {
   font-size: 10.4pt;
@@ -370,41 +465,14 @@ ul.views li::before {
 .ctx b {
   font-family: "PingFang SC", sans-serif;
 }
-.reason {
-  font-size: 10.6pt;
-  line-height: 1.85;
-}
-.reason-title {
-  font-weight: 700;
-  font-size: 10.5pt;
-  margin-bottom: 1mm;
-}
-
-.cu-script {
-  font-family: "Kaiti SC", "STKaiti", serif;
-  font-size: 12pt;
-  line-height: 1.95;
-  border: 1pt solid #000;
-  padding: 4mm 5.5mm;
-  margin: 1mm 0;
-}
-.cu-script p {
-  margin: 1.6mm 0;
-  text-indent: 2em;
-}
-
 .decon-list {
   margin-top: 1mm;
 }
 .decon-item {
-  margin-bottom: 2mm;
+  margin-bottom: 1.6mm;
 }
-.decon-target {
-  font-family: "PingFang SC", sans-serif;
-  font-weight: 700;
-  font-size: 10pt;
-  color: #111;
-  margin-bottom: 0.5mm;
+.decon-item p.ctx {
+  margin: 0.6mm 0;
 }
 
 /* ---------- 模块三：原文拆解 ---------- */
@@ -497,15 +565,16 @@ ul.views li::before {
   </style>
 </head>
 <body>
+
 <section class="cq">
-  <div class="preview-header">
-    <span>【单单元预览】评论单元 · C03</span>
-    <span>对应复述：R04</span>
+  <div class="page-meta">
+    <span class="meta-left">高中口语表达 · 评论单元</span>
+    <span class="meta-right">1 / 3</span>
   </div>
   <div class="cuhead">
     <span class="rno">C03</span>
     <h3>“100% 椰子水”被指掺水：把账算清楚，标签才守得住</h3>
-    <span class="backref">对应复述·R04 材料页</span>
+    <span class="backref">关联材料：《100% 椰子水被指掺水》</span>
   </div>
   <div class="cu-blk">
     <div class="lbl">回想材料</div>
@@ -519,22 +588,38 @@ ul.views li::before {
     <div class="lbl">思考问题</div>
     <ol class="qs">
       <li>
-        消费者挑选椰子水时依赖配料表，“100%”代表了怎样的品质承诺？
-        <div class="wl"></div>
+        <div class="q-text">消费者挑选椰子水时依赖配料表，“100%”代表了怎样的品质承诺？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
       <li>
-        配料表只写椰子水却暗中加水，为什么容易让老实做产品的厂家吃亏？
-        <div class="wl"></div>
+        <div class="q-text">配料表只写椰子水却暗中加水，为什么容易让老实做产品的厂家吃亏？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
       <li>
-        监管部门开展排查并立案查处，释放了怎样的治理信号？
-        <div class="wl"></div>
+        <div class="q-text">如果只提醒顾客仔细看标签，能解决暗中掺水吗？为什么还需要检查瓶子里实际装了什么？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
     </ol>
   </div>
 </section>
 
 <section class="cview">
+  <div class="page-meta">
+    <span class="meta-left">高中口语表达 · 评论单元</span>
+    <span class="meta-right">2 / 3</span>
+  </div>
   <div class="cuhead">
     <span class="rno">C03</span>
     <h3>“100% 椰子水”被指掺水：把账算清楚，标签才守得住 · 观点与推演</h3>
@@ -543,53 +628,61 @@ ul.views li::before {
     <div class="lbl">观点参考（多元思考方向）</div>
     <div class="baseline">买饮料平时都看配料表，如果标着 100% 还能掺水，以后不知道该信什么了。</div>
     <ul class="views">
-      <li>
-        <b>食品标签是买卖双方信任的重要依据，隐瞒掺水破坏了诚实透明的交易基础。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>食品标签是买卖双方信任的重要依据，隐瞒掺水破坏了诚实透明的交易基础。</b></div>
         <div class="how">
-          依据与来源：消费者无法在货架前化验成分，配料表是判断品质与价格的关键依据。
-          ；说明：现代消费建立在真实透明的标签之上，破坏标签真实性等于透支消费信任。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">消费者无法在货架前化验成分，配料表是判断品质与价格的关键依据。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">现代消费建立在真实透明的标签之上，破坏标签真实性等于透支消费信任。</span></div>
         </div>
       </li>
-      <li>
-        <b>掺水产品压低了原料成本，容易通过价格优势或超额利润，让守规矩的厂家处于不利位置。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>掺水产品压低了原料成本，容易通过价格优势或超额利润，让守规矩的厂家处于不利位置。</b></div>
         <div class="how">
-          依据与来源：掺水降低了生产成本却同样标示100%；若降价抢占市场或维持售价多获利，坚持纯正原料的厂家就会在竞争中吃亏。
-          ；说明：当消费者难以现场分辨真伪时，投机取巧者往往获利，认真做产品的人反而承受竞争压力。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">掺水降低了生产成本却同样标示100%；若降价抢占市场或维持售价多获利，坚持纯正原料的厂家就会在竞争中吃亏。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">当消费者难以现场分辨真伪时，投机取巧者往往获利，认真做产品的人反而承受竞争压力。</span></div>
         </div>
       </li>
-      <li>
-        <b>守住标签真实底线，关键在提高查处力度，不能让掺水比认真做产品更划算。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>守住标签真实底线，关键在提高查处力度，不能让掺水比认真做产品更划算。</b></div>
         <div class="how">
-          依据与来源：监管部门对排查发现问题的 23 家企业开展整治，并对 5 家立案查处。
-          ；说明：只有打破“违规成本低、老实人吃亏”的侥幸，才能真正促使从业者敬畏规则。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">监管部门对排查发现问题的 23 家企业开展整治，并对 5 家立案查处。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">只有打破“违规成本低、老实人吃亏”的侥幸，才能真正促使从业者敬畏规则。</span></div>
         </div>
       </li>
-      <li>
-        <b>守护食品品质，离不开监管排查、媒体监督与社会公众的共同关注。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>守护食品品质，离不开监管排查、媒体监督与社会公众的共同关注。</b></div>
         <div class="how">
-          依据与来源：媒体调查与监管排查形成合力，推动了隐蔽问题的曝光与整治。
-          ；说明：增强抽检透明度并及时通报，有助于帮助消费者看清真相，倒逼生产端规范生产。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">媒体调查与监管排查形成合力，推动了隐蔽问题的曝光与整治。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">增强抽检透明度并及时通报，有助于帮助消费者看清真相，倒逼生产端规范生产。</span></div>
         </div>
       </li>
     </ul>
   </div>
-  <div class="cu-blk">
+  <div class="cu-blk reason-blk">
     <div class="lbl">怎么想到的：从看不见原料到想清竞争影响</div>
-    <p class="ctx reason">这则材料的核心在于：消费者在货架前选购椰子水，很难当场分辨成分，通常只能根据包装上的配料表作判断。标签写着“100%”，大家就把它当作品质承诺。但如果个别厂家暗中兑水，原料成本就明显降了下来。这时候，掺水者既可以通过压低售价来吸引顾客抢占市场，也可以维持原价赚取更多的利润。而在不知情的顾客眼里，它们标示相同，就会误当成同品质产品去比价。这样一来，坚持纯正原料、承担更高成本的合规企业，反而容易在竞争中吃亏。正因如此，监管部门排查并立案查处，核心目的就在于打破这种投机侥幸：严肃查处违规行为，不能让掺水比认真做产品更划算，才能保护诚实经营者，让大家买得安心。</p>
+    <div class="reason-content">
+        <p class="ctx reason">这则材料的核心在于：消费者在货架前选购椰子水，很难当场分辨成分，通常只能根据包装上的配料表作判断。标签写着“100%”，大家就把它当作品质承诺。</p>
+        <p class="ctx reason">但如果个别厂家暗中兑水，原料成本就明显降了下来。这时候，掺水者既可以通过压低售价来吸引顾客抢占市场，也可以维持原价赚取更多的利润。而在不知情的顾客眼里，它们标示相同，就会误当成同品质产品去比价。这样一来，坚持纯正原料、承担更高成本的合规企业，反而容易在竞争中吃亏。</p>
+        <p class="ctx reason">正因如此，监管部门排查并立案查处，核心目的就在于打破这种投机侥幸：严肃查处违规行为，不能让掺水比认真做产品更划算，才能保护诚实经营者，让大家买得安心。</p>
+    </div>
   </div>
 </section>
 
 <section class="cscript">
+  <div class="page-meta">
+    <span class="meta-left">高中口语表达 · 评论单元</span>
+    <span class="meta-right">3 / 3</span>
+  </div>
   <div class="cuhead">
     <span class="rno">C03</span>
     <h3>“100% 椰子水”被指掺水：把账算清楚，标签才守得住 · 口语范本与拆解</h3>
   </div>
   <div class="cu-blk">
-    <div class="lbl">口语范本（双主体展开 · 约 2 分钟）</div>
+    <div class="lbl">口语范本（两段主体展开）</div>
     <div class="cu-script">
       <p>一瓶标着“100%”的椰子水暗中掺水，破坏的不仅是饮料品质，更是大家对配料表的信任。守住货架上的标签，既要看清掺水如何让诚实经营者吃亏，也需要监管严格查处，不能让弄虚作假比认真做产品更划算。看清这两点，才能保护公平放心的消费环境。</p>
-      <p>首先，消费者在货架前很难检验成分，隐瞒掺水容易让守规矩的厂家吃亏。 在货架前挑选饮料，消费者无法现场化验，配料表就是判断品质的关键依据。标着“100%”，大家就默认是纯正原料。一旦暗中兑水，原料成本降低了，掺水者既能靠低价吸引顾客，也能按原价售卖多赚利润。在不知道成分有差别时，顾客可能把它们当成同类产品，再按价格作选择，坚持真材实料的合规厂家就会处于不利地位。这不仅打破了交易透明，也伤害了诚实经营的环境。</p>
-      <p>其次，守住配料表底线，必须严肃查处违规，不能让弄虚作假比认真做产品更划算。 监管部门排查发现二十三家企业存在问题，并对其中五家立案查处。执法的关键，在于打消企业的侥幸心理。只有让违法违规真正付出代价，让行业看到投机取巧行不通，认真做产品的人才能挺直腰杆，包装上的“100%”才能真正成为靠得住的承诺。</p>
+            <p><b>首先，消费者在货架前很难检验成分，隐瞒掺水容易让守规矩的厂家吃亏。</b> 在货架前挑选饮料，消费者无法现场化验，配料表就是判断品质的关键依据。标着“100%”，大家就默认是纯正原料。一旦暗中兑水，原料成本降低了，掺水者既能靠低价吸引顾客，也能按原价售卖多赚利润。在不知道成分有差别时，顾客可能把它们当成同类产品，再按价格作选择，坚持真材实料的合规厂家就会处于不利地位。这不仅打破了交易透明，也伤害了诚实经营的环境。</p>
+            <p><b>其次，守住配料表底线，必须严肃查处违规，不能让弄虚作假比认真做产品更划算。</b> 监管部门排查发现二十三家企业存在问题，并对其中五家立案查处。执法的关键，在于打消企业的侥幸心理。只有让违法违规真正付出代价，让行业看到投机取巧行不通，认真做产品的人才能挺直腰杆，包装上的“100%”才能真正成为靠得住的承诺。</p>
       <p>消费者可以接受优质高价，但不能接受弄虚作假。只有让守规矩的人不吃亏、让投机取巧者承担相应代价，货架上的标签才能真正让人放心。</p>
     </div>
   </div>

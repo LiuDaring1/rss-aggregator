@@ -12,6 +12,7 @@
   {% set unit = unit_data.unit %}
   {% set backref_page = unit_data.backref_page %}
   {% set is_unverified = unit_data.is_unverified | default(false) %}
+  {% set retelling_title = unit_data.retelling_title | default("") %}
   {% set is_preview = true %}
   {% include "commentary.html.jinja2" %}
 {% elif unit_type == "excerpt" %}

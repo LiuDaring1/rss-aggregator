@@ -166,6 +166,22 @@ def render_unit_preview_html(unit: Any, unit_type: str, backref_page: Optional[i
         )
         unit_data["mindmap_svg"] = generate_mindmap_svg(unit.mindmap_tree)
         unit_data["illustration_html"] = None
+    elif unit_type == "commentary":
+        retelling_title = ""
+        try:
+            import yaml
+            ref_path = os.path.join(PACKAGE_DIR, f"../../content/retellings/{unit.retelling_ref}.yaml")
+            if os.path.exists(ref_path):
+                with open(ref_path, "r", encoding="utf-8") as f:
+                    r_raw = yaml.safe_load(f)
+                    rt = r_raw.get("title", "")
+                    if "：" in rt:
+                        retelling_title = rt.split("：")[0].strip().replace("“", "").replace("”", "")
+                    else:
+                        retelling_title = rt.strip().replace("“", "").replace("”", "")
+        except Exception:
+            pass
+        unit_data["retelling_title"] = retelling_title
         
     badge_title = " · 草稿（未核验）" if is_unverified else ""
     html_out = template.render(
@@ -200,9 +216,19 @@ def render_issue_html(manifest: IssueManifest,
     commentaries_data = []
     for c in commentaries:
         backref = page_map.get(c.retelling_ref)
+        retelling_title = ""
+        for r in retellings:
+            if r.id == c.retelling_ref:
+                rt = getattr(r, "title", "")
+                if "：" in rt:
+                    retelling_title = rt.split("：")[0].strip().replace("“", "").replace("”", "")
+                else:
+                    retelling_title = rt.strip().replace("“", "").replace("”", "")
+                break
         commentaries_data.append({
             "unit": c,
-            "backref_page": backref
+            "backref_page": backref,
+            "retelling_title": retelling_title
         })
         
     excerpts_data = [{"unit": f} for f in excerpts]

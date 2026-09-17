@@ -289,6 +289,35 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   break-before: page;
   page-break-before: always;
 }
+.page-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 8.8pt;
+  color: #555;
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  border-bottom: 0.6pt solid #bbb;
+  padding-bottom: 1.2mm;
+  margin-bottom: 3mm;
+}
+.page-meta .meta-left {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.page-meta .meta-right {
+  font-weight: 700;
+  color: #222;
+  letter-spacing: 0.08em;
+}
+.unverified-tag {
+  color: #c00;
+  margin-left: 6px;
+  font-weight: 700;
+}
+.unverified-backref {
+  color: #c00 !important;
+  font-weight: bold;
+}
 .cuhead {
   display: flex;
   align-items: baseline;
@@ -302,7 +331,7 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   line-height: 1.45;
 }
 .cu-blk {
-  margin: 3mm 0;
+  margin: 2.8mm 0;
 }
 .cu-blk .lbl {
   font-family: "PingFang SC", sans-serif;
@@ -310,56 +339,122 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   font-size: 11pt;
   border-left: 2.4pt solid #000;
   padding-left: 2.5mm;
-  margin-bottom: 1.2mm;
+  margin-bottom: 1.5mm;
 }
+
+/* Page 1: 回想材料与思考问题 */
 ul.recap {
   margin: 0;
-  padding-left: 7mm;
+  padding-left: 6.5mm;
 }
 ul.recap li {
-  margin: 1mm 0;
-  font-size: 10.5pt;
+  margin: 1.2mm 0;
+  font-size: 11.2pt;
+  line-height: 1.68;
 }
 ol.qs {
   margin: 0;
-  padding-left: 7mm;
+  padding-left: 6.5mm;
 }
 ol.qs li {
-  margin: 1.6mm 0 0.8mm;
-  font-size: 10.8pt;
+  margin: 1.8mm 0;
+  font-size: 11.2pt;
+  line-height: 1.65;
+}
+.qs .q-text {
+  font-weight: 500;
+  color: #000;
+}
+.qs .writing-area {
+  margin: 1.5mm 0 3mm;
 }
 .qs .wl {
-  border-bottom: 0.6pt dotted #555;
-  height: 7mm;
-  margin: 0.8mm 0 1.6mm;
+  border-bottom: 0.6pt dotted #888;
+  height: 8.5mm;
+  margin: 0;
 }
+
+/* Page 2: 观点池与推演 */
 .baseline {
-  font-size: 10.5pt;
+  font-size: 10pt;
   color: #333;
-  margin-bottom: 1.5mm;
+  margin-bottom: 1.2mm;
+  padding: 0.8mm 2mm;
+  background: #f7f7f7;
+  border-left: 1.5pt solid #888;
+  line-height: 1.45;
 }
 ul.views {
   margin: 0;
-  padding-left: 2mm;
+  padding-left: 0;
   list-style: none;
 }
-ul.views li {
-  margin: 2mm 0;
-  font-size: 10.8pt;
-  padding-left: 5mm;
-  text-indent: -5mm;
-  line-height: 1.6;
+ul.views li.view-item {
+  margin: 1.2mm 0 1.6mm;
+  padding: 0.8mm 2.2mm;
+  border-left: 1.8pt solid #222;
+  background: #fafafa;
 }
-ul.views li::before {
-  content: "◆ ";
-  font-size: 8pt;
+.view-claim {
+  font-size: 10.8pt;
+  line-height: 1.48;
+  color: #000;
+  margin-bottom: 0.5mm;
+}
+.view-claim b {
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-weight: 700;
 }
 .views .how {
-  font-size: 9.5pt;
-  color: #444;
-  margin-top: 0.5mm;
-  text-indent: 0;
-  padding-left: 0;
+  font-size: 10.2pt;
+  color: #1a1a1a;
+  line-height: 1.52;
+}
+.how-row {
+  margin: 0.4mm 0;
+  display: flex;
+  align-items: baseline;
+}
+.how-tag {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 9.4pt;
+  color: #333;
+  flex-shrink: 0;
+}
+.how-txt {
+  flex: 1;
+}
+
+.reason-blk {
+  margin-top: 2mm;
+}
+.reason-content p.reason {
+  font-size: 10.4pt;
+  line-height: 1.66;
+  margin: 1mm 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* Page 3: 口语范本与拆解 */
+.cu-script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12pt;
+  line-height: 1.95;
+  border: 1pt solid #000;
+  padding: 4mm 5.5mm;
+  margin: 1mm 0 3mm;
+}
+.cu-script p {
+  margin: 1.6mm 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+.cu-script b {
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-weight: 700;
+  color: #000;
 }
 .ctx {
   font-size: 10.4pt;
@@ -370,41 +465,14 @@ ul.views li::before {
 .ctx b {
   font-family: "PingFang SC", sans-serif;
 }
-.reason {
-  font-size: 10.6pt;
-  line-height: 1.85;
-}
-.reason-title {
-  font-weight: 700;
-  font-size: 10.5pt;
-  margin-bottom: 1mm;
-}
-
-.cu-script {
-  font-family: "Kaiti SC", "STKaiti", serif;
-  font-size: 12pt;
-  line-height: 1.95;
-  border: 1pt solid #000;
-  padding: 4mm 5.5mm;
-  margin: 1mm 0;
-}
-.cu-script p {
-  margin: 1.6mm 0;
-  text-indent: 2em;
-}
-
 .decon-list {
   margin-top: 1mm;
 }
 .decon-item {
-  margin-bottom: 2mm;
+  margin-bottom: 1.6mm;
 }
-.decon-target {
-  font-family: "PingFang SC", sans-serif;
-  font-weight: 700;
-  font-size: 10pt;
-  color: #111;
-  margin-bottom: 0.5mm;
+.decon-item p.ctx {
+  margin: 0.6mm 0;
 }
 
 /* ---------- 模块三：原文拆解 ---------- */
@@ -497,15 +565,16 @@ ul.views li::before {
   </style>
 </head>
 <body>
+
 <section class="cq">
-  <div class="preview-header">
-    <span>【单单元预览】评论单元 · c-dan-jiao-xie</span>
-    <span>对应复述：R-dan-jiao-xie</span>
+  <div class="page-meta">
+    <span class="meta-left">高中口语表达 · 评论单元</span>
+    <span class="meta-right">1 / 3</span>
   </div>
   <div class="cuhead">
-    <span class="rno">c-dan-jiao-xie</span>
+    <span class="rno">C-单</span>
     <h3>“单脚鞋银行”：解开被忽视的真实需求</h3>
-    <span class="backref">对应复述·R-dan-jiao-xie 材料页</span>
+    <span class="backref">关联材料：《温州大学师生创办单脚鞋银行》</span>
   </div>
   <div class="cu-blk">
     <div class="lbl">回想材料</div>
@@ -520,88 +589,112 @@ ul.views li::before {
     <div class="lbl">思考问题</div>
     <ol class="qs">
       <li>
-        鞋企展示后按惯例销毁单只样品鞋，而单脚人士买鞋却常买一双扔一只，为什么此前很少有人把这两端连起来？
-        <div class="wl"></div>
+        <div class="q-text">鞋企展示后按惯例销毁单只样品鞋，而单脚人士买鞋却常买一双扔一只，为什么此前很少有人把这两端连起来？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
       <li>
-        从最初寄送一两只皮鞋，到后来增加配额并改选防滑运动鞋，团队是顺着受助者的哪些生活细节做出调整的？
-        <div class="wl"></div>
+        <div class="q-text">团队为什么增加寄送数量？为什么又要为务农的受助者挑选防滑耐磨的运动鞋？这两种调整有什么共同点？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
       <li>
-        2025年团队寄送需求减少到30只，为什么队员们依然选择继续留守？
-        <div class="wl"></div>
+        <div class="q-text">2025年团队寄送需求减少到30只，为什么队员们依然选择继续留守？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
       <li>
-        组织制作手工艺品和尝试开发生活助手，对受助者来说意味着送鞋之外的哪些改变？
-        <div class="wl"></div>
+        <div class="q-text">组织制作手工艺品和尝试开发生活助手，对受助者来说意味着送鞋之外的哪些改变？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
     </ol>
   </div>
 </section>
 
 <section class="cview">
+  <div class="page-meta">
+    <span class="meta-left">高中口语表达 · 评论单元</span>
+    <span class="meta-right">2 / 3</span>
+  </div>
   <div class="cuhead">
-    <span class="rno">c-dan-jiao-xie</span>
+    <span class="rno">C-单</span>
     <h3>“单脚鞋银行”：解开被忽视的真实需求 · 观点与推演</h3>
   </div>
   <div class="cu-blk">
     <div class="lbl">观点参考（多元思考方向）</div>
     <div class="baseline">把鞋企要扔掉的单只鞋送给有需要的人，既不浪费又能帮上忙，这主意想得挺巧的。</div>
     <ul class="views">
-      <li>
-        <b>解决特殊的现实困难，关键在于搭起联系，让闲置的物资找到真正需要它的人。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>解决特殊的现实困难，关键在于搭起联系，让闲置的物资找到真正需要它的人。</b></div>
         <div class="how">
-          依据与来源：鞋企展示后销毁单只样品鞋，而单脚人士买鞋常买一双扔一只；团队主动搭桥，把闲置样品送给需要的人。
-          ；说明：很多现实困难并非物资绝对匮乏，而是缺少沟通与对接的渠道；主动搭起联系，原本被白白浪费的闲置就能变成实实在在的帮助。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">鞋企展示后销毁单只样品鞋，而单脚人士买鞋常买一双扔一只；团队主动搭桥，把闲置样品送给需要的人。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">很多现实困难并非物资绝对匮乏，而是缺少沟通与对接的渠道；主动搭起联系，原本被白白浪费的闲置就能变成实实在在的帮助。</span></div>
         </div>
       </li>
-      <li>
-        <b>真正的帮助不仅在于把东西送出去，更在于顺着对方的具体生活给得合用。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>真正的帮助不仅在于把东西送出去，更在于顺着对方的具体生活给得合用。</b></div>
         <div class="how">
-          依据与来源：受助者在农村要下地劳作，皮鞋不仅容易摔倒还不耐磨，换成防滑耐磨运动鞋才能真正解决生活难题。
-          ；说明：关切他人的处境不能只停留在纸面上的主观设想，只有深入了解对方具体的生活场景，帮助才能真正起作用。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">受助者在农村要下地劳作，皮鞋不仅容易摔倒还不耐磨，换成防滑耐磨运动鞋才能真正解决生活难题。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">关切他人的处境不能只停留在纸面上的主观设想，只有深入了解对方具体的生活场景，帮助才能真正起作用。</span></div>
         </div>
       </li>
-      <li>
-        <b>单只鞋寄送需求的减少反映了保障水平与假肢技术的改善，而坚守的价值在于不让剩下的少数人感到被遗忘。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>单只鞋寄送需求的减少反映了保障水平与假肢技术的改善，而坚守的价值在于不让剩下的少数人感到被遗忘。</b></div>
         <div class="how">
-          依据与来源：2025年团队收到的单脚鞋寄送需求降至30只；团队坚持“只要还有一个人需要就做下去”。
-          ；说明：需求减少反映了假肢技术与保障水平的提升，但不能把数字变小当成放弃留守的理由。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">2025年团队收到的单脚鞋寄送需求降至30只；团队坚持“只要还有一个人需要就做下去”。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">需求减少反映了假肢技术与保障水平的提升，但不能把数字变小当成放弃留守的理由。</span></div>
         </div>
       </li>
-      <li>
-        <b>组织手工艺品制作与义卖，能让受助者在被动受助之外体会到劳动自立的尊严与成就感。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>组织手工艺品制作与义卖，能让受助者在被动受助之外体会到劳动自立的尊严与成就感。</b></div>
         <div class="how">
-          依据与来源：团队组织残障人士制作永生花和手工艺品，十六岁女孩通过义卖劳动第一次获得几十元报酬。
-          ；说明：除了接受物资馈赠，通过自己的双手付出劳动并获得社会认可，能让人感受到实实在在的成就感与生活信心。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">团队组织残障人士制作永生花和手工艺品，十六岁女孩通过义卖劳动第一次获得几十元报酬。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">除了接受物资馈赠，通过自己的双手付出劳动并获得社会认可，能让人感受到实实在在的成就感与生活信心。</span></div>
         </div>
       </li>
-      <li>
-        <b>把专业技能融入志愿服务，能让日常帮扶更有针对性、走得更扎实。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>把专业技能融入志愿服务，能让日常帮扶更有针对性、走得更扎实。</b></div>
         <div class="how">
-          依据与来源：电气与计算机专业学生尝试将编程、在线平台和语音助手应用到日常帮扶中。
-          ；说明：志愿服务不仅靠一时的热情，更需要用专业知识解决具体问题。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">电气与计算机专业学生尝试将编程、在线平台和语音助手应用到日常帮扶中。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">志愿服务不仅靠一时的热情，更需要用专业知识解决具体问题。</span></div>
         </div>
       </li>
     </ul>
   </div>
-  <div class="cu-blk">
+  <div class="cu-blk reason-blk">
     <div class="lbl">怎么想到的：从资源对接走到生活合用</div>
-    <p class="ctx reason">读这则材料，可以从两个层次来体会：第一层是怎样想到这件事的。一边是买鞋时往往只能扔掉另一只的单脚人士，另一边是展示后成批销毁的单只样品鞋。两边原本看似没有交集，但如果有人主动搭起桥梁，把鞋企要销毁的样品送给最需要的人，原本白白浪费的闲置就能化解现实的困难。第二层则是把鞋送出去之后，怎样顺着生活把事情做实。团队在回访中发现，单脚受力大，三个月就会磨坏鞋底，于是把配额从一两只增加到四至六只；又得知有人在农村干农活，皮鞋容易打滑，又特意挑选防滑耐磨的运动鞋。把这两层连起来看就能明白：做好事不仅需要敏锐搭起联系、找到适合的使用者，更要在后续相处中细致体贴，顺着对方具体的生活调整做法，善意才能真正合用、管用。</p>
+    <div class="reason-content">
+        <p class="ctx reason">读这则材料，可以从两个层次来体会：第一层是怎样想到这件事的。一边是买鞋时往往只能扔掉另一只的单脚人士，另一边是展示后成批销毁的单只样品鞋。两边原本看似没有交集，但如果有人主动搭起桥梁，把鞋企要销毁的样品送给最需要的人，原本白白浪费的闲置就能化解现实的困难。</p>
+        <p class="ctx reason">第二层则是把鞋送出去之后，怎样顺着生活把事情做实。团队在回访中发现，单脚受力大，三个月就会磨坏鞋底，于是把配额从一两只增加到四至六只；又得知有人在农村干农活，皮鞋容易打滑，又特意挑选防滑耐磨的运动鞋。</p>
+        <p class="ctx reason">把这两层连起来看就能明白：做好事不仅需要敏锐搭起联系、找到适合的使用者，更要在后续相处中细致体贴，顺着对方具体的生活调整做法，善意才能真正合用、管用。</p>
+    </div>
   </div>
 </section>
 
 <section class="cscript">
+  <div class="page-meta">
+    <span class="meta-left">高中口语表达 · 评论单元</span>
+    <span class="meta-right">3 / 3</span>
+  </div>
   <div class="cuhead">
-    <span class="rno">c-dan-jiao-xie</span>
+    <span class="rno">C-单</span>
     <h3>“单脚鞋银行”：解开被忽视的真实需求 · 口语范本与拆解</h3>
   </div>
   <div class="cu-blk">
-    <div class="lbl">口语范本（双主体展开 · 约 2 分钟）</div>
+    <div class="lbl">口语范本（两段主体展开）</div>
     <div class="cu-script">
       <p>“单脚鞋银行”之所以打动人心，不仅在于主动搭起桥梁，让闲置的样品鞋找到了需要它的人，更在于九年来，志愿者始终顺着大家的生活细节调整办法。落到实处的善意，既要敏锐搭起联系对准困难，更要在具体日子里懂得体贴与合用。</p>
-      <p>首先，帮助他人需要敏锐搭起联系，让闲置的物资对准真实的需求。 在鞋企集中的温州，每年都有成批单只样品鞋在展示后被销毁；而单脚人士买鞋时，往往买一双只能扔掉另一只。大学生们没有忽视这种错位，而是主动搭桥，把鞋企要销毁的样品送给最需要的人。很多时候，困难并不在于物资绝对匮乏，而是缺少沟通的渠道。主动搭起联系，原本被白白浪费的闲置，就能变成实实在在的温暖。</p>
-      <p>其次，真正的善意要在具体生活细节中不断调整，给得合用。 送鞋听起来简单，管不管用全在细节。起初团队每人寄一两只，回访得知单脚磨损极快，便将配额增加到四至六只；得知有人在乡下务农，皮鞋容易打滑，志愿者又特意挑出防滑耐磨的运动鞋。善意不能停留在单向给予，顺着对方具体处境调整，帮助才能切实减轻生活负担。</p>
+            <p><b>首先，帮助他人需要敏锐搭起联系，让闲置的物资对准真实的需求。</b> 在鞋企集中的温州，每年都有成批单只样品鞋在展示后被销毁；而单脚人士买鞋时，往往买一双只能扔掉另一只。大学生们没有忽视这种错位，而是主动搭桥，把鞋企要销毁的样品送给最需要的人。很多时候，困难并不在于物资绝对匮乏，而是缺少沟通的渠道。主动搭起联系，原本被白白浪费的闲置，就能变成实实在在的温暖。</p>
+            <p><b>其次，真正的善意要在具体生活细节中不断调整，给得合用。</b> 送鞋听起来简单，管不管用全在细节。起初团队每人寄一两只，回访得知单脚磨损极快，便将配额增加到四至六只；得知有人在乡下务农，皮鞋容易打滑，志愿者又特意挑出防滑耐磨的运动鞋。善意不能停留在单向给予，顺着对方具体处境调整，帮助才能切实减轻生活负担。</p>
       <p>从最初帮大家“找鞋”到后来细致地“挑鞋、配鞋”，“单脚鞋银行”告诉我们：做好一件好事，不仅需要敏锐的眼光，更需要设身处地替人着想的细致与长久耐心。</p>
     </div>
   </div>

@@ -289,6 +289,35 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   break-before: page;
   page-break-before: always;
 }
+.page-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 8.8pt;
+  color: #555;
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  border-bottom: 0.6pt solid #bbb;
+  padding-bottom: 1.2mm;
+  margin-bottom: 3mm;
+}
+.page-meta .meta-left {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.page-meta .meta-right {
+  font-weight: 700;
+  color: #222;
+  letter-spacing: 0.08em;
+}
+.unverified-tag {
+  color: #c00;
+  margin-left: 6px;
+  font-weight: 700;
+}
+.unverified-backref {
+  color: #c00 !important;
+  font-weight: bold;
+}
 .cuhead {
   display: flex;
   align-items: baseline;
@@ -302,7 +331,7 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   line-height: 1.45;
 }
 .cu-blk {
-  margin: 3mm 0;
+  margin: 2.8mm 0;
 }
 .cu-blk .lbl {
   font-family: "PingFang SC", sans-serif;
@@ -310,56 +339,122 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   font-size: 11pt;
   border-left: 2.4pt solid #000;
   padding-left: 2.5mm;
-  margin-bottom: 1.2mm;
+  margin-bottom: 1.5mm;
 }
+
+/* Page 1: 回想材料与思考问题 */
 ul.recap {
   margin: 0;
-  padding-left: 7mm;
+  padding-left: 6.5mm;
 }
 ul.recap li {
-  margin: 1mm 0;
-  font-size: 10.5pt;
+  margin: 1.2mm 0;
+  font-size: 11.2pt;
+  line-height: 1.68;
 }
 ol.qs {
   margin: 0;
-  padding-left: 7mm;
+  padding-left: 6.5mm;
 }
 ol.qs li {
-  margin: 1.6mm 0 0.8mm;
-  font-size: 10.8pt;
+  margin: 1.8mm 0;
+  font-size: 11.2pt;
+  line-height: 1.65;
+}
+.qs .q-text {
+  font-weight: 500;
+  color: #000;
+}
+.qs .writing-area {
+  margin: 1.5mm 0 3mm;
 }
 .qs .wl {
-  border-bottom: 0.6pt dotted #555;
-  height: 7mm;
-  margin: 0.8mm 0 1.6mm;
+  border-bottom: 0.6pt dotted #888;
+  height: 8.5mm;
+  margin: 0;
 }
+
+/* Page 2: 观点池与推演 */
 .baseline {
-  font-size: 10.5pt;
+  font-size: 10pt;
   color: #333;
-  margin-bottom: 1.5mm;
+  margin-bottom: 1.2mm;
+  padding: 0.8mm 2mm;
+  background: #f7f7f7;
+  border-left: 1.5pt solid #888;
+  line-height: 1.45;
 }
 ul.views {
   margin: 0;
-  padding-left: 2mm;
+  padding-left: 0;
   list-style: none;
 }
-ul.views li {
-  margin: 2mm 0;
-  font-size: 10.8pt;
-  padding-left: 5mm;
-  text-indent: -5mm;
-  line-height: 1.6;
+ul.views li.view-item {
+  margin: 1.2mm 0 1.6mm;
+  padding: 0.8mm 2.2mm;
+  border-left: 1.8pt solid #222;
+  background: #fafafa;
 }
-ul.views li::before {
-  content: "◆ ";
-  font-size: 8pt;
+.view-claim {
+  font-size: 10.8pt;
+  line-height: 1.48;
+  color: #000;
+  margin-bottom: 0.5mm;
+}
+.view-claim b {
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-weight: 700;
 }
 .views .how {
-  font-size: 9.5pt;
-  color: #444;
-  margin-top: 0.5mm;
-  text-indent: 0;
-  padding-left: 0;
+  font-size: 10.2pt;
+  color: #1a1a1a;
+  line-height: 1.52;
+}
+.how-row {
+  margin: 0.4mm 0;
+  display: flex;
+  align-items: baseline;
+}
+.how-tag {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 9.4pt;
+  color: #333;
+  flex-shrink: 0;
+}
+.how-txt {
+  flex: 1;
+}
+
+.reason-blk {
+  margin-top: 2mm;
+}
+.reason-content p.reason {
+  font-size: 10.4pt;
+  line-height: 1.66;
+  margin: 1mm 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* Page 3: 口语范本与拆解 */
+.cu-script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12pt;
+  line-height: 1.95;
+  border: 1pt solid #000;
+  padding: 4mm 5.5mm;
+  margin: 1mm 0 3mm;
+}
+.cu-script p {
+  margin: 1.6mm 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+.cu-script b {
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-weight: 700;
+  color: #000;
 }
 .ctx {
   font-size: 10.4pt;
@@ -370,41 +465,14 @@ ul.views li::before {
 .ctx b {
   font-family: "PingFang SC", sans-serif;
 }
-.reason {
-  font-size: 10.6pt;
-  line-height: 1.85;
-}
-.reason-title {
-  font-weight: 700;
-  font-size: 10.5pt;
-  margin-bottom: 1mm;
-}
-
-.cu-script {
-  font-family: "Kaiti SC", "STKaiti", serif;
-  font-size: 12pt;
-  line-height: 1.95;
-  border: 1pt solid #000;
-  padding: 4mm 5.5mm;
-  margin: 1mm 0;
-}
-.cu-script p {
-  margin: 1.6mm 0;
-  text-indent: 2em;
-}
-
 .decon-list {
   margin-top: 1mm;
 }
 .decon-item {
-  margin-bottom: 2mm;
+  margin-bottom: 1.6mm;
 }
-.decon-target {
-  font-family: "PingFang SC", sans-serif;
-  font-weight: 700;
-  font-size: 10pt;
-  color: #111;
-  margin-bottom: 0.5mm;
+.decon-item p.ctx {
+  margin: 0.6mm 0;
 }
 
 /* ---------- 模块三：原文拆解 ---------- */
@@ -497,15 +565,16 @@ ul.views li::before {
   </style>
 </head>
 <body>
+
 <section class="cq">
-  <div class="preview-header">
-    <span>【单单元预览】评论单元 · C01</span>
-    <span>对应复述：R01</span>
+  <div class="page-meta">
+    <span class="meta-left">高中口语表达 · 评论单元</span>
+    <span class="meta-right">1 / 3</span>
   </div>
   <div class="cuhead">
     <span class="rno">C01</span>
     <h3>“想被夸夸”：大方求赞，真诚给赞</h3>
-    <span class="backref">对应复述·R01 材料页</span>
+    <span class="backref">关联材料：《女童从三楼阳台坠落，路人楚亮伸手接住后发帖求点赞》</span>
   </div>
   <div class="cu-blk">
     <div class="lbl">回想材料</div>
@@ -519,22 +588,38 @@ ul.views li::before {
     <div class="lbl">思考问题</div>
     <ol class="qs">
       <li>
-        楚亮在买饭途中跑上前伸手接住坠楼幼童，自己也多处受伤；脱险后他在网上发帖求大家“夸夸自己”，为什么这个举动会引发这么大的关注？
-        <div class="wl"></div>
+        <div class="q-text">楚亮在买饭途中跑上前伸手接住坠楼幼童，自己也多处受伤；脱险后他在网上发帖求大家“夸夸自己”，为什么这个举动会引发这么大的关注？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
       <li>
-        一个人承受了惊险和伤痛之后，希望得到大家的认可与鼓励，这种心情该怎么理解？
-        <div class="wl"></div>
+        <div class="q-text">一个人承受了惊险和伤痛之后，希望得到大家的认可与鼓励，这种心情该怎么理解？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
       <li>
-        网友给出九万人次点赞，公益机构也送来奖励，这种积极回应对于挺身而出的人意味着什么？
-        <div class="wl"></div>
+        <div class="q-text">网友给出九万人次点赞，公益机构也送来奖励，这种积极回应对于挺身而出的人意味着什么？</div>
+        <div class="writing-area">
+          <div class="wl"></div>
+          <div class="wl"></div>
+          <div class="wl"></div>
+        </div>
       </li>
     </ol>
   </div>
 </section>
 
 <section class="cview">
+  <div class="page-meta">
+    <span class="meta-left">高中口语表达 · 评论单元</span>
+    <span class="meta-right">2 / 3</span>
+  </div>
   <div class="cuhead">
     <span class="rno">C01</span>
     <h3>“想被夸夸”：大方求赞，真诚给赞 · 观点与推演</h3>
@@ -543,53 +628,61 @@ ul.views li::before {
     <div class="lbl">观点参考（多元思考方向）</div>
     <div class="baseline">救了人还上网发帖求大家夸夸，让人觉得挺意外，但也挺真实的。</div>
     <ul class="views">
-      <li>
-        <b>救人之后大方求夸，并不会削弱先前舍身救人的事实与价值。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>救人之后大方求夸，并不会削弱先前舍身救人的事实与价值。</b></div>
         <div class="how">
-          依据与来源：楚亮在危急瞬间冲上前伸手接住孩子，自己也受了伤，实实在在地化解了险情。
-          ；说明：伸手救人冒了极大的受伤风险，避免了孩子坠地的悲剧；事后希望得到大家的肯定，是付出辛苦后真实正常的情感期待。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">楚亮在危急瞬间冲上前伸手接住孩子，自己也受了伤，实实在在地化解了险情。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">伸手救人冒了极大的受伤风险，避免了孩子坠地的悲剧；事后希望得到大家的肯定，是付出辛苦后真实正常的情感期待。</span></div>
         </div>
       </li>
-      <li>
-        <b>公众的热情点赞，让救人者的付出得到了温暖而真诚的反馈。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>公众的热情点赞，让救人者的付出得到了温暖而真诚的反馈。</b></div>
         <div class="how">
-          依据与来源：求夸网帖获得了超过九万人次点赞，网友热情留言鼓励，还有人想寄家乡特产。
-          ；说明：大家没有用苛刻的标准挑刺，而是真诚回馈赞赏，让救人者感到自己的冒险被大家看见和珍惜。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">求夸网帖获得了超过九万人次点赞，网友热情留言鼓励，还有人想寄家乡特产。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">大家没有用苛刻的标准挑刺，而是真诚回馈赞赏，让救人者感到自己的冒险被大家看见和珍惜。</span></div>
         </div>
       </li>
-      <li>
-        <b>公益机构给予的专项奖励，为民间的见义勇为提供了实实在在的鼓励。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>公益机构给予的专项奖励，为民间的见义勇为提供了实实在在的鼓励。</b></div>
         <div class="how">
-          依据与来源：楚亮的行为不仅得到网友关注，也获得了公益机构发放的奖励。
-          ；说明：除了舆论的赞美，实打实的荣誉与奖励能够为自发的善行提供物质上的肯定与支持。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">楚亮的行为不仅得到网友关注，也获得了公益机构发放的奖励。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">除了舆论的赞美，实打实的荣誉与奖励能够为自发的善行提供物质上的肯定与支持。</span></div>
         </div>
       </li>
-      <li>
-        <b>面对家属致谢嘱咐“照顾好孩子最重要”，展现了救人者不给受助家庭增加负担的体谅。</b>
+      <li class="view-item">
+        <div class="view-claim"><b>面对家属致谢嘱咐“照顾好孩子最重要”，展现了救人者不给受助家庭增加负担的体谅。</b></div>
         <div class="how">
-          依据与来源：面对赶来感谢的孩子家人，楚亮最关心的是孩子的安全与恢复。
-          ；说明：行善后不以恩人自居，而是设身处地为对方着想，展现了质朴善良的处事分寸。
+          <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">面对赶来感谢的孩子家人，楚亮最关心的是孩子的安全与恢复。</span></div>
+          <div class="how-row"><span class="how-tag">可以怎样理解：</span><span class="how-txt">行善后不以恩人自居，而是设身处地为对方着想，展现了质朴善良的处事分寸。</span></div>
         </div>
       </li>
     </ul>
   </div>
-  <div class="cu-blk">
+  <div class="cu-blk reason-blk">
     <div class="lbl">怎么想到的：为什么求夸不影响救人的价值</div>
-    <p class="ctx reason">读这则材料，很多人第一反应是觉得楚亮“求夸”很新鲜。怎样把这个有意思的细节想深一步？先看事实：孩子悬在三楼，楚亮冲上前伸出双手接住，自己被砸得身上多处疼痛。在危急的一瞬间，救人的事实已经发生，付出的辛苦也是实实在在的。再看求夸：脱离危险之后，他在网上希望大家夸夸自己。有人可能会嘀咕“做好事怎么还主动要表扬”。但仔细想：冒着受伤风险去救一个素不相识的孩子，事后希望听到一句肯定，这是人很真实、也很朴素的心情。只要动机光明正大，希望自己的辛苦被看见，丝毫不影响先前勇敢行动的分量。看清了这一点，再看网友的九万人次点赞和公益机构的奖励，就能理解：宽厚真诚的社会，懂得珍惜每一份真实的善良。</p>
+    <div class="reason-content">
+        <p class="ctx reason">读这则材料，很多人第一反应是觉得楚亮“求夸”很新鲜。怎样把这个有意思的细节想深一步？先看事实：孩子悬在三楼，楚亮冲上前伸出双手接住，自己被砸得身上多处疼痛。在危急的一瞬间，救人的事实已经发生，付出的辛苦也是实实在在的。</p>
+        <p class="ctx reason">再看求夸：脱离危险之后，他在网上希望大家夸夸自己。有人可能会嘀咕“做好事怎么还主动要表扬”。但仔细想：冒着受伤风险去救一个素不相识的孩子，事后希望听到一句肯定，这是人很真实、也很朴素的心情。只要动机光明正大，希望自己的辛苦被看见，丝毫不影响先前勇敢行动的分量。</p>
+        <p class="ctx reason">看清了这一点，再看网友的九万人次点赞和公益机构的奖励，就能理解：宽厚真诚的社会，懂得珍惜每一份真实的善良。</p>
+    </div>
   </div>
 </section>
 
 <section class="cscript">
+  <div class="page-meta">
+    <span class="meta-left">高中口语表达 · 评论单元</span>
+    <span class="meta-right">3 / 3</span>
+  </div>
   <div class="cuhead">
     <span class="rno">C01</span>
     <h3>“想被夸夸”：大方求赞，真诚给赞 · 口语范本与拆解</h3>
   </div>
   <div class="cu-blk">
-    <div class="lbl">口语范本（双主体展开 · 约 2 分钟）</div>
+    <div class="lbl">口语范本（两段主体展开）</div>
     <div class="cu-script">
       <p>救人之后，楚亮在网上发帖请大家夸夸自己，这份坦率同样让人感到温暖。做好事的人可以大方求夸，看到好事的人也乐于真诚给赞。当善意走出一步，理应得到社会温暖而有分寸的回响。</p>
-      <p>首先，救人之后大方求夸，不会让已经给出的帮助变轻。 在危急时刻，楚亮冲上前伸出双手接住孩子，自己也受了伤。救人的事实已经发生，付出的辛苦也是实实在在的。脱险之后希望听到大家的肯定，这是很朴素的人之常情。已经帮到的忙，并不会因为事后想要一句夸奖而减少；坦然表达被认可的愿望，同样坦坦荡荡，值得大家真诚尊重。</p>
-      <p>其次，社会的真诚回馈让施救者的付出得到了切实的珍惜。 面对楚亮的求赞帖，网友们没有挑剔审判，而是用超过九万人次真诚的点赞与留言表达敬意，公益机构也及时送上了专项奖励。这份回响，既有公众的情感温度，也有实实在在的物质鼓励。这一次，他的挺身而出没有被冷落，真诚的回馈让勇敢得到了实实在在的回应；也希望这份温暖的互动，能让下一次挺身而出更有底气。</p>
+            <p><b>首先，救人之后大方求夸，不会让已经给出的帮助变轻。</b> 在危急时刻，楚亮冲上前伸出双手接住孩子，自己也受了伤。救人的事实已经发生，付出的辛苦也是实实在在的。脱险之后希望听到大家的肯定，这是很朴素的人之常情。已经帮到的忙，并不会因为事后想要一句夸奖而减少；坦然表达被认可的愿望，同样坦坦荡荡，值得大家真诚尊重。</p>
+            <p><b>其次，社会的真诚回馈让施救者的付出得到了切实的珍惜。</b> 面对楚亮的求赞帖，网友们没有挑剔审判，而是用超过九万人次真诚的点赞与留言表达敬意，公益机构也及时送上了专项奖励。这份回响，既有公众的情感温度，也有实实在在的物质鼓励。这一次，他的挺身而出没有被冷落，真诚的回馈让勇敢得到了实实在在的回应；也希望这份温暖的互动，能让下一次挺身而出更有底气。</p>
       <p>愿意求赞的人不必难为情，乐于给赞的人也不必吝惜掌声。人与人之间多一些这样的真诚，善意就会传递得更加踏实。</p>
     </div>
   </div>
@@ -610,7 +703,7 @@ ul.views li::before {
         <p class="ctx"><b>【主体二段：双重回响】</b>　首句提出回响意义；第2句列举九万人次点赞（情感）与专项奖励（实际鼓励）；第3句从本次回应延伸到对下一次勇敢的期待。</p>
       </div>
       <div class="decon-item">
-        <p class="ctx"><b>【结尾收拢】</b>　前半句归纳求赞与给赞双方的心态，后半句落脚到善意长远传递的愿望，完成口语表达闭环。</p>
+        <p class="ctx"><b>【结尾收拢】</b>　前半句归纳求赞与给赞双方的心态，后半句落脚到真诚相待让善意传递更踏实的愿望。</p>
       </div>
     </div>
   </div>

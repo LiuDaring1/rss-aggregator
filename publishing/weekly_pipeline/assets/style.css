@@ -283,6 +283,35 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   break-before: page;
   page-break-before: always;
 }
+.page-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 8.8pt;
+  color: #555;
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  border-bottom: 0.6pt solid #bbb;
+  padding-bottom: 1.2mm;
+  margin-bottom: 3mm;
+}
+.page-meta .meta-left {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.page-meta .meta-right {
+  font-weight: 700;
+  color: #222;
+  letter-spacing: 0.08em;
+}
+.unverified-tag {
+  color: #c00;
+  margin-left: 6px;
+  font-weight: 700;
+}
+.unverified-backref {
+  color: #c00 !important;
+  font-weight: bold;
+}
 .cuhead {
   display: flex;
   align-items: baseline;
@@ -296,7 +325,7 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   line-height: 1.45;
 }
 .cu-blk {
-  margin: 3mm 0;
+  margin: 2.8mm 0;
 }
 .cu-blk .lbl {
   font-family: "PingFang SC", sans-serif;
@@ -304,56 +333,122 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   font-size: 11pt;
   border-left: 2.4pt solid #000;
   padding-left: 2.5mm;
-  margin-bottom: 1.2mm;
+  margin-bottom: 1.5mm;
 }
+
+/* Page 1: 回想材料与思考问题 */
 ul.recap {
   margin: 0;
-  padding-left: 7mm;
+  padding-left: 6.5mm;
 }
 ul.recap li {
-  margin: 1mm 0;
-  font-size: 10.5pt;
+  margin: 1.2mm 0;
+  font-size: 11.2pt;
+  line-height: 1.68;
 }
 ol.qs {
   margin: 0;
-  padding-left: 7mm;
+  padding-left: 6.5mm;
 }
 ol.qs li {
-  margin: 1.6mm 0 0.8mm;
-  font-size: 10.8pt;
+  margin: 1.8mm 0;
+  font-size: 11.2pt;
+  line-height: 1.65;
+}
+.qs .q-text {
+  font-weight: 500;
+  color: #000;
+}
+.qs .writing-area {
+  margin: 1.5mm 0 3mm;
 }
 .qs .wl {
-  border-bottom: 0.6pt dotted #555;
-  height: 7mm;
-  margin: 0.8mm 0 1.6mm;
+  border-bottom: 0.6pt dotted #888;
+  height: 8.5mm;
+  margin: 0;
 }
+
+/* Page 2: 观点池与推演 */
 .baseline {
-  font-size: 10.5pt;
+  font-size: 10pt;
   color: #333;
-  margin-bottom: 1.5mm;
+  margin-bottom: 1.2mm;
+  padding: 0.8mm 2mm;
+  background: #f7f7f7;
+  border-left: 1.5pt solid #888;
+  line-height: 1.45;
 }
 ul.views {
   margin: 0;
-  padding-left: 2mm;
+  padding-left: 0;
   list-style: none;
 }
-ul.views li {
-  margin: 2mm 0;
-  font-size: 10.8pt;
-  padding-left: 5mm;
-  text-indent: -5mm;
-  line-height: 1.6;
+ul.views li.view-item {
+  margin: 1.2mm 0 1.6mm;
+  padding: 0.8mm 2.2mm;
+  border-left: 1.8pt solid #222;
+  background: #fafafa;
 }
-ul.views li::before {
-  content: "◆ ";
-  font-size: 8pt;
+.view-claim {
+  font-size: 10.8pt;
+  line-height: 1.48;
+  color: #000;
+  margin-bottom: 0.5mm;
+}
+.view-claim b {
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-weight: 700;
 }
 .views .how {
-  font-size: 9.5pt;
-  color: #444;
-  margin-top: 0.5mm;
-  text-indent: 0;
-  padding-left: 0;
+  font-size: 10.2pt;
+  color: #1a1a1a;
+  line-height: 1.52;
+}
+.how-row {
+  margin: 0.4mm 0;
+  display: flex;
+  align-items: baseline;
+}
+.how-tag {
+  font-family: "PingFang SC", sans-serif;
+  font-weight: 700;
+  font-size: 9.4pt;
+  color: #333;
+  flex-shrink: 0;
+}
+.how-txt {
+  flex: 1;
+}
+
+.reason-blk {
+  margin-top: 2mm;
+}
+.reason-content p.reason {
+  font-size: 10.4pt;
+  line-height: 1.66;
+  margin: 1mm 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+
+/* Page 3: 口语范本与拆解 */
+.cu-script {
+  font-family: "Kaiti SC", "STKaiti", serif;
+  font-size: 12pt;
+  line-height: 1.95;
+  border: 1pt solid #000;
+  padding: 4mm 5.5mm;
+  margin: 1mm 0 3mm;
+}
+.cu-script p {
+  margin: 1.6mm 0;
+  text-indent: 2em;
+  text-align: justify;
+}
+.cu-script b {
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  font-weight: 700;
+  color: #000;
 }
 .ctx {
   font-size: 10.4pt;
@@ -364,41 +459,14 @@ ul.views li::before {
 .ctx b {
   font-family: "PingFang SC", sans-serif;
 }
-.reason {
-  font-size: 10.6pt;
-  line-height: 1.85;
-}
-.reason-title {
-  font-weight: 700;
-  font-size: 10.5pt;
-  margin-bottom: 1mm;
-}
-
-.cu-script {
-  font-family: "Kaiti SC", "STKaiti", serif;
-  font-size: 12pt;
-  line-height: 1.95;
-  border: 1pt solid #000;
-  padding: 4mm 5.5mm;
-  margin: 1mm 0;
-}
-.cu-script p {
-  margin: 1.6mm 0;
-  text-indent: 2em;
-}
-
 .decon-list {
   margin-top: 1mm;
 }
 .decon-item {
-  margin-bottom: 2mm;
+  margin-bottom: 1.6mm;
 }
-.decon-target {
-  font-family: "PingFang SC", sans-serif;
-  font-weight: 700;
-  font-size: 10pt;
-  color: #111;
-  margin-bottom: 0.5mm;
+.decon-item p.ctx {
+  margin: 0.6mm 0;
 }
 
 /* ---------- 模块三：原文拆解 ---------- */
