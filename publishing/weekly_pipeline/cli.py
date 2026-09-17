@@ -236,7 +236,7 @@ def cmd_build(args):
         cur_p += 2
         
     page_map["复述参考"] = cur_p
-    ans_pages = 2 if len(retellings) >= 5 else 1
+    ans_pages = 3 if len(retellings) >= 8 else (2 if len(retellings) >= 5 else 1)
     cur_p += ans_pages
     
     for c in commentaries:
@@ -265,10 +265,57 @@ def cmd_build(args):
         f.write(html_out)
     print(f"  ✅ HTML 构建完成: {out_html}")
     
+    # 导出整刊同源 Markdown (含非空断言)
+    from weekly_pipeline.export_markdown import export_full_issue_markdown
+    out_md = os.path.join(out_dir, f"{issue_id}.md")
+    try:
+        md_text = export_full_issue_markdown(manifest, content_dir="content", edition="student", page_map=page_map, ai_prompt_text=ai_prompt)
+        with open(out_md, "w", encoding="utf-8") as f:
+            f.write(md_text)
+        print(f"  ✅ 整刊同源 Markdown 导出完成: {out_md}")
+    except Exception as e:
+        print(f"  ❌ 整刊 Markdown 导出校验失败并阻断: {e}")
+        sys.exit(1)
+    
     if "pdf" in formats or "png" in formats:
         out_pdf = os.path.join(out_dir, f"{issue_id}.pdf")
         render_html_to_pdf(out_html, out_pdf)
         print(f"  ✅ PDF 打印完成: {out_pdf}")
+        
+        # 导出模块分册 PDF (复述 / 评论 / 原文拆解与积累)
+        try:
+            import pypdf
+            reader = pypdf.PdfReader(out_pdf)
+            c_start = page_map[commentaries[0].id]
+            f_start = page_map[excerpts[0].id]
+            app_start = page_map.get("附录", len(reader.pages) + 1)
+            
+            w_r = pypdf.PdfWriter()
+            for p_idx in range(2, c_start - 1):
+                if p_idx < len(reader.pages):
+                    w_r.add_page(reader.pages[p_idx])
+            r_pdf_path = os.path.join(out_dir, f"{issue_id}-复述.pdf")
+            with open(r_pdf_path, "wb") as fp:
+                w_r.write(fp)
+                
+            w_c = pypdf.PdfWriter()
+            for p_idx in range(c_start - 1, f_start - 1):
+                if p_idx < len(reader.pages):
+                    w_c.add_page(reader.pages[p_idx])
+            c_pdf_path = os.path.join(out_dir, f"{issue_id}-评论.pdf")
+            with open(c_pdf_path, "wb") as fp:
+                w_c.write(fp)
+                
+            w_f = pypdf.PdfWriter()
+            for p_idx in range(f_start - 1, app_start - 1):
+                if p_idx < len(reader.pages):
+                    w_f.add_page(reader.pages[p_idx])
+            f_pdf_path = os.path.join(out_dir, f"{issue_id}-原文拆解与积累.pdf")
+            with open(f_pdf_path, "wb") as fp:
+                w_f.write(fp)
+            print(f"  ✅ 模块分册 PDF 导出完成: 复述 ({len(w_r.pages)}页) / 评论 ({len(w_c.pages)}页) / 原文拆解与积累 ({len(w_f.pages)}页)")
+        except Exception as se:
+            print(f"  ⚠️ 模块分册 PDF 导出跳过: {se}")
         
         if "png" in formats:
             png_dir = os.path.join(out_dir, f"{issue_id}_pages")

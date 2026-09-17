@@ -153,6 +153,280 @@ def export_excerpt_markdown(unit: ExcerptUnit, edition: str = "teacher") -> str:
     lines.append(f"> {unit.demo_text}")
     return "\n".join(lines)
 
+def export_full_issue_markdown(
+    manifest: IssueManifest,
+    content_dir: str = "content",
+    edition: str = "student",
+    page_map: Optional[Dict[str, int]] = None,
+    ai_prompt_text: Optional[str] = None
+) -> str:
+    """
+    生成整刊合订本 Markdown (同源导出，严格与 HTML / PDF 数据模型对齐)。
+    严格复用 Pydantic 数据模型，断言所有单元正文非空，杜绝空白残缺输出。
+    """
+    lines = []
+    is_student = (edition == "student")
+    title_suffix = "（学生完整正文）" if is_student else "（教师/编辑审阅版）"
+    
+    # 1. 刊头
+    lines.append(f"# 高中播音艺考口语素材周刊 · {manifest.title} {title_suffix}")
+    lines.append(f"**期号**：{manifest.issue_id} ｜ **期号显示**：{manifest.issue_no_label} ｜ **时间范围**：{manifest.date_range}")
+    lines.append("")
+    lines.append("本期栏目：**复述**（每则材料页＋提示页，参考答案集中在「复述参考」）· **评论**（同一批材料，每题三页：审题破题／观点推演／范本拆解）· **原文拆解与积累**（独立精选近期深度评论完整语段）。本文件为完整学生正文；印刷版见相应 PDF 与分册。")
+    lines.append("")
+    
+    # 2. 动态计算页码映射（若未传入）
+    if not page_map:
+        page_map = {}
+        cur_p = 3
+        for rid in manifest.retelling_ids:
+            page_map[rid] = cur_p
+            cur_p += 2
+        page_map["复述参考"] = cur_p
+        ans_pages = 2 if len(manifest.retelling_ids) >= 5 else 1
+        cur_p += ans_pages
+        for cid in manifest.commentary_ids:
+            page_map[cid] = cur_p
+            cur_p += 3
+        for fid in manifest.excerpt_ids:
+            page_map[fid] = cur_p
+            cur_p += 1
+        page_map["附录"] = cur_p
+
+    # 3. 目录
+    lines.append("## 目录")
+    r_toc = []
+    for rid in manifest.retelling_ids:
+        p = page_map.get(rid, 0)
+        r_toc.append(f"{rid}（{p}–{p+1} 页）")
+    ans_p = page_map.get("复述参考", 0)
+    ans_rng = f"{ans_p}–{ans_p+1} 页" if len(manifest.retelling_ids) >= 5 else f"{ans_p} 页"
+    r_toc.append(f"复述参考（{ans_rng}）")
+    lines.append(f"**复述**：{' ｜ '.join(r_toc)}")
+    lines.append("")
+    
+    c_toc = []
+    for cid in manifest.commentary_ids:
+        p = page_map.get(cid, 0)
+        c_toc.append(f"{cid}（{p}–{p+2} 页）")
+    lines.append(f"**评论**：{' ｜ '.join(c_toc)}")
+    lines.append("")
+    
+    f_toc = []
+    for fid in manifest.excerpt_ids:
+        p = page_map.get(fid, 0)
+        f_toc.append(f"{fid}（{p} 页）")
+    lines.append(f"**原文拆解与积累**：{' ｜ '.join(f_toc)}")
+    lines.append("")
+    lines.append(f"**附录 · 使用说明**：{page_map.get('附录', '—')} 页")
+    lines.append("")
+
+    # 4. AI 陪练完整指令
+    if ai_prompt_text:
+        lines.append("## AI 陪练完整指令")
+        lines.append("```")
+        lines.append(ai_prompt_text.strip())
+        lines.append("```")
+        lines.append("")
+
+    lines.append("---")
+    lines.append("")
+    
+    # 5. 模块一：口语复述
+    lines.append("# 一、口语复述")
+    lines.append("")
+    
+    retellings_loaded = []
+    for rid in manifest.retelling_ids:
+        yp = os.path.join(content_dir, "retellings", f"{rid}.yaml")
+        if not os.path.exists(yp):
+            raise FileNotFoundError(f"缺少复述单元文件: {yp}")
+        with open(yp, "r", encoding="utf-8") as fp:
+            u = RetellingUnit.model_validate(load_yaml_safely(fp.read()))
+        
+        # 校验关键正文非空
+        if not u.material_paragraphs or any(not p.strip() for p in u.material_paragraphs):
+            raise ValueError(f"复述单元 {u.id} 材料正文为空，阻断整刊导出！")
+        if not u.ref_retelling.strip():
+            raise ValueError(f"复述单元 {u.id} 参考复述为空，阻断整刊导出！")
+            
+        retellings_loaded.append(u)
+        p_start = page_map.get(u.id, 0)
+        lines.append(f"## {u.id} · {u.title}（{u.category}）")
+        lines.append(f"**材料页（第 {p_start} 页）**　{u.date_label} ｜ {u.source_label}")
+        lines.append("")
+        for p in u.material_paragraphs:
+            lines.append(f"> {p.strip()}")
+            lines.append("")
+        lines.append(f"**提示页（第 {p_start+1} 页）**")
+        lines.append(f"- **关键词**：{' · '.join(u.keywords)}")
+        lines.append(f"- **思维导图（虚线待补写）**：")
+        lines.append("```")
+        lines.append(f"中心：{u.mindmap_tree.center}")
+        for branch in u.mindmap_tree.branches:
+            lines.append(f"├─ {branch.name}")
+            for leaf in branch.leaves:
+                lines.append(f"│   └─ [提示] {leaf.hint}")
+        lines.append("```")
+        lines.append(f"- **插画需求**：{u.illustration_brief or '黑白报刊式插画'}")
+        lines.append("")
+
+    # 6. 集中复述参考
+    lines.append("---")
+    lines.append("")
+    lines.append("# 复述参考")
+    ans_start_p = page_map.get("复述参考", 0)
+    lines.append(f"*集中参考答案页（第 {ans_rng}）*")
+    lines.append("")
+    for u in retellings_loaded:
+        r_p = page_map.get(u.id, 0)
+        lines.append(f"### {u.id} · {u.title}")
+        lines.append(f"*材料见第 {r_p} 页*")
+        lines.append(f"**【参考复述】**：{u.ref_retelling.strip()}")
+        lines.append(f"**【导图参照】**：{u.mapkey.strip()}")
+        lines.append("")
+
+    # 7. 模块二：口语评论
+    lines.append("---")
+    lines.append("")
+    lines.append("# 二、口语评论")
+    lines.append("")
+    
+    for cid in manifest.commentary_ids:
+        yp = os.path.join(content_dir, "commentaries", f"{cid}.yaml")
+        if not os.path.exists(yp):
+            raise FileNotFoundError(f"缺少评论单元文件: {yp}")
+        with open(yp, "r", encoding="utf-8") as fp:
+            c = CommentaryUnit.model_validate(load_yaml_safely(fp.read()))
+            
+        # 校验评论正文完整性
+        if not c.learning.recap_facts or not c.learning.questions:
+            raise ValueError(f"评论单元 {c.id} 学习事实或提问为空，阻断整刊导出！")
+        if not c.learning.viewpoints or len(c.learning.viewpoints) < 3:
+            raise ValueError(f"评论单元 {c.id} 观点池数量不足 3 项，阻断整刊导出！")
+        if not c.speech.main_claim.strip() or not c.speech.closing.strip():
+            raise ValueError(f"评论单元 {c.id} 范本总论点或结尾为空，阻断整刊导出！")
+        if not c.speech.body or len(c.speech.body) < 2:
+            raise ValueError(f"评论单元 {c.id} 范本主体段不足 2 段，阻断整刊导出！")
+        for b_idx, b in enumerate(c.speech.body):
+            if not b.paragraphs or any(not p.strip() for p in b.paragraphs):
+                raise ValueError(f"评论单元 {c.id} 主体段 {b_idx+1} 正文为空，阻断整刊导出！")
+
+        cp = page_map.get(c.id, 0)
+        ref_p = page_map.get(c.retelling_ref, 0)
+        ref_str = f"关联材料见第 {ref_p} 页" if ref_p else f"关联材料：{c.retelling_ref}"
+        
+        lines.append(f"## {c.id} · {c.title}")
+        lines.append(f"*{ref_str} ｜ 全题占 3 页（第 {cp}–{cp+2} 页）*")
+        lines.append("")
+        
+        # P1: 事实与引导
+        lines.append(f"### 第 1 页（第 {cp} 页）：审题立意与探究提问")
+        lines.append("**核心事实回想**：")
+        for f in c.learning.recap_facts:
+            lines.append(f"- {f.strip()}")
+        lines.append("")
+        lines.append("**探究与引导提问**：")
+        for q_idx, q in enumerate(c.learning.questions):
+            lines.append(f"{q_idx+1}. {q.strip()}")
+        lines.append("")
+        lines.append(f"**初始感受诊断**：{c.learning.baseline_diagnostic.strip()}")
+        lines.append("")
+        
+        # P2: 观点池与推演
+        lines.append(f"### 第 2 页（第 {cp+1} 页）：多向观点池与逻辑推演")
+        lines.append("**多维观点池（多角度立论）**：")
+        for v in c.learning.viewpoints:
+            exp_str = f"（深层理解：{v.explanation.strip()}）" if v.explanation else ""
+            lines.append(f"- **【观点 {v.id}】{v.claim.strip()}**：依据细节——{v.evidence.strip()} {exp_str}")
+        lines.append("")
+        for lesson in c.learning.reasoning_lessons:
+            lines.append(f"**推演示范（{lesson.title.strip()}）**：")
+            lines.append(f"> {lesson.deduction_text.strip()}")
+            lines.append("")
+            
+        # P3: 口语表达范本与拆解
+        lines.append(f"### 第 3 页（第 {cp+2} 页）：口语范本与教学拆解")
+        spoken_text = c.get_full_spoken_text()
+        cn_len = count_chinese_chars(spoken_text)
+        lines.append(f"**【口语范本（两段主体展开）】**（正文约 {cn_len} 汉字，适合考场从容表达）：")
+        lines.append("")
+        lines.append(f"> **【破题总述】** {c.speech.main_claim.strip()}")
+        lines.append(">")
+        for b_idx, b in enumerate(c.speech.body):
+            ordinal = "一" if b_idx == 0 else "二"
+            claim_clean = b.claim.strip()
+            for p_idx, p in enumerate(b.paragraphs):
+                p_clean = p.strip()
+                if p_idx == 0 and not p_clean.startswith(claim_clean):
+                    lines.append(f"> **【主体{ordinal}】** **{claim_clean}** {p_clean}")
+                else:
+                    lines.append(f"> **【主体{ordinal}】** {p_clean}")
+            lines.append(">")
+        lines.append(f"> **【收束总结】** {c.speech.closing.strip()}")
+        lines.append("")
+        lines.append("**【技法拆解与修辞指引】**：")
+        lines.append(f"- **论述骨架**：{c.teaching.spine.strip()}")
+        for d in c.teaching.deconstruction:
+            lines.append(f"- **{d.target.strip()}**：{d.instruction.strip()}")
+        lines.append("")
+
+    # 8. 模块三：原文拆解与积累
+    lines.append("---")
+    lines.append("")
+    lines.append("# 三、原文拆解与积累")
+    lines.append("")
+    
+    for fid in manifest.excerpt_ids:
+        yp = os.path.join(content_dir, "excerpts", f"{fid}.yaml")
+        if not os.path.exists(yp):
+            raise FileNotFoundError(f"缺少原文拆解单元文件: {yp}")
+        with open(yp, "r", encoding="utf-8") as fp:
+            ex = ExcerptUnit.model_validate(load_yaml_safely(fp.read()))
+            
+        # 校验原文摘录非空
+        if not ex.quote_paragraphs or any(not p.strip() for p in ex.quote_paragraphs):
+            raise ValueError(f"原文拆解单元 {ex.id} 引用原段为空，阻断整刊导出！")
+        if not ex.analyze.strip():
+            raise ValueError(f"原文拆解单元 {ex.id} 话语解析为空，阻断整刊导出！")
+        if not ex.demo_text.strip():
+            raise ValueError(f"原文拆解单元 {ex.id} 口语迁移示范为空，阻断整刊导出！")
+            
+        fp_page = page_map.get(ex.id, 0)
+        lines.append(f"## {ex.id} · {ex.topic}（第 {fp_page} 页）")
+        lines.append(f"**出处**：{ex.source_name} ｜ 日期：{ex.source_date}")
+        lines.append("")
+        lines.append("**【文章语境】**：")
+        lines.append(f"> {ex.context.strip()}")
+        lines.append("")
+        lines.append("**【精选原文原段】**：")
+        for qp in ex.quote_paragraphs:
+            lines.append(f"> {qp.strip()}")
+            lines.append("")
+        lines.append("**【话语解析与积累】**：")
+        lines.append(f"- **话语解析**：{ex.analyze.strip()}")
+        if ex.memorize:
+            lines.append(f"- **好句摘记**：{ex.memorize.strip()}")
+        if ex.method:
+            lines.append(f"- **技法提炼**：{ex.method.strip()}")
+        lines.append("")
+        lines.append(f"**【迁移口语示范（{ex.demo_title.strip()}）】**：")
+        lines.append(f"> {ex.demo_text.strip()}")
+        lines.append("")
+
+    # 9. 附录
+    lines.append("---")
+    lines.append("")
+    lines.append(f"# 附录 · 使用说明（第 {page_map.get('附录', '—')} 页）")
+    lines.append("")
+    lines.append("本周刊专为高中播音主持与口语传播艺考生打造，紧扣高考口语表达三大能力：快速提炼与结构化复述、观点构建与思辨评述、语言积淀与文采锤炼。")
+    lines.append("1. **口语复述**：先看材料页读懂记准核心事实，翻到提示页看关键词网与思维导图，向语音 AI 听众口头复述并听取反馈；")
+    lines.append("2. **口语评论**：按审题立意（P1）、观点池与推演（P2）、范本朗读（P3）三步训练，重点体会两段主体首句的立论抓手；")
+    lines.append("3. **原文拆解**：品味主流媒体深度评论的原汁原味，积累精妙比喻、论证技法与时空句式，并尝试在日常表达中迁移应用。")
+    lines.append("")
+    
+    return "\n".join(lines)
+
 def publish_directory_atomically(staging_dir: str, target_dir: str, _fault_after_backup: bool = False) -> None:
     """
     将 staging_dir 发布至 target_dir。在单进程发布、可捕获异常且文件系统允许回滚的场景中，

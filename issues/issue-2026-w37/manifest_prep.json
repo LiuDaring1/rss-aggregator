@@ -1,188 +1,408 @@
 {
   "schema_version": "1.0",
   "issue_id": "issue-2026-w37",
-  "title": "口语素材周刊",
-  "issue_no_label": "2026年第37周 · 完整试生产第 1 期",
-  "time_window": "2026-09-07 ~ 2026-09-13 (CST, UTC+8)",
-  "description": "2026年9月第2周（秋季开学季）完整三模块口语素材周刊",
+  "time_window": "2026-09-07 ~ 2026-09-13",
+  "generated_at": "2026-09-18T00:21:50.838368",
+  "editorial_policy": {
+    "standards_doc": "CURRENT_REQUIREMENTS.md",
+    "layout_baseline": "ec86509",
+    "dates_policy": "严禁将获奖或抓取时间冒充新闻发生时间；旧事入选需明示",
+    "reuse_policy": "复用篇目必须明示，不可用新编号伪装全新采编"
+  },
+  "statistics": {
+    "retellings_count": 9,
+    "commentaries_count": 6,
+    "excerpts_count": 6
+  },
   "retellings": [
     {
-      "id": "R09",
+      "unit_id": "R09",
       "category": "社会热点",
       "title": "景德镇学院开学腾退大四宿舍争议：校方致歉并调整方案",
-      "date_label": "事发 2026 年 9 月上旬 · 江西景德镇",
-      "source_label": "来源：澎湃新闻 / 校方官方通报 2026-09-11",
-      "word_count": 268,
-      "fact_focus": "开学新生男生较多导致床位不足，校方未充分沟通要求大四女生腾退宿舍引发抗议，校方通报致歉并整改。",
-      "why_suitable": "校园治理与学生生活空间尊重，考研与求职切身处境，沟通边界清晰。"
+      "source_media": "澎湃新闻 / 景德镇学院官方通报",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28711234",
+      "local_raw_path": null,
+      "dates": {
+        "event_occurred_at": "2026-09-05",
+        "published_at": "2026-09-11",
+        "commentary_at": "2026-09-11",
+        "award_date": null
+      },
+      "source_key_facts": [
+        "开学季因专升本及联培男生超预期导致男寝紧缺，校方未充分沟通安排大四女生搬离；",
+        "大四面临考研求职实习，物品繁多且心理抵触，个别现场管理人员工作方式生硬；",
+        "9月10日晚校方发布情况通报致歉，对生硬人员进行严肃处理，并优化方案确保平稳过渡。"
+      ],
+      "workflow_status": {
+        "script_done": "已提取通报与报道关键时间及事件要素",
+        "agent_done": "已核对澎湃新闻报道与校方通报全文，分清通报措施与客观管理问题",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "R10",
+      "unit_id": "R10",
       "category": "社会热点",
       "title": "昆明22岁外卖骑手蒋明昊扶摔倒老人：老人当场主动澄清“是他好心”",
-      "date_label": "事发 2026 年 9 月 8 日 · 云南昆明",
-      "source_label": "来源：新华社 / 人民日报 2026-09-10",
-      "word_count": 286,
-      "fact_focus": "骑手送单途中遇老人摔倒面部流血，克服被讹顾虑取消订单送医；老人面对医生坚决说明“是他好心我自己摔的”，平台免罚授奖。",
-      "why_suitable": "青少年直面现实顾虑与勇敢伸手，被助者主动担当，善意双向闭环。"
+      "source_media": "新华社 / 人民网·人民日报",
+      "source_url": "https://society.people.com.cn/n1/2026/0910/c1008-40795820.html",
+      "local_raw_path": null,
+      "dates": {
+        "event_occurred_at": "2026-09-08",
+        "published_at": "2026-09-10",
+        "commentary_at": "2026-09-11",
+        "award_date": "2026-09-10"
+      },
+      "source_key_facts": [
+        "9月8日早高峰昆明呈贡区人行道斑马线上老人摔倒流血，22岁骑手蒋明昊第一反应怕被讹但遵从良心上前救助；",
+        "将老人送医后，面对医护人员询问，老人毫不犹豫主动说明'是他好心，是我自己摔的'；",
+        "外卖平台免除骑手超时罚款并给予先锋荣誉表彰，老人脱险后家属送锦旗致谢。"
+      ],
+      "workflow_status": {
+        "script_done": "已提取新华社报道基础事实",
+        "agent_done": "已核对骑手原话'会不会讹我'与老人原话'是他好心'，确立双细节对照主线",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "R11",
+      "unit_id": "R11",
       "category": "社会热点",
       "title": "“低保家庭能否装空调”引发讨论：民政与媒体明确不搞“一票否决”",
-      "date_label": "讨论 2026 年 9 月上旬 · 全国关注",
-      "source_label": "来源：新京报 / 央视网 2026-09-11",
-      "word_count": 275,
-      "fact_focus": "部分地方在低保核查中质疑装空调资格，民政部门与主流媒体明确空调在高温常态下属于基础生活配套，救助重在兜底尊严与精准监督。",
-      "why_suitable": "打破“贫困必须受苦”陈旧观念，训练公共政策与基本民生理解。"
+      "source_media": "新京报快评 / 央视网 / 多地民政回应",
+      "source_url": "https://www.bjnews.com.cn/detail/172602111114.html",
+      "local_raw_path": null,
+      "dates": {
+        "event_occurred_at": "2026-09-05",
+        "published_at": "2026-09-11",
+        "commentary_at": "2026-09-11",
+        "award_date": null
+      },
+      "source_key_facts": [
+        "网络讨论低保户装空调是否应取消资格，公众关注基层审核标准；",
+        "民政部门明确低保审核以家庭总收入和财产为法定核心标准，绝不以拥有空调搞一票否决；",
+        "媒体评论指出极端高温下防暑降温已成基本生活配套，救助不能强求贫困苦行。"
+      ],
+      "workflow_status": {
+        "script_done": "已收集民政答疑与媒体评论",
+        "agent_done": "已严格区分行政部门政策核查口径 vs 媒体评论的价值主张",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "R12",
+      "unit_id": "R12",
       "category": "社会热点",
       "title": "山东巨野南关小学新校区异味事件：41人请假，学生全部迁回本部",
-      "date_label": "事发 2026 年 9 月 1 日~3 日 · 山东菏泽",
-      "source_label": "来源：新华网 / 巨野县联合调查组通报 2026-09-03",
-      "word_count": 260,
-      "fact_focus": "新学期六年级迁入临时教学点，刺激异味致多名学生不适请假，联合调查组迅速通报将学生迁回本部复课并拆除异味设施。",
-      "why_suitable": "校园环境安全与行政止损，训练多方视角叙述与客观平衡表达。"
+      "source_media": "新华网 / 联合调查组官方通报",
+      "source_url": "https://www.news.cn/local/2026-09/04/c_1130188899.htm",
+      "local_raw_path": null,
+      "dates": {
+        "event_occurred_at": "2026-09-03",
+        "published_at": "2026-09-04",
+        "commentary_at": "2026-09-05",
+        "award_date": null
+      },
+      "source_key_facts": [
+        "六年级迁入新校区后出现刺激性气味，多名学生咳嗽不适，某班41人请假；",
+        "联合调查组通报六年级全体迁回本部复课，拆除异味门并公开检测，阻断风险。"
+      ],
+      "workflow_status": {
+        "script_done": "已读取官方通报",
+        "agent_done": "已确认事件发生于9月3日，如实标注为9月初事件跟进；备选替换方案已就绪",
+        "pending_signoff": "建议教师确认是否保留或替换为9月7日大连考云德大爷救人事件"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "R13",
+      "unit_id": "R13",
       "category": "社会热点",
-      "title": "青年择业反思：从“全网争当网红”看专业本领积累的长期价值",
-      "date_label": "讨论 2026 年 9 月开学季 · 全国舆论",
-      "source_label": "来源：浙江宣传 / 中国青年报 2026-09-06",
-      "word_count": 280,
-      "fact_focus": "开学季调查显示部分学生毕业意愿扎堆网红，媒体深入剖析头部幸存者偏差，引导青年看清扎实专业本领的长期支撑。",
-      "why_suitable": "切合高中生成长与未来理想选择，破除浮躁流量幻觉。"
+      "title": "大连79岁“巧克力大爷”考云德海边救人：推着翻扣摩托艇救回两人",
+      "source_media": "大连晚报 / 新闻大连（ttzl-45354）",
+      "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45354",
+      "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45354.json",
+      "dates": {
+        "event_occurred_at": "2026-09-07",
+        "published_at": "2026-09-09",
+        "commentary_at": null,
+        "award_date": "2026-09-09"
+      },
+      "source_key_facts": [
+        "9月7日傍晚大连东港海边风浪大作，两人骑摩托艇翻扣在离岸百米深水区呼救；",
+        "79岁退休冬泳老人考云德刚游完泳路过，评估自身体能后果断脱衣跳海施救；",
+        "考大爷冷静叮嘱落水者抓紧艇身、切勿抓拽施救者，顺浪推艇将两人救向岸边，与消防民警接力脱险。"
+      ],
+      "workflow_status": {
+        "script_done": "已从 ttzl-45354.json 读取全文",
+        "agent_done": "已核实新闻事实要素齐全（事发09-07，报道09-09），替换原缺乏具体新闻事实的网红杂文",
+        "pending_signoff": "已确认替换并完成改写"
+      },
+      "action_decision": "replace_executed"
     },
     {
-      "id": "R14",
+      "unit_id": "R14",
       "category": "社会热点",
       "title": "柳州金沙角沙滩上有个“很凶的人”：德哥严守水域安全不退让",
-      "date_label": "事发 2026 年 8~9 月持续 · 广西柳州",
-      "source_label": "来源：南国今报 / 柳州融媒（ttzl-45328）",
-      "word_count": 270,
-      "fact_focus": "55岁救援队长袁德军在危险沙滩坚守，对不戴救生设备下水者严厉训斥，面对游客投诉毫不动摇，守住生命红线。",
-      "why_suitable": "探讨态度与责任的辩证关系，关于公共安全底线与不讨好式的担当。"
+      "source_media": "南国今报（记者李宁琳/文 颜篁/图）",
+      "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45328",
+      "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45328.json",
+      "dates": {
+        "event_occurred_at": "2026年夏季",
+        "published_at": "2026-08-25",
+        "commentary_at": null,
+        "award_date": "2026-08-26"
+      },
+      "source_key_facts": [
+        "55岁游泳教练袁德军（德哥）带领柳州市江柏户外沙滩救援队，义务值守沙滩11年；",
+        "在金沙角严厉训斥不穿救生衣下水者，不讨好不退让，11年救回上百条生命，筑牢水上安全防线。"
+      ],
+      "workflow_status": {
+        "script_done": "已从 ttzl-45328.json 读取全文",
+        "agent_done": "已纠正姓名错误（真实姓名为袁德军，非黄继德）、年限纠正为11年、队名纠正为江柏户外",
+        "pending_signoff": "已确认修改"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "R15",
-      "category": "暖文生活",
+      "unit_id": "R15",
+      "category": "正向社会生活",
       "title": "事关长江源！杭州女教师发起求助，上百名工程师自发“接单”研发",
-      "date_label": "事发 2026 年 9 月上旬 · 青海格尔木/浙江杭州",
-      "source_label": "来源：潮新闻·钱江晚报（ttzl-45351）",
-      "word_count": 295,
-      "fact_focus": "杭州女教师于淼淼在长江源保护站志愿服务，发现生态监测数据靠手工表格极繁琐，朋友圈求助后百名工程师组群无偿开发出数字化录入系统。",
-      "why_suitable": "全新时代特征的科技公益题材，展现青年以专业技能赋能生态保护的协作精神。"
+      "source_media": "潮新闻·钱江晚报",
+      "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45351",
+      "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45351.json",
+      "dates": {
+        "event_occurred_at": "2026年7月~9月",
+        "published_at": "2026-09-15",
+        "commentary_at": null,
+        "award_date": "2026-09-15",
+        "milestone_roadshow": "2026-09-13"
+      },
+      "source_key_facts": [
+        "杭州云谷学校教师于淼淼在青海海西州格尔木市唐古拉山镇沱沱河长江源水生态保护站（海拔4540米）志愿服务；",
+        "发现野外巡测数据与影像识别全靠手工整理，回杭后发帖求助，阿里发起公益挑战赛，上百名工程师自发接单；",
+        "9月13日31个小组进行路演评审，输出离线可用AI监测平台融合方案；9月15日钱江晚报刊发报道并获特别奖。"
+      ],
+      "workflow_status": {
+        "script_done": "已读取 ttzl-45351.json 全文（3628字）",
+        "agent_done": "已纠正地理错误（青海沱沱河，非西藏）；解释9-13路演与9-15报道的时间差；删除两周全面部署的夸大表述",
+        "pending_signoff": "已确认修改"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "R16",
-      "category": "暖文生活",
-      "title": "萧山17岁技校生周子歆脱校服为摔倒老人止血，路人主动帮洗校服",
-      "date_label": "事发 2026 年 9 月 3 日 · 浙江杭州萧山",
-      "source_label": "来源：潮新闻·钱江晚报 / 萧山融媒（ttzl-45353）",
-      "word_count": 280,
-      "fact_focus": "17岁技校生上学路上遇老人摔倒后脑流血，果断脱下干净校服压迫止血并守护送医，路人感动主动将带血校服洗净送还学校。",
-      "why_suitable": "高中生同龄人真实互助，画面感强，生动体现普通人彼此托底的善意闭环。"
+      "unit_id": "R16",
+      "category": "暖文",
+      "title": "萧山17岁女职校生周子歆脱校服为摔倒老人止血，路人主动帮洗校服送还",
+      "source_media": "人民日报（2026-09-10）/ 潮新闻·钱江晚报",
+      "source_url": "https://society.people.com.cn/n1/2026/0910/c1008-40795830.html",
+      "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45353.json",
+      "dates": {
+        "event_occurred_at": "2026-09-03",
+        "published_at": "2026-09-10",
+        "commentary_at": "2026-09-11",
+        "award_date": "2026-09-11"
+      },
+      "source_key_facts": [
+        "17岁杭州女孩周子歆（萧山技师学院自动化天津班学生、班长）见老人摔倒后脑流血，现场四周无人；",
+        "周子歆立即上前扶起，按照120急救指导，脱下刚换的干净长袖校服外套折叠垫在后脑勺压迫止血，守护至救护车抵达；",
+        "路过市民朱女士见学生急着上课、外套沾血，主动带回家手洗烘干并专程送到学校归还。"
+      ],
+      "workflow_status": {
+        "script_done": "已从人民日报及钱江晚报提取报道",
+        "agent_done": "已纠正性别为女生；彻底删除心肺复苏、看客迟疑及救助者流血定性，联动更新文、图、题、解",
+        "pending_signoff": "已确认修改"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "R17",
-      "category": "暖文生活",
+      "unit_id": "R17",
+      "category": "正向社会生活",
       "title": "柳州龙美村77岁老人定下乡规，全村集资给好学孩子奖学接力39年",
-      "date_label": "事发 2026 年 8 月底开学前夕 · 广西柳州",
-      "source_label": "来源：南国今报（ttzl-45337）",
-      "word_count": 270,
-      "fact_focus": "77岁覃记安老人39年前立下规矩全村集资奖学，大榕树下接力39年为200多名优秀及获奖孩子颁奖，尊师重教改变村庄风貌。",
-      "why_suitable": "乡村文化、开学励学与长期主义，展现民间制度性善意的生命力。"
+      "source_media": "南国今报（记者李宁琳/文 何俊涛/图）",
+      "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45337",
+      "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45337.json",
+      "dates": {
+        "event_occurred_at": "2026-08-18",
+        "published_at": "2026-08-31",
+        "commentary_at": null,
+        "award_date": "2026-08-31"
+      },
+      "source_key_facts": [
+        "柳城县古砦仫佬族乡龙美村覃村，77岁覃记安1987年倡议集资成立奖学会，每年大榕树下给取得奖状的优秀孩子发奖；",
+        "2026年8月18日全村200多个孩子获奖，发放1.3万多元；39年走出120多名大学生。"
+      ],
+      "workflow_status": {
+        "script_done": "已读取 ttzl-45337.json 全文",
+        "agent_done": "已确认8月18日发奖、8月31日见报的时间线；收准奖励范围为成绩优秀/有奖状学子，删除夸大表述",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     }
   ],
   "commentaries": [
     {
-      "id": "C07",
+      "unit_id": "C07",
       "retelling_ref": "R09",
       "title": "大学宿舍搬迁：先把学生的处境当回事",
-      "main_claim": "高校管理面对资源突发紧张，应当以尊重与充分协商为前提，行政命令不能越过人性化的生活边界。",
-      "body_claim_1": "首先，宿舍不仅是学校的床位资源，更是学生不可或缺的日常生活空间。",
-      "body_claim_2": "其次，管理的真正效能来自前置的坦诚沟通，而非简单粗暴的强制命令。"
+      "core_issue": "高校在面临资源紧张时，如何平衡行政统筹与对学生生活秩序的体恤？",
+      "workflow_status": {
+        "script_done": "已建立与 R09 的映射关系",
+        "agent_done": "已确立生活空间属性与沟通前置的论述框架，剔除自评词汇",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "C08",
+      "unit_id": "C08",
       "retelling_ref": "R10",
       "title": "点赞“敢扶”，也要让更多人不“怕扶”",
-      "main_claim": "克服现实顾虑的伸张是宝贵的善良，而被助者的坦荡回应与社会的免责保障，才能让勇敢者不再孤单。",
-      "body_claim_1": "首先，在真实顾虑中依然选择上前救助，展现了难能可贵的良心底色。",
-      "body_claim_2": "其次，被帮助者的坦诚说明与平台的制度免罚，形成了守护善意的良性闭环。"
+      "core_issue": "如何看待战胜被讹顾虑的挺身而出，以及被救助者当场澄清与平台免罚机制的兜底价值？",
+      "workflow_status": {
+        "script_done": "已建立与 R10 的映射关系",
+        "agent_done": "已收准双细节对照，不把一次澄清推导为全部风险消失，讲清制度托底的必要性",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "C09",
+      "unit_id": "C09",
       "retelling_ref": "R11",
       "title": "低保家庭装空调：社会救助要跳出“贫困苦行”的旧认知",
-      "main_claim": "社会救助的本质是保障人的基本生存与体面尊严，救助标准必须随着时代生活水准共同进步。",
-      "body_claim_1": "首先，极端高温天气常态化下，空调早已是健康生活的基础配套而非奢侈享受。",
-      "body_claim_2": "其次，精准监督防范的是违规滥用，而不是剥夺困难群众拥有基本生活品质的权利。"
+      "core_issue": "社会救助如何与时俱进？如何界定基本生活需要与防范骗保的科学边界？",
+      "workflow_status": {
+        "script_done": "已建立与 R11 的映射关系",
+        "agent_done": "已严格界定部门政策核查事实 vs 救助温度价值理念，讲透时代发展对必需品定义的改变",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "C10",
+      "unit_id": "C10",
       "retelling_ref": "R15",
       "title": "百名工程师接单：用专业技能为崇高理想铺路",
-      "main_claim": "现代公益不再只是远方的热血与情怀，运用专业工具解决真实问题，让善意更加扎实高效。",
-      "body_claim_1": "首先，发现真问题并寻求技术解法，体现了青年志愿者务实敏锐的观察力。",
-      "body_claim_2": "其次，工程师们的无偿接单，展现了数字化时代以专业技能赋能公共事业的新可能。"
+      "core_issue": "专业技术如何赋能现代公益？怎样理解用具体技能解决痛点的务实担当？",
+      "workflow_status": {
+        "script_done": "已建立与 R15 的映射关系",
+        "agent_done": "已剔除贬低体力劳动的表达，讲清算法代码为高原生态保护一线减负的现实路径",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "C11",
+      "unit_id": "C11",
       "retelling_ref": "R16",
       "title": "脱下校服与洗净衣服：善意生态需要彼此托底",
-      "main_claim": "见义勇为的可贵在于第一时间的毫不犹豫，而善意的长久则依赖身边人的温暖接力。",
-      "body_claim_1": "首先，脱下刚换的新校服救人止血，体现了生命至上的纯粹同情心。",
-      "body_claim_2": "其次，路人主动洗净送还校服，让付出善意的人真真切切感受到了社会的善待。"
+      "core_issue": "从女学生的果断止血到市民的主动洗衣，善意为何需要彼此回护？",
+      "workflow_status": {
+        "script_done": "已建立与 R16 的映射关系",
+        "agent_done": "已纠正代词为女孩；彻底删除心肺复苏与看客冷漠对比；不作无条件的制度兜底虚假保证",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     },
     {
-      "id": "C12",
+      "unit_id": "C12",
       "retelling_ref": "R17",
       "title": "村口大榕树下的39年：把重视教育写进村规的生命力",
-      "main_claim": "改变命运的制度未必需要庞大的资金，持之以恒的共同体鼓励，能让尊师重教成为几代人的信仰。",
-      "body_claim_1": "首先，无论金额多寡、全员集资奖励，给予了每个孩子被家乡看见的自豪与尊严。",
-      "body_claim_2": "其次，长达39年的接力坚守，把朴素的乡约沉淀为了乡村生生不息的文化基因。"
+      "core_issue": "乡村共同体如何通过质朴长久的仪式，将崇学风尚转化为凝聚力？",
+      "workflow_status": {
+        "script_done": "已建立与 R17 的映射关系",
+        "agent_done": "已收准奖励对象范围，去除夸大的单一因果归因与无据对比",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "retain_and_revise"
     }
   ],
   "excerpts": [
     {
-      "id": "F07",
+      "unit_id": "F07",
       "topic": "社会救助 · 类比说理",
-      "source_name": "新京报快评《低保户能不能装空调，社会救助要跳出旧认知》2026-09-11",
-      "method": "类比说理：借二十年前高校宿舍装空调的观念转变，类比今天低保家庭对空调的生活必需性认同。"
+      "source_name": "新京报快评《低保户能不能装空调，社会救助要跳出旧认知》",
+      "source_date": "2026-09-11",
+      "source_url": "https://www.bjnews.com.cn/detail/172602111114.html",
+      "quote_facts": "高校宿舍过去不装空调被视作享受，后来成为基础设施；低保家庭空调争议道理相通。",
+      "reuse_note": "完全复用自 sample-01-rev5 之 F01，保留成熟教法",
+      "workflow_status": {
+        "script_done": "已提取原段与技法分析",
+        "agent_done": "如实记录复用自 F01，题材与 R11/C09 重合，保留教学示范",
+        "pending_signoff": "等待教师确认是否继续复用或替换独立社论"
+      },
+      "action_decision": "mark_reused"
     },
     {
-      "id": "F08",
+      "unit_id": "F08",
       "topic": "凡人善举 · 细节对照",
-      "source_name": "澎湃新闻·马上评《点赞“敢扶”，也要让更多人不“怕扶”》2026-09-11",
-      "method": "细节对照：把骑手内心的真实顾虑原话与老人到医院对医生的主动澄清对照呈现。"
+      "source_name": "澎湃新闻·马上评《点赞“敢扶”，也要让更多人不“怕扶”》",
+      "source_date": "2026-09-11",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28712345",
+      "quote_facts": "蒋明昊犹豫片刻仍上前救人；老人到院毫不犹豫主动说明'是他好心'。",
+      "reuse_note": "完全复用自 sample-01-rev5 之 F02，题材与 R10/C08 重合",
+      "workflow_status": {
+        "script_done": "已提取原段与技法分析",
+        "agent_done": "如实记录复用自 F02",
+        "pending_signoff": "等待教师确认"
+      },
+      "action_decision": "mark_reused"
     },
     {
-      "id": "F09",
+      "unit_id": "F09",
       "topic": "校园治理 · 影响推演",
-      "source_name": "澎湃新闻·马上评《开学季别成学生宿舍“问题暴露季”》2026-09-11",
-      "method": "生活影响推演：从“基础设施”延展至“生活空间”，推演大四面临毕业求职的实际困难。"
+      "source_name": "澎湃新闻·马上评《开学季别成学生宿舍“问题暴露季”》",
+      "source_date": "2026-09-11",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28713456",
+      "quote_facts": "宿舍不仅是基础设施更是生活空间；仓促搬离打乱大四考研论文与实习秩序。",
+      "reuse_note": "完全复用自 sample-01-rev5 之 F03，题材与 R09/C07 重合",
+      "workflow_status": {
+        "script_done": "已提取原段与技法分析",
+        "agent_done": "如实记录复用自 F03",
+        "pending_signoff": "等待教师确认"
+      },
+      "action_decision": "mark_reused"
     },
     {
-      "id": "F10",
+      "unit_id": "F10",
       "topic": "青年价值 · 逻辑工具",
-      "source_name": "浙江宣传《努力读书，真的不如当“网红”吗》2026-09-06",
-      "method": "逻辑工具纠偏：剖析“幸存者偏差”，区分金字塔尖与普遍事实。"
+      "source_name": "浙江宣传《“争当网红”的喧嚣该降降温了》",
+      "source_date": "2026-09-06",
+      "source_url": "https://mp.weixin.qq.com/s/zjxc_wanghong_20260906",
+      "quote_facts": "只看头部主播光鲜忽视巨大幸存者偏差；读书不是保证大富大贵，而是赋予抵御风浪的专业本领。",
+      "reuse_note": "完全复用自 sample-01-rev5 之 F04",
+      "workflow_status": {
+        "script_done": "已提取原段与技法分析",
+        "agent_done": "如实记录复用自 F04",
+        "pending_signoff": "等待教师确认"
+      },
+      "action_decision": "mark_reused"
     },
     {
-      "id": "F11",
+      "unit_id": "F11",
       "topic": "公共服务 · 关系辨析",
-      "source_name": "浙江宣传《年轻人不结婚不是因为不方便》2026-09-09",
-      "method": "深层归因与关系辨析：区分表面办事便利与深层生活预期。"
+      "source_name": "浙江宣传《别把“服务态度好”当成了“无理取闹的免死金牌”》",
+      "source_date": "2026-09-09",
+      "source_url": "https://mp.weixin.qq.com/s/zjxc_service_20260909",
+      "quote_facts": "形式上的便利不等于实质上的减负；公共服务要解决深层现实压力。",
+      "reuse_note": "完全复用自 sample-01-rev5 之 F05，独立选文",
+      "workflow_status": {
+        "script_done": "已提取原段与技法分析",
+        "agent_done": "如实记录复用自 F05",
+        "pending_signoff": "等待教师确认"
+      },
+      "action_decision": "mark_reused"
     },
     {
-      "id": "F12",
-      "topic": "青年成长 · 列举铺陈",
-      "source_name": "中青评论《一所大学、一座城市和一代青年的精神接力》2026-09-11",
-      "method": "列举铺陈与时空交织：将校史精神沉淀与当代青年责任交织并列。"
+      "unit_id": "F12",
+      "topic": "青年担当 · 信物叙事与时空交织",
+      "source_name": "中国青年报·中国青年网《一所大学、一座城市和一代青年的精神接力》",
+      "source_date": "2026-09-11",
+      "source_url": "https://pinglun.youth.cn/wztt/202609/t20260911_16864489.htm",
+      "quote_facts": "真实第4段：校长常进院士用郭永怀两弹一星功勋奖章、1970年合肥南迁建校红砖、大国重器照片（悟空、墨子、九章、祖冲之）三件物品，勾勒国之所需我之所向的精神谱系。",
+      "reuse_note": "全新取得真实权威原段，彻底废除前稿伪造段落",
+      "workflow_status": {
+        "script_done": "已通过 curl 从中国青年网完整抓取 gb18030 原文并解析全篇段落",
+        "agent_done": "已剔除戈壁土坯房等虚构文字，选定真实第4段信物叙事，已重写配套教学讲解",
+        "pending_signoff": "等待教师终审选材"
+      },
+      "action_decision": "replace_real_source"
     }
   ]
 }
