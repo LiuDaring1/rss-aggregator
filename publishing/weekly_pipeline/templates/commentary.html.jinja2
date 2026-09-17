@@ -1,5 +1,6 @@
 {# 模块二：评论与即兴表达单元模板 (三页制) #}
 {% set display_id = "C-单" if unit.id == "c-dan-jiao-xie" else unit.id %}
+{% set is_unverified = is_unverified | default(false) %}
 
 {# 页面 1：问题与材料回想 #}
 <section class="cq">

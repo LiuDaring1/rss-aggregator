@@ -224,8 +224,8 @@ def cmd_build(args):
     # 计算页码布局 (静态页码规则：
     # 封面: 第 1 页
     # 目录: 第 2 页
-    # 复述: 每个 2 页 (R01 为 3..4, R02 为 5..6, ...)
-    # 答案: 接在复述后，占 1 页 (第 3 + len(retellings)*2 页)
+    # 复述: 每个 2 页 (从第 3 页起)
+    # 答案: 依篇数计算，每页约容纳 4~5 篇答案，5 篇以上占 2 页
     # 评论: 每个 3 页
     # 原文拆解: 每个 1 页
     # 附录: 占 1 页
@@ -236,7 +236,8 @@ def cmd_build(args):
         cur_p += 2
         
     page_map["复述参考"] = cur_p
-    cur_p += 1 # 复述参考页
+    ans_pages = 2 if len(retellings) >= 5 else 1
+    cur_p += ans_pages
     
     for c in commentaries:
         page_map[c.id] = cur_p
@@ -250,7 +251,9 @@ def cmd_build(args):
     
     # AI 陪练提示
     ai_prompt = ""
-    prompt_file = os.path.join("weekly", "sample-01-rev5", "ai-retelling-prompt.txt")
+    issue_prompt = os.path.join("issues", issue_id, manifest.ai_prompt_path or "ai-retelling-prompt.txt")
+    fallback_prompt = os.path.join("weekly", "sample-01-rev5", "ai-retelling-prompt.txt")
+    prompt_file = issue_prompt if os.path.exists(issue_prompt) else fallback_prompt
     if os.path.exists(prompt_file):
         with open(prompt_file, "r", encoding="utf-8") as pf:
             ai_prompt = pf.read().strip()

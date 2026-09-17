@@ -17,6 +17,7 @@ references/teaching-private/
 # 本地重构与临时产物
 local-data/
 outputs/
+output/
 *.tmp
 
 # 运行数据与日志（本机留档）
