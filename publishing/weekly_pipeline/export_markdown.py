@@ -147,6 +147,10 @@ def _export_edition(content_dir: str, target_dir: str, edition: str, available_r
     import tempfile
     import shutil
     
+    # 0. 检查输入目录是否存在
+    if not os.path.exists(content_dir):
+        raise ValueError(f"内容输入目录不存在: {content_dir}")
+
     # 1. 预先收集并校验所有可用复述单元
     r_dir = os.path.join(content_dir, "retellings")
     c_dir = os.path.join(content_dir, "commentaries")
@@ -202,6 +206,9 @@ def _export_edition(content_dir: str, target_dir: str, edition: str, available_r
         err_msg = "\n".join(f"  ❌ {e}" for e in validation_errors)
         raise ValueError(f"导出前置校验失败（发现 {len(validation_errors)} 个错误，拒绝写入导出目录）:\n{err_msg}")
 
+    if not r_files and not c_files and not f_files:
+        raise ValueError(f"内容输入目录中未找到任何有效单元文件: {content_dir}")
+
     # 3. 在临时目录中渲染写入，成功后原子同步至 target_dir，防止残留旧文件
     generated = []
     with tempfile.TemporaryDirectory() as tmp_out:
@@ -244,12 +251,52 @@ def _export_edition(content_dir: str, target_dir: str, edition: str, available_r
     return generated
 
 def export_all_markdown(content_dir: str, out_dir: str, edition: str = "both", available_retellings: Optional[set] = None) -> List[str]:
+    import tempfile
+    import shutil
+    
+    if not os.path.exists(content_dir):
+        raise ValueError(f"内容输入目录不存在: {content_dir}")
+        
     generated = []
     if edition == "both":
-        student_dir = os.path.join(out_dir, "student")
-        teacher_dir = os.path.join(out_dir, "teacher")
-        generated.extend(_export_edition(content_dir, student_dir, "student", available_retellings=available_retellings))
-        generated.extend(_export_edition(content_dir, teacher_dir, "teacher", available_retellings=available_retellings))
+        # 核心发布保证：完整在暂存区生成双版本后，才原子更新审阅入口；中途任何失败均不触碰现有审阅目录
+        with tempfile.TemporaryDirectory() as tmp_root:
+            tmp_student = os.path.join(tmp_root, "student")
+            tmp_teacher = os.path.join(tmp_root, "teacher")
+            
+            # 先在暂存区完整导出学生版与教师版（任一失败立即抛错并丢弃暂存）
+            _export_edition(content_dir, tmp_student, "student", available_retellings=available_retellings)
+            _export_edition(content_dir, tmp_teacher, "teacher", available_retellings=available_retellings)
+            
+            # 双版本均完整生成后，再同步更新至目标审阅目录
+            student_dir = os.path.join(out_dir, "student")
+            teacher_dir = os.path.join(out_dir, "teacher")
+            os.makedirs(student_dir, exist_ok=True)
+            os.makedirs(teacher_dir, exist_ok=True)
+            
+            for old_fn in os.listdir(student_dir):
+                if old_fn.endswith(".md"):
+                    os.remove(os.path.join(student_dir, old_fn))
+            for fn in os.listdir(tmp_student):
+                shutil.copy2(os.path.join(tmp_student, fn), os.path.join(student_dir, fn))
+                generated.append(os.path.join(student_dir, fn))
+                
+            for old_fn in os.listdir(teacher_dir):
+                if old_fn.endswith(".md"):
+                    os.remove(os.path.join(teacher_dir, old_fn))
+            for fn in os.listdir(tmp_teacher):
+                shutil.copy2(os.path.join(tmp_teacher, fn), os.path.join(teacher_dir, fn))
+                generated.append(os.path.join(teacher_dir, fn))
     else:
-        generated.extend(_export_edition(content_dir, out_dir, edition, available_retellings=available_retellings))
+        with tempfile.TemporaryDirectory() as tmp_root:
+            tmp_target = os.path.join(tmp_root, edition)
+            _export_edition(content_dir, tmp_target, edition, available_retellings=available_retellings)
+            os.makedirs(out_dir, exist_ok=True)
+            for old_fn in os.listdir(out_dir):
+                if old_fn.endswith(".md"):
+                    os.remove(os.path.join(out_dir, old_fn))
+            for fn in os.listdir(tmp_target):
+                shutil.copy2(os.path.join(tmp_target, fn), os.path.join(out_dir, fn))
+                generated.append(os.path.join(out_dir, fn))
+                
     return generated

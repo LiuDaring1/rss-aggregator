@@ -117,11 +117,13 @@ def cmd_preview(args):
                 available_retellings.add(rf.rsplit(".", 1)[0])
                 
     # 严格前置校验：重复键或非法结构拒绝渲染
+    is_unverified = False
     val_res = validate_file(target, available_retellings=available_retellings)
     if not val_res.is_valid:
         # 判断是否仅为单篇草稿未载入复述引用
         is_only_retell_ref_err = len(val_res.errors) == 1 and "未在有效复述材料列表中找到" in val_res.errors[0]
         if is_only_retell_ref_err:
+            is_unverified = True
             print(f"⚠️ [草稿预览] {val_res.errors[0]}（单篇草稿预览标记为【未核验】，允许生成预览）")
         else:
             print(f"❌ 单元前置校验失败，拒绝渲染预览: {target}")
@@ -145,8 +147,10 @@ def cmd_preview(args):
         print(f"❌ 无法识别单元类型: {target}")
         sys.exit(1)
         
-    res = preview_unit(unit, u_type, out_dir, formats=formats)
+    res = preview_unit(unit, u_type, out_dir, formats=formats, is_unverified=is_unverified)
     print("✅ 预览生成成功:")
+    if is_unverified:
+        print("  ⚠️ 引用状态: 【草稿·未核验】（已注入 HTML/PDF/PNG 产物标记）")
     for k, v in res.items():
         if k == "pngs":
             print(f"  - PNG 页面 ({len(v)} 页):")

@@ -149,13 +149,17 @@ def generate_mindmap_svg(tree: MindmapTree) -> str:
 # HTML 页面渲染
 # ==============================================================================
 
-def render_unit_preview_html(unit: Any, unit_type: str, backref_page: Optional[int] = None) -> str:
+def render_unit_preview_html(unit: Any, unit_type: str, backref_page: Optional[int] = None, is_unverified: bool = False) -> str:
     """渲染单单元预览 HTML"""
     env = get_jinja_env()
     template = env.get_template("unit_preview.html.jinja2")
     style_css = get_style_css()
     
-    unit_data: Dict[str, Any] = {"unit": unit, "backref_page": backref_page}
+    unit_data: Dict[str, Any] = {
+        "unit": unit,
+        "backref_page": backref_page,
+        "is_unverified": is_unverified
+    }
     if unit_type == "retelling":
         unit_data["keywords_svg"] = generate_keywords_svg(
             unit.mindmap_tree.center, unit.keywords
@@ -163,8 +167,9 @@ def render_unit_preview_html(unit: Any, unit_type: str, backref_page: Optional[i
         unit_data["mindmap_svg"] = generate_mindmap_svg(unit.mindmap_tree)
         unit_data["illustration_html"] = None
         
+    badge_title = " · 草稿（未核验）" if is_unverified else ""
     html_out = template.render(
-        title=f"口语周刊 · 单元预览 [{unit.id}] {getattr(unit, 'title', getattr(unit, 'topic', ''))}",
+        title=f"口语周刊 · 单元预览{badge_title} [{unit.id}] {getattr(unit, 'title', getattr(unit, 'topic', ''))}",
         style_css=style_css,
         unit_type=unit_type,
         unit_data=unit_data
@@ -290,15 +295,16 @@ def render_pdf_to_pngs(pdf_path: str, output_dir: str, prefix: str = "page", dpi
 
 def preview_unit(unit: Any, unit_type: str, out_dir: str,
                  formats: Optional[List[str]] = None,
-                 backref_page: Optional[int] = None) -> Dict[str, Any]:
+                 backref_page: Optional[int] = None,
+                 is_unverified: bool = False) -> Dict[str, Any]:
     """快捷单单元全格式预览接口"""
     formats = formats or ["html", "pdf", "png"]
     os.makedirs(out_dir, exist_ok=True)
     
     unit_id = unit.id
-    html_content = render_unit_preview_html(unit, unit_type, backref_page=backref_page)
+    html_content = render_unit_preview_html(unit, unit_type, backref_page=backref_page, is_unverified=is_unverified)
     
-    results: Dict[str, Any] = {"unit_id": unit_id, "unit_type": unit_type}
+    results: Dict[str, Any] = {"unit_id": unit_id, "unit_type": unit_type, "is_unverified": is_unverified}
     
     # 强制覆盖写入最新 HTML，确保无头浏览器打印的始终是最新内容
     html_file = os.path.join(out_dir, f"{unit_id}.html")

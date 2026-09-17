@@ -3,8 +3,8 @@
 <section class="cq">
   {% if is_preview %}
   <div class="preview-header">
-    <span>【单单元预览】评论单元 · {{ unit.id }}</span>
-    <span>对应复述：{{ unit.retelling_ref }}</span>
+    <span>【单单元预览】评论单元 · {{ unit.id }}{% if is_unverified %} <strong style="color: #c00; margin-left: 6px;">【草稿·未核验】</strong>{% endif %}</span>
+    <span>对应复述：{{ unit.retelling_ref }}{% if is_unverified %}（未核验）{% endif %}</span>
   </div>
   {% endif %}
   <div class="cuhead">
@@ -12,6 +12,8 @@
     <h3>{{ unit.title }}</h3>
     {% if backref_page %}
     <span class="backref">对应复述·{{ unit.retelling_ref }} 材料页（第 {{ backref_page }} 页）</span>
+    {% elif is_unverified %}
+    <span class="backref" style="color: #c00; font-weight: bold;">对应复述·{{ unit.retelling_ref }}（未核验）</span>
     {% else %}
     <span class="backref">对应复述·{{ unit.retelling_ref }} 材料页</span>
     {% endif %}

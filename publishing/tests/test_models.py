@@ -404,5 +404,67 @@ teaching:
             # 断言 out_dir 下未残留任何 C_BAD.md
             self.assertFalse(os.path.exists(os.path.join(out_dir, "C_BAD.md")))
 
+    def test_export_preserves_old_output_on_nonexistent_or_invalid_input(self):
+        """测试错误或不存在的输入目录绝不会清空或破坏已有旧输出"""
+        import tempfile
+        from weekly_pipeline.export_markdown import export_all_markdown
+        
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            out_dir = os.path.join(tmp_dir, "reviews", "markdown")
+            stud_dir = os.path.join(out_dir, "student")
+            teach_dir = os.path.join(out_dir, "teacher")
+            os.makedirs(stud_dir, exist_ok=True)
+            os.makedirs(teach_dir, exist_ok=True)
+            
+            old_stud_file = os.path.join(stud_dir, "C01.md")
+            old_teach_file = os.path.join(teach_dir, "C01.md")
+            with open(old_stud_file, "w", encoding="utf-8") as f:
+                f.write("OLD_STUDENT_CONTENT")
+            with open(old_teach_file, "w", encoding="utf-8") as f:
+                f.write("OLD_TEACHER_CONTENT")
+                
+            # 1. 尝试使用完全不存在的输入目录
+            non_existent_dir = os.path.join(tmp_dir, "does_not_exist")
+            with self.assertRaises(ValueError) as ctx:
+                export_all_markdown(non_existent_dir, out_dir, edition="both")
+            self.assertIn("不存在", str(ctx.exception))
+            
+            # 断言已有旧输出完好无损，绝未被清空
+            self.assertTrue(os.path.exists(old_stud_file))
+            self.assertTrue(os.path.exists(old_teach_file))
+            with open(old_stud_file, "r", encoding="utf-8") as f:
+                self.assertEqual(f.read(), "OLD_STUDENT_CONTENT")
+            with open(old_teach_file, "r", encoding="utf-8") as f:
+                self.assertEqual(f.read(), "OLD_TEACHER_CONTENT")
+
+            # 2. 尝试使用空输入目录
+            empty_dir = os.path.join(tmp_dir, "empty_content")
+            os.makedirs(empty_dir, exist_ok=True)
+            with self.assertRaises(ValueError) as ctx2:
+                export_all_markdown(empty_dir, out_dir, edition="both")
+            self.assertIn("未找到任何有效单元文件", str(ctx2.exception))
+            
+            # 断言已有旧输出依旧完好无损
+            with open(old_stud_file, "r", encoding="utf-8") as f:
+                self.assertEqual(f.read(), "OLD_STUDENT_CONTENT")
+
+    def test_preview_unit_unverified_badge_rendered(self):
+        """测试草稿缺引用时的【未核验】状态能真实渲染进预览产物 HTML"""
+        import tempfile
+        from weekly_pipeline.render import preview_unit
+        cu = create_sample_commentary(viewpoint_count=3, body_count=2)
+        
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            res = preview_unit(cu, "commentary", tmp_dir, formats=["html"], is_unverified=True)
+            self.assertTrue(res.get("is_unverified"))
+            html_file = res.get("html")
+            self.assertTrue(os.path.exists(html_file))
+            
+            with open(html_file, "r", encoding="utf-8") as f:
+                html_content = f.read()
+                
+            self.assertIn("【草稿·未核验】", html_content)
+            self.assertIn("（未核验）", html_content)
+
 if __name__ == "__main__":
     unittest.main()
