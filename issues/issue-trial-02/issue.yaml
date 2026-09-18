@@ -1,0 +1,23 @@
+schema_version: '1.0'
+issue_id: issue-trial-02
+title: 口语素材周刊
+kicker: 高中播音艺考口语素材周刊
+issue_no_label: 新材料独立试产 · 第 2 期 (trial-02)
+date_range: 2026-09-08 ~ 2026-09-18
+retelling_ids:
+- R21
+- R22
+- R23
+commentary_ids:
+- C15
+- C16
+excerpt_ids:
+- F15
+- F16
+ai_prompt_path: ai-retelling-prompt.txt
+build_config:
+  pdf_render_timeout_ms: 15000
+  font_family_serif: '"Songti SC", "STSong", "SimSun", serif'
+  font_family_sans: '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
+  font_family_kaiti: '"Kaiti SC", "STKaiti", serif'
+  min_font_size_pt: 9.0
