@@ -222,6 +222,13 @@ def cmd_build(args):
         with open(yp, "r", encoding="utf-8") as fp:
             excerpts.append(ExcerptUnit.model_validate(load_yaml_safely(fp.read())))
             
+    # 前置信源连续子串核验 (任何入选摘录缺少真实原件归档或引文不匹配，坚决立即终止构建与发布)
+    from weekly_pipeline.verifier import verify_issue_quotes, verify_issue_splits
+    sources_dir = os.path.join("issues", issue_id, "sources")
+    if not verify_issue_quotes(issue_id, content_dir="content", sources_dir=sources_dir):
+        print(f"❌ [构建终止] 信源原段连续匹配校验未通过，坚决拦截构建与正式归档！")
+        sys.exit(1)
+            
     # 统一计算页码布局 (静态页码规则，严格与 Markdown / HTML / PDF 保持一致)
     from weekly_pipeline.export_markdown import compute_page_map, export_full_issue_markdown
     page_map, ans_pages, total_pages = compute_page_map(manifest)
@@ -343,6 +350,12 @@ def cmd_build(args):
             pngs = render_pdf_to_pngs(out_pdf, png_dir, prefix=f"{issue_id}")
             print(f"  ✅ PNG 页面快照完成 ({len(pngs)} 页): {png_dir}")
 
+    # 产物全量物理页数二次核验（整刊与分册完整性拦截）
+    if "pdf" in formats:
+        if not verify_issue_splits(issue_id, target_dir=out_dir):
+            print(f"❌ [发布拦截] 模块分册或整刊物理页数核验未通过，坚决拦截正式归档交付！")
+            sys.exit(1)
+
     # 自动同步归档至 issues/{issue_id}/ (确保版本库始终跟踪最新同源成品)
     issue_repo_dir = os.path.join("issues", issue_id)
     if os.path.exists(issue_repo_dir) and os.path.abspath(out_dir) != os.path.abspath(issue_repo_dir):
@@ -358,7 +371,7 @@ def cmd_build(args):
                 shutil.copy2(src_f, dst_f)
             else:
                 print(f"  ⚠️ 警告: 预期产物不存在或为空，未同步: {src_f}")
-        print(f"  ✅ 同步归档交付成品至仓库目录: {issue_repo_dir}")
+        print(f"  ✅ 发布全量核验（信源原段与物理页数）100% 通过，已正式同步归档至仓库目录: {issue_repo_dir}")
 
 def cmd_export_md(args):
     from weekly_pipeline.export_markdown import export_all_markdown
