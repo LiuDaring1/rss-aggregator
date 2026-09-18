@@ -284,10 +284,10 @@ def cmd_build(args):
             exp_c_pages = f_start - c_start
             exp_f_pages = app_start - f_start
             
-            # 严格防止整刊 PDF 打印截断或页数不足
-            if len(reader.pages) < total_pages:
+            # 严格核对整刊 PDF 物理总页数（防止打印截断或排版多页溢出）
+            if len(reader.pages) != total_pages:
                 raise RuntimeError(
-                    f"整刊 PDF 实际页数 ({len(reader.pages)}) 小于静态规划总页数 ({total_pages})，构建终止！"
+                    f"整刊 PDF 实际物理页数 ({len(reader.pages)}) 与静态规划总页数 ({total_pages}) 不符（存在排版多页溢出或打印截断），构建终止！"
                 )
 
             w_r = pypdf.PdfWriter()
@@ -373,9 +373,18 @@ def cmd_export_md(args):
         print(f"  ❌ 导出终止并阻断发布:\n{e}")
         sys.exit(1)
 
+def cmd_verify_issue(args):
+    from weekly_pipeline.verifier import run_full_issue_verification
+    issue_id = args.issue
+    target_dir = args.dir
+    sources_dir = args.sources_dir
+    ok = run_full_issue_verification(issue_id, target_dir=target_dir, sources_dir=sources_dir)
+    if not ok:
+        sys.exit(1)
+
 def main():
-    parser = argparse.ArgumentParser(description="口语素材周刊 命令行工具")
-    subparsers = parser.add_subparsers(dest="subcommand", required=True)
+    parser = argparse.ArgumentParser(description="口语素材周刊流水线 CLI 工具")
+    subparsers = parser.add_subparsers(dest="command", required=True)
     
     # doctor
     p_doc = subparsers.add_parser("doctor", help="环境与工具链体检")
@@ -417,6 +426,13 @@ def main():
     p_md.add_argument("--outdir", default="outputs/markdown")
     p_md.add_argument("--edition", choices=["both", "student", "teacher"], default="both", help="导出版本: student/teacher/both")
     p_md.set_defaults(func=cmd_export_md)
+    
+    # verify-issue
+    p_ver = subparsers.add_parser("verify-issue", help="验证期刊信源原段与分册物理页数")
+    p_ver.add_argument("--issue", default="issue-trial-01", help="期刊ID")
+    p_ver.add_argument("--dir", default=None, help="待检测 PDF 目录 (默认: issues/<issue>)")
+    p_ver.add_argument("--sources-dir", default=None, help="信源存档目录 (默认: issues/<issue>/sources)")
+    p_ver.set_defaults(func=cmd_verify_issue)
     
     args = parser.parse_args()
     args.func(args)
