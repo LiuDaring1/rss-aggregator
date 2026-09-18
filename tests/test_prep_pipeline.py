@@ -170,29 +170,68 @@ class TestPrepPipeline(unittest.TestCase):
         self.assertEqual(total_pages, 48)
 
     def test_prep_scan_isolation_and_curated_protection(self):
-        """验证候选扫描与已核验选材清单的物理隔离及防误覆盖机制"""
+        """验证候选扫描与已核验选材清单的物理隔离及防误覆盖机制 (含真实 CLI 调用与逐字节一致性测试)"""
+        import subprocess
         from weekly_pipeline.prep import resolve_curated_path
         
         # 1. 验证智能路径解析能识别不同命名风格
         p = resolve_curated_path("issue-2026-w37")
         self.assertTrue(os.path.exists(p), f"必须能解析到已核验数据: {p}")
 
-        # 2. 验证已有选材清单受到保护，普通候选写入不能静默清空已有 retellings
+        # 2. 验证已有选材清单受到保护：通过 subprocess.run 真实调用 prep.py 命令行
         with tempfile.TemporaryDirectory() as tmpdir:
             manifest_file = os.path.join(tmpdir, "manifest_prep.json")
-            with open(manifest_file, "w", encoding="utf-8") as fp:
+            original_bytes = json.dumps({
+                "issue_id": "issue-2026-w37",
+                "retellings": [{"id": "R09"}],
+                "commentaries": [{"id": "C07"}],
+                "excerpts": [{"id": "F07"}]
+            }, ensure_ascii=False, indent=2).encode("utf-8")
+            with open(manifest_file, "wb") as fp:
+                fp.write(original_bytes)
+
+            cmd_no_force = [
+                sys.executable,
+                os.path.abspath(os.path.join(os.path.dirname(__file__), "../publishing/weekly_pipeline/prep.py")),
+                "--issue-id", "issue-2026-w37",
+                "--out", manifest_file
+            ]
+            res_no_force = subprocess.run(cmd_no_force, capture_output=True, text=True)
+            # 必须非0退出拦截
+            self.assertNotEqual(res_no_force.returncode, 0, "未加 --force 试图覆盖已核验选材时必须非0退出拦截")
+            self.assertIn("安全拦截", res_no_force.stderr, "标准错误输出中必须包含安全拦截说明")
+            # 必须逐字节无损伤
+            with open(manifest_file, "rb") as fp:
+                self.assertEqual(fp.read(), original_bytes, "被拦截后原选材清单文件内容必须逐字节保持一致，无任何破坏")
+
+            # 3. 加上 --force 参数时允许覆盖
+            raw_dir = os.path.join(tmpdir, "mock_raw")
+            os.makedirs(raw_dir, exist_ok=True)
+            with open(os.path.join(raw_dir, "mock.json"), "w", encoding="utf-8") as fp:
                 json.dump({
-                    "issue_id": "issue-2026-w37",
-                    "retellings": [{"id": "R09"}],
-                    "commentaries": [{"id": "C07"}],
-                    "excerpts": [{"id": "F07"}]
+                    "id": "mock-1",
+                    "origin": "news",
+                    "publishedAt": "2026-09-08",
+                    "title": "测试覆盖",
+                    "content": "正文"
                 }, fp)
 
-            # 模拟用户运行普通候选写入且未带 force
+            cmd_with_force = [
+                sys.executable,
+                os.path.abspath(os.path.join(os.path.dirname(__file__), "../publishing/weekly_pipeline/prep.py")),
+                "--raw-dir", raw_dir,
+                "--start-date", "2026-09-01",
+                "--end-date", "2026-09-15",
+                "--issue-id", "issue-2026-w37",
+                "--out", manifest_file,
+                "--force"
+            ]
+            res_with_force = subprocess.run(cmd_with_force, capture_output=True, text=True)
+            self.assertEqual(res_with_force.returncode, 0, f"--force 参数应允许正常覆盖: {res_with_force.stderr}")
             with open(manifest_file, "r", encoding="utf-8") as fp:
-                data = json.load(fp)
-            has_curated = bool(data.get("retellings") or data.get("commentaries") or data.get("excerpts"))
-            self.assertTrue(has_curated, "已核验选材存在")
+                overwritten_data = json.load(fp)
+            self.assertIn("candidates", overwritten_data, "覆盖后的文件应为扫描输出的候选清单")
+            self.assertEqual(overwritten_data["candidates"][0]["raw_id"], "mock-1")
 
 if __name__ == "__main__":
     unittest.main()

@@ -259,6 +259,19 @@ def cmd_build(args):
         print(f"  ✅ PDF 打印完成: {out_pdf}")
         
         # 导出模块分册 PDF (复述 / 评论 / 原文拆解与积累)
+        split_files = {
+            "retelling": os.path.join(out_dir, f"{issue_id}-复述.pdf"),
+            "commentary": os.path.join(out_dir, f"{issue_id}-评论.pdf"),
+            "excerpt": os.path.join(out_dir, f"{issue_id}-原文拆解与积累.pdf"),
+        }
+        # 显式清理旧分册文件，坚决杜绝混批或旧残卷混入交付
+        for sp in split_files.values():
+            if os.path.exists(sp):
+                try:
+                    os.remove(sp)
+                except Exception as ce:
+                    print(f"  ⚠️ 清理旧分册文件失败: {sp}: {ce}")
+
         try:
             import pypdf
             reader = pypdf.PdfReader(out_pdf)
@@ -270,28 +283,39 @@ def cmd_build(args):
             for p_idx in range(2, c_start - 1):
                 if p_idx < len(reader.pages):
                     w_r.add_page(reader.pages[p_idx])
-            r_pdf_path = os.path.join(out_dir, f"{issue_id}-复述.pdf")
-            with open(r_pdf_path, "wb") as fp:
+            with open(split_files["retelling"], "wb") as fp:
                 w_r.write(fp)
                 
             w_c = pypdf.PdfWriter()
             for p_idx in range(c_start - 1, f_start - 1):
                 if p_idx < len(reader.pages):
                     w_c.add_page(reader.pages[p_idx])
-            c_pdf_path = os.path.join(out_dir, f"{issue_id}-评论.pdf")
-            with open(c_pdf_path, "wb") as fp:
+            with open(split_files["commentary"], "wb") as fp:
                 w_c.write(fp)
                 
             w_f = pypdf.PdfWriter()
             for p_idx in range(f_start - 1, app_start - 1):
                 if p_idx < len(reader.pages):
                     w_f.add_page(reader.pages[p_idx])
-            f_pdf_path = os.path.join(out_dir, f"{issue_id}-原文拆解与积累.pdf")
-            with open(f_pdf_path, "wb") as fp:
+            with open(split_files["excerpt"], "wb") as fp:
                 w_f.write(fp)
+
+            # 产物完整性与非空硬断言
+            for sp_key, sp_path in split_files.items():
+                if not os.path.exists(sp_path) or os.path.getsize(sp_path) == 0:
+                    raise RuntimeError(f"模块分册 PDF 导出失败或为空文件: {sp_path}")
+
             print(f"  ✅ 模块分册 PDF 导出完成: 复述 ({len(w_r.pages)}页) / 评论 ({len(w_c.pages)}页) / 原文拆解与积累 ({len(w_f.pages)}页)")
         except Exception as se:
-            print(f"  ⚠️ 模块分册 PDF 导出跳过: {se}")
+            print(f"  ❌ 模块分册 PDF 导出失败并阻断: {se}")
+            # 清理可能生成的半残文件，防止误作交付
+            for sp in split_files.values():
+                if os.path.exists(sp):
+                    try:
+                        os.remove(sp)
+                    except Exception:
+                        pass
+            sys.exit(1)
         
         if "png" in formats:
             png_dir = os.path.join(out_dir, f"{issue_id}_pages")
@@ -302,14 +326,17 @@ def cmd_build(args):
     issue_repo_dir = os.path.join("issues", issue_id)
     if os.path.exists(issue_repo_dir) and os.path.abspath(out_dir) != os.path.abspath(issue_repo_dir):
         import shutil
-        for fname in [
+        deliverables = [
             f"{issue_id}.md", f"{issue_id}.pdf",
             f"{issue_id}-复述.pdf", f"{issue_id}-评论.pdf", f"{issue_id}-原文拆解与积累.pdf"
-        ]:
+        ]
+        for fname in deliverables:
             src_f = os.path.join(out_dir, fname)
             dst_f = os.path.join(issue_repo_dir, fname)
-            if os.path.exists(src_f):
+            if os.path.exists(src_f) and os.path.getsize(src_f) > 0:
                 shutil.copy2(src_f, dst_f)
+            else:
+                print(f"  ⚠️ 警告: 预期产物不存在或为空，未同步: {src_f}")
         print(f"  ✅ 同步归档交付成品至仓库目录: {issue_repo_dir}")
 
 def cmd_export_md(args):

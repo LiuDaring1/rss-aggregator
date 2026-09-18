@@ -30,73 +30,65 @@ flowchart TD
     subgraph 上游采集与雷达层
         S1[11家媒体评论源] -->|RSSHub 自研路由 :1200| AGGR[aggr-site :3000/3001 聚合站]
         S2[微信公众号评论] -->|we-mp-rss 授权采集 :8001| AGGR
-        S3[天天正能量获奖案例] -->|wenwen 爬虫增量抓取| RAW[(本地正文资料库 275篇 raw)]
-        RAW --> GLM[GLM API 结构化分析]
-        GLM --> DB[(db.json 270事件快照 / 筛选报告)]
+        S3[天天正能量获奖案例] -->|wenwen 爬虫增量抓取| RAW[(本地正文资料库 raw/*.json)]
+        RAW --> PREP[prep.py 备料与选材候选生成]
     end
 
-    subgraph 中游编辑加工层
-        DB & RAW --> FILTER[人工 / AI 素材分层筛选]
-        FILTER --> RETELL[模块一: 复述材料加工<br/>中性事实+关键词+导图树]
-        FILTER --> COMM[模块二: 评论单元创作<br/>多角度细致推演 ➔ 双主体段口语范本]
-        S1 --> FRAG[模块三: 近期优质评论原文精选<br/>话语化拆解+口语示范]
+    subgraph 中游采编加工层
+        PREP --> FILTER[人工 / AI 素材核验与选材]
+        FILTER --> RETELL[content/retellings/*.yaml<br/>中性事实+关键词+导图树]
+        FILTER --> COMM[content/commentaries/*.yaml<br/>三页规范: 问题+多角度推演+双主体范本]
+        S1 --> FRAG[content/excerpts/*.yaml<br/>话语化拆解+口语示范]
     end
 
-    subgraph 下游排版与渲染层
-        RETELL & COMM & FRAG --> CONTENT[content5.py 数据源]
-        CONTENT --> BUILD[build5.py 组装 HTML & 内嵌 SVG]
-        BUILD --> CHROME[Chrome 无头打印 render.sh]
-        CHROME --> PDF[sample.pdf 45页 A4黑白周刊]
-        CHROME --> SPLIT[三模块独立分册 PDF]
+    subgraph 下游排版与同源渲染层
+        RETELL & COMM & FRAG --> ISSUE[issues/{issue_id}/issue.yaml 组刊清单]
+        ISSUE --> CLI[weekly_pipeline/cli.py 构建管线]
+        CLI --> JINJA[Jinja2 模板渲染 HTML]
+        CLI --> MD_EXP[同源 Markdown 导出]
+        JINJA --> CHROME[无头浏览器 Chromium 打印]
+        CHROME --> PDF[整刊 PDF & 三模块独立分册 PDF]
     end
 ```
 
 ---
 
-## 🎯 致 Reviewer Agent：全系统重构与优化指导诉求
+## 🏗️ 内容生产流水线与架构说明
 
-我们邀请 Reviewer Agent 审阅整个移植后的系统，并从**架构设计、数据流向、代码解耦与教学落地**四个维度指导我们进行完全重构：
+经过流水线重构与工程解耦，系统已实现模块化、同源渲染的工业化生产链路：
 
-### 1. 内容生产流水线的解耦与工程化（重中之重）
-- **现状痛点**：目前全部 8 则复述、6 篇评论、6 段拆解均硬编码在一个 60,000 字节的巨石文件 `content5.py` 中；排版脚本 `build5.py` 充斥着大量 Python 字符串拼接 HTML，缺乏 Schema 约束与校验逻辑。
-- **重构诉求**：如何将其拆分为标准化的数据模型（如 JSON Schema / Pydantic）、模版引擎（如 Jinja2）与独立单元文件？如何支持单篇热插拔与自动化校验？
-
-### 2. 评论教学逻辑的彻底重构（教学质量核心）
-- **现状痛点**：rev.5 审阅稿因执行误读，将“观点与推演页”压缩成两个观点，导致思考空间被成稿结构绑架；部分范本出现假大空的口号、未成年人救援不设边界等逻辑缺陷。
-- **重构基线**：Antigravity 最新试写的新范式——[`weekly/draft-commentary-single-shoe/`](weekly/draft-commentary-single-shoe/)（《单脚鞋银行》）：
-  - **第1页（问题页）**：3 条不剧透但事实充分的回想 + 4 个启发性问题；
-  - **第2页（观点与推演页）**：5 个互不重复、有材料依据的具体思考方向 + 三步因果处境推演；
-  - **第3页（口语范本与拆解页）**：选定一条主线，开头统领、双主体段递进展开（约 380 字，符合 2 分钟口语节奏）+ 四维教学拆解。
-- **重构诉求**：请 Reviewer 评估该结构，指导如何将此模式模块化，并制定全量替换 rev.5 现有 6 篇评论的任务书。
-
-### 3. 雷达资料库到周刊生产链路的闭环
-- **现状痛点**：本地资料库虽已沉淀 275 篇完整 raw 正文与 270 个结构化事件，但从“雷达筛选”到“周刊初稿生成”仍依赖人工手工倒腾。
-- **重构诉求**：如何打通 CLI 或脚本管线，实现从 `data/wenwen/raw/*.json` 自动提取事件要素、生成周刊复述素材初稿与推演提纲？
-
-### 4. 上游服务的轻量化与解耦
-- **现状痛点**：上游引入了完整的 RSSHub 与 we-mp-rss 巨石仓库（含数千文件），本地维护成本极高。
-- **重构诉求**：如何进一步抽离核心路由与抓取逻辑，建立轻量化、容器化或无状态的信源采集层？
+1. **结构化数据单元（YAML + Pydantic Schema）**：
+   - 彻底废除旧版巨石脚本（历史脚本 `weekly/sample-01-rev5/content5.py` 与 `build5.py` 已归档为历史基准，不再参与日常生产）。
+   - 所有素材独立沉淀在 `content/` 目录下（`content/retellings/`、`content/commentaries/`、`content/excerpts/`），由强类型 Schema 严格校验。
+2. **组刊配置（Manifest）**：
+   - 每期周刊由独立的 `issues/{issue_id}/issue.yaml` 清单定义，明确选材 ID、栏目次序、期号与时间跨度。
+3. **同源渲染与多格式导出**：
+   - 基于 Jinja2 模板与无头 Chromium 打印，确保全刊 A4 印刷 PDF、各栏目独立分册 PDF（复述/评论/原文拆解）与同源 Markdown 审阅文本一键自动化生成，页码与版心严格一致。
 
 ---
 
-## 🛠️ 已验证的运行与构建命令
+## 🛠️ 当前标准运行与构建命令
 
-所有命令均已在副本沙盒完成非破坏性验证：
+所有命令均在项目根目录下通过 CLI 执行：
 
 ```bash
-# 1. 周刊重生成（在 project 内）
-cd weekly/sample-01-rev5
-python3 build5.py toc-pages.json && ./render.sh   # 渲染 45 页完整 sample.pdf
+# 1. 环境与工具链体检（检查 Python 依赖、Node.js、Chromium 浏览器）
+python3 publishing/weekly_pipeline/cli.py doctor
 
-# 2. 新示范单元（单脚鞋银行）独立生成
-cd ../draft-commentary-single-shoe
-python3 build_draft.py && ./render.sh            # 渲染 3 页 draft.pdf
+# 2. 全量素材单元 Schema 验证（校验 content/ 下所有 YAML）
+python3 publishing/weekly_pipeline/cli.py validate
 
-# 3. 聚合站离线测试（15 项）
-cd ../../aggr-site && npm test
+# 3. 运行完整自动化测试套件
+python3 -m unittest discover -s tests -v
 
-# 4. 只读启动聚合站（安全沙盒模式，独立端口，不触发 AI 预热与抓取写库）
-AGGR_AUTOTASKS=off PORT=3467 node server.js
+# 4. 构建指定期号周刊（生成 HTML、整刊 PDF、3本模块分册 PDF、同源 Markdown）
+python3 publishing/weekly_pipeline/cli.py build --issue issue-2026-w37 --outdir outputs/issue-2026-w37
+
+# 5. 聚合站离线测试（15 项）
+cd aggr-site && npm test
+
+# 6. 历史样刊与基准参考（已归档为只读基准，非生产命令）
+# cd weekly/sample-01-rev5 && python3 build5.py toc-pages.json && ./render.sh
 ```
 
 ---
