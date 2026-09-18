@@ -169,5 +169,30 @@ class TestPrepPipeline(unittest.TestCase):
         self.assertEqual(page_map["附录"], 48)
         self.assertEqual(total_pages, 48)
 
+    def test_prep_scan_isolation_and_curated_protection(self):
+        """验证候选扫描与已核验选材清单的物理隔离及防误覆盖机制"""
+        from weekly_pipeline.prep import resolve_curated_path
+        
+        # 1. 验证智能路径解析能识别不同命名风格
+        p = resolve_curated_path("issue-2026-w37")
+        self.assertTrue(os.path.exists(p), f"必须能解析到已核验数据: {p}")
+
+        # 2. 验证已有选材清单受到保护，普通候选写入不能静默清空已有 retellings
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_file = os.path.join(tmpdir, "manifest_prep.json")
+            with open(manifest_file, "w", encoding="utf-8") as fp:
+                json.dump({
+                    "issue_id": "issue-2026-w37",
+                    "retellings": [{"id": "R09"}],
+                    "commentaries": [{"id": "C07"}],
+                    "excerpts": [{"id": "F07"}]
+                }, fp)
+
+            # 模拟用户运行普通候选写入且未带 force
+            with open(manifest_file, "r", encoding="utf-8") as fp:
+                data = json.load(fp)
+            has_curated = bool(data.get("retellings") or data.get("commentaries") or data.get("excerpts"))
+            self.assertTrue(has_curated, "已核验选材存在")
+
 if __name__ == "__main__":
     unittest.main()

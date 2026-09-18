@@ -191,6 +191,22 @@ def load_curated_manifest(curated_file: str, out_file: Optional[str] = None) -> 
         print(f"✅ 成功输出已核验备料清单: {out_file} (包含 {len(manifest.get('retellings', []))} 复述, {len(manifest.get('commentaries', []))} 评论, {len(manifest.get('excerpts', []))} 原文拆解)")
     return manifest
 
+def resolve_curated_path(issue_id: str, curated_file: Optional[str] = None) -> str:
+    """
+    智能解析已核验备料数据路径，兼容 issue_2026_w37 与 w37 等命名规范。
+    """
+    if curated_file:
+        return curated_file
+    candidates = [
+        f"publishing/weekly_pipeline/data/manifest_{issue_id.replace('-', '_')}_curated.json",
+        f"publishing/weekly_pipeline/data/manifest_{issue_id.split('-')[-1]}_curated.json",
+        f"publishing/weekly_pipeline/data/manifest_{issue_id}_curated.json",
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    return candidates[0]
+
 def main():
     parser = argparse.ArgumentParser(description="周刊备料管线连接工具")
     parser.add_argument("--raw-dir", default="aggr-site/data/wenwen/raw", help="raw 资料库路径")
@@ -199,25 +215,43 @@ def main():
     parser.add_argument("--issue-id", default="issue-2026-w37", help="期刊 ID")
     parser.add_argument("--curated-file", default=None, help="显式已核验编辑数据路径 (JSON)")
     parser.add_argument("--apply-curated", action="store_true", help="若指定且存在已核验文件则应用")
+    parser.add_argument("--force", action="store_true", help="强制覆盖已存在的选材清单")
     parser.add_argument("--out", default=None, help="输出清单路径")
     args = parser.parse_args()
 
-    # 默认输出路径
-    out_file = args.out or f"issues/{args.issue_id}/manifest_prep.json"
-
-    # 若指定使用已核验数据
+    # 1. 若指定使用已核验数据 (显式模式)
     if args.curated_file or args.apply_curated:
-        curated_path = args.curated_file or f"publishing/weekly_pipeline/data/manifest_{args.issue_id.replace('-', '_')}_curated.json"
+        curated_path = resolve_curated_path(args.issue_id, args.curated_file)
+        out_file = args.out or f"issues/{args.issue_id}/manifest_prep.json"
         if os.path.exists(curated_path):
             print(f"正在应用已核验备料数据: {curated_path} -> {out_file}...")
             load_curated_manifest(curated_path, out_file)
             return
         else:
-            if args.curated_file:
-                print(f"❌ 找不到指定的已核验数据: {curated_path}", file=sys.stderr)
-                sys.exit(1)
+            print(f"❌ 找不到已核验数据文件: {curated_path}，绝不静默回退并覆盖输出！", file=sys.stderr)
+            sys.exit(1)
 
-    # 正常扫描流程：严格依据输入 raw 资料与时间窗
+    # 2. 正常候选扫描流程：
+    # 默认输出到 candidates_scan.json，坚决不直接覆盖已核验选材清单 manifest_prep.json！
+    out_file = args.out or f"issues/{args.issue_id}/candidates_scan.json"
+
+    # 若用户通过 --out 显式指向已有文件，检测是否包含已核验选材数据以提供保护
+    if os.path.exists(out_file) and not args.force:
+        try:
+            with open(out_file, "r", encoding="utf-8") as fp:
+                existing_data = json.load(fp)
+            if existing_data.get("retellings") or existing_data.get("commentaries") or existing_data.get("excerpts"):
+                print(
+                    f"❌ 安全拦截：目标文件 {out_file} 中包含已核验的选材数据 (retellings/commentaries/excerpts)。\n"
+                    f"候选扫描默认输出到 candidates_scan.json，严禁无故清空已核验选材清单！\n"
+                    f"如确需覆盖，请显式添加 --force 参数。",
+                    file=sys.stderr
+                )
+                sys.exit(1)
+        except Exception:
+            pass
+
+    # 严格依据输入 raw 资料与时间窗
     if not os.path.exists(args.raw_dir):
         print(f"❌ 原始资料库不存在: {args.raw_dir}，跳过生成以保护已有清单交付。", file=sys.stderr)
         sys.exit(1)

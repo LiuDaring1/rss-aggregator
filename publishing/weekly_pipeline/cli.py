@@ -298,6 +298,20 @@ def cmd_build(args):
             pngs = render_pdf_to_pngs(out_pdf, png_dir, prefix=f"{issue_id}")
             print(f"  ✅ PNG 页面快照完成 ({len(pngs)} 页): {png_dir}")
 
+    # 自动同步归档至 issues/{issue_id}/ (确保版本库始终跟踪最新同源成品)
+    issue_repo_dir = os.path.join("issues", issue_id)
+    if os.path.exists(issue_repo_dir) and os.path.abspath(out_dir) != os.path.abspath(issue_repo_dir):
+        import shutil
+        for fname in [
+            f"{issue_id}.md", f"{issue_id}.pdf",
+            f"{issue_id}-复述.pdf", f"{issue_id}-评论.pdf", f"{issue_id}-原文拆解与积累.pdf"
+        ]:
+            src_f = os.path.join(out_dir, fname)
+            dst_f = os.path.join(issue_repo_dir, fname)
+            if os.path.exists(src_f):
+                shutil.copy2(src_f, dst_f)
+        print(f"  ✅ 同步归档交付成品至仓库目录: {issue_repo_dir}")
+
 def cmd_export_md(args):
     from weekly_pipeline.export_markdown import export_all_markdown
     c_dir = args.content_dir
