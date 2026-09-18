@@ -15,6 +15,7 @@ import json
 import yaml
 from typing import Dict, Any, List
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from weekly_pipeline.models import (
     RetellingUnit, CommentaryUnit, ExcerptUnit, IssueManifest
@@ -221,33 +222,9 @@ def cmd_build(args):
         with open(yp, "r", encoding="utf-8") as fp:
             excerpts.append(ExcerptUnit.model_validate(load_yaml_safely(fp.read())))
             
-    # 计算页码布局 (静态页码规则：
-    # 封面: 第 1 页
-    # 目录: 第 2 页
-    # 复述: 每个 2 页 (从第 3 页起)
-    # 答案: 依篇数计算，每页约容纳 4~5 篇答案，5 篇以上占 2 页
-    # 评论: 每个 3 页
-    # 原文拆解: 每个 1 页
-    # 附录: 占 1 页
-    page_map: Dict[str, int] = {}
-    cur_p = 3
-    for r in retellings:
-        page_map[r.id] = cur_p
-        cur_p += 2
-        
-    page_map["复述参考"] = cur_p
-    ans_pages = 3 if len(retellings) >= 8 else (2 if len(retellings) >= 5 else 1)
-    cur_p += ans_pages
-    
-    for c in commentaries:
-        page_map[c.id] = cur_p
-        cur_p += 3
-        
-    for f in excerpts:
-        page_map[f.id] = cur_p
-        cur_p += 1
-        
-    page_map["附录"] = cur_p
+    # 统一计算页码布局 (静态页码规则，严格与 Markdown / HTML / PDF 保持一致)
+    from weekly_pipeline.export_markdown import compute_page_map, export_full_issue_markdown
+    page_map, ans_pages, total_pages = compute_page_map(manifest)
     
     # AI 陪练提示
     ai_prompt = ""
@@ -266,7 +243,6 @@ def cmd_build(args):
     print(f"  ✅ HTML 构建完成: {out_html}")
     
     # 导出整刊同源 Markdown (含非空断言)
-    from weekly_pipeline.export_markdown import export_full_issue_markdown
     out_md = os.path.join(out_dir, f"{issue_id}.md")
     try:
         md_text = export_full_issue_markdown(manifest, content_dir="content", edition="student", page_map=page_map, ai_prompt_text=ai_prompt)

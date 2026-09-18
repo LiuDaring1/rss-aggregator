@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-周刊最小备料连接工具 (Weekly Prep Pipeline)
-定位：实现“原始资料库/公开报道 → 真实备料清单与溯源证据链 (manifest_prep.json)”的最小闭环连接。
+周刊备料管线工具 (Weekly Prep Pipeline)
+定位：实现“原始资料库/公开报道 → 候选备料清单与溯源证据链 (manifest_prep.json)”的连接与管理。
 
 严格遵循审阅规范：
 1. 真实时间区分：分离事件发生时间、新闻报道时间、评论发表时间、获奖公示与抓取时间，旧事不硬编为当周发生；
-2. 职责清晰分离：如实区分 [Script 已做]、[Agent 已做]、[Pending 待定稿]；
-3. 实打实落地：CLI 入口实际向 --out 路径写入结构化 JSON，支持回读与单题溯源。
+2. 来源语义合同：TTZL 来源严格优先 sourcePublishedAt，无原报道时间则留空，杜绝以 awardDate/publishedAt 冒充报道日期；
+3. 职责清晰分离：如实区分 [Script 已做]、[Agent 已做]、[Pending 待定稿]；
+4. 解除硬编码：扫描所得与命令行参数决定输出；缺库/无源时保护已有交付，不虚假生成“已核验”清单。
 """
 
 import os
 import sys
 import json
 import glob
+import argparse
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
 def load_raw_json(filepath: str) -> Optional[Dict[str, Any]]:
+    """安全读取本地单个 raw json 文件"""
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -25,23 +28,46 @@ def load_raw_json(filepath: str) -> Optional[Dict[str, Any]]:
         return None
 
 def extract_dates_from_raw(data: Dict[str, Any]) -> Dict[str, Optional[str]]:
-    """分离并归一化四类时间戳，杜绝获奖日期冒充原报道时间"""
+    """
+    分离并归一化四类时间戳，严格遵守各来源字段合同：
+    - TTZL (天天正能量):
+        * 原始媒体报道时间在 sourcePublishedAt (若无则为 None，严禁以 awardDate 冒充)
+        * awardDate 为评选获奖/公示时间 (或旧字段 publishedAt 兼容)
+        * eventOccurredAt 为事发时间
+    - 非 TTZL 来源:
+        * 优先读取 publishedAt / sourcePublishedAt / pubDate 作为报道时间
+    """
+    origin = data.get("origin") or data.get("sourceType") or ""
+    raw_id = str(data.get("id") or "")
+    is_ttzl = (origin == "ttzl") or raw_id.startswith("ttzl-")
+
     event_date = data.get("eventOccurredAt")
     if event_date:
         event_date = str(event_date)[:10]
-        
-    pub_date = data.get("publishedAt") or data.get("sourcePublishedAt")
-    if pub_date:
-        pub_date = str(pub_date)[:10]
-        
+
     award_date = data.get("awardDate")
     if award_date:
         award_date = str(award_date)[:10]
-        
+
+    if is_ttzl:
+        # TTZL 合同：报道日期仅取 sourcePublishedAt；若无则为 None
+        pub_date = data.get("sourcePublishedAt")
+        if pub_date:
+            pub_date = str(pub_date)[:10]
+        else:
+            pub_date = None
+        # 若 award_date 为空但存在旧 publishedAt，则填入 award_date
+        if not award_date and data.get("publishedAt"):
+            award_date = str(data.get("publishedAt"))[:10]
+    else:
+        pub_date = data.get("publishedAt") or data.get("sourcePublishedAt") or data.get("pubDate")
+        if pub_date:
+            pub_date = str(pub_date)[:10]
+
     fetched_date = data.get("fetchedAt")
     if fetched_date:
         fetched_date = str(fetched_date)[:10]
-        
+
     return {
         "event_occurred_at": event_date,
         "published_at": pub_date,
@@ -54,7 +80,13 @@ def scan_raw_candidates(
     start_date: str = "2026-09-01",
     end_date: str = "2026-09-15"
 ) -> List[Dict[str, Any]]:
-    """扫描本地 raw 资料，提取规范化元数据"""
+    """
+    扫描本地 raw 资料库，提取规范化元数据并按时间窗过滤。
+    若 raw_dir 不存在，抛出 FileNotFoundError 以保护下游交付。
+    """
+    if not os.path.exists(raw_dir):
+        raise FileNotFoundError(f"原始资料库目录不存在: {raw_dir}")
+
     candidates = []
     files = glob.glob(os.path.join(raw_dir, "*.json"))
     for f in sorted(files):
@@ -81,409 +113,39 @@ def scan_raw_candidates(
             })
     return candidates
 
-def build_issue_w37_manifest(out_file: str) -> Dict[str, Any]:
+def build_manifest_from_candidates(
+    candidates: List[Dict[str, Any]],
+    issue_id: str,
+    time_window: str,
+    out_file: Optional[str] = None
+) -> Dict[str, Any]:
     """
-    构建 issue-2026-w37 本期经过人工核实与交叉对比的权威备料清单。
-    严格记录真实出处、段落依据及修订决定。
+    从扫描所得的候选资料构建规范备料清单。
+    严格区分脚本自动提取与人工/Agent审核状态，新扫描项默认为 pending_review。
     """
-    retellings_prep = [
-        {
-            "unit_id": "R09",
-            "category": "社会热点",
-            "title": "景德镇学院开学腾退大四宿舍争议：校方致歉并调整方案",
-            "source_media": "澎湃新闻 / 景德镇学院官方通报",
-            "source_url": "https://www.thepaper.cn/newsDetail_forward_28711234",
-            "local_raw_path": None,
-            "dates": {
-                "event_occurred_at": "2026-09-05",
-                "published_at": "2026-09-11",
-                "commentary_at": "2026-09-11",
-                "award_date": None
-            },
-            "source_key_facts": [
-                "开学季因专升本及联培男生超预期导致男寝紧缺，校方未充分沟通安排大四女生搬离；",
-                "大四面临考研求职实习，物品繁多且心理抵触，个别现场管理人员工作方式生硬；",
-                "9月10日晚校方发布情况通报致歉，对生硬人员进行严肃处理，并优化方案确保平稳过渡。"
-            ],
+    items = []
+    for c in candidates:
+        items.append({
+            "raw_id": c["raw_id"],
+            "title": c["title"],
+            "source_media": c["media"],
+            "source_url": c["url"],
+            "dates": c["dates"],
+            "category": c["category"],
+            "sample_paragraphs": c["sample_paragraphs"],
+            "char_count": c["char_count"],
             "workflow_status": {
-                "script_done": "已提取通报与报道关键时间及事件要素",
-                "agent_done": "已核对澎湃新闻报道与校方通报全文，分清通报措施与客观管理问题",
-                "pending_signoff": "等待教师终审选材"
+                "script_done": f"已由脚本从 {os.path.basename(c['file_path'])} 提取元数据与时间戳",
+                "agent_done": None,
+                "pending_signoff": "待人工/Agent选材与交叉比对核验"
             },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "R10",
-            "category": "社会热点",
-            "title": "昆明22岁外卖骑手蒋明昊扶摔倒老人：老人当场主动澄清“是他好心”",
-            "source_media": "新华社 / 人民网·人民日报",
-            "source_url": "https://society.people.com.cn/n1/2026/0910/c1008-40795820.html",
-            "local_raw_path": None,
-            "dates": {
-                "event_occurred_at": "2026-09-08",
-                "published_at": "2026-09-10",
-                "commentary_at": "2026-09-11",
-                "award_date": "2026-09-10"
-            },
-            "source_key_facts": [
-                "9月8日早高峰昆明呈贡区人行道斑马线上老人摔倒流血，22岁骑手蒋明昊第一反应怕被讹但遵从良心上前救助；",
-                "将老人送医后，面对医护人员询问，老人毫不犹豫主动说明'是他好心，是我自己摔的'；",
-                "外卖平台免除骑手超时罚款并给予先锋荣誉表彰，老人脱险后家属送锦旗致谢。"
-            ],
-            "workflow_status": {
-                "script_done": "已提取新华社报道基础事实",
-                "agent_done": "已核对骑手原话'会不会讹我'与老人原话'是他好心'，确立双细节对照主线",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "R11",
-            "category": "社会热点",
-            "title": "“低保家庭能否装空调”引发讨论：民政与媒体明确不搞“一票否决”",
-            "source_media": "新京报快评 / 央视网 / 多地民政回应",
-            "source_url": "https://www.bjnews.com.cn/detail/172602111114.html",
-            "local_raw_path": None,
-            "dates": {
-                "event_occurred_at": "2026-09-05",
-                "published_at": "2026-09-11",
-                "commentary_at": "2026-09-11",
-                "award_date": None
-            },
-            "source_key_facts": [
-                "网络讨论低保户装空调是否应取消资格，公众关注基层审核标准；",
-                "民政部门明确低保审核以家庭总收入和财产为法定核心标准，绝不以拥有空调搞一票否决；",
-                "媒体评论指出极端高温下防暑降温已成基本生活配套，救助不能强求贫困苦行。"
-            ],
-            "workflow_status": {
-                "script_done": "已收集民政答疑与媒体评论",
-                "agent_done": "已严格区分行政部门政策核查口径 vs 媒体评论的价值主张",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "R12",
-            "category": "社会热点",
-            "title": "山东巨野南关小学新校区异味事件：41人请假，学生全部迁回本部",
-            "source_media": "新华网 / 联合调查组官方通报",
-            "source_url": "https://www.news.cn/local/2026-09/04/c_1130188899.htm",
-            "local_raw_path": None,
-            "dates": {
-                "event_occurred_at": "2026-09-03",
-                "published_at": "2026-09-04",
-                "commentary_at": "2026-09-05",
-                "award_date": None
-            },
-            "source_key_facts": [
-                "六年级迁入新校区后出现刺激性气味，多名学生咳嗽不适，某班41人请假；",
-                "联合调查组通报六年级全体迁回本部复课，拆除异味门并公开检测，阻断风险。"
-            ],
-            "workflow_status": {
-                "script_done": "已读取官方通报",
-                "agent_done": "已确认事件发生于9月3日，如实标注为9月初事件跟进；备选替换方案已就绪",
-                "pending_signoff": "建议教师确认是否保留或替换为9月7日大连考云德大爷救人事件"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "R13",
-            "category": "社会热点",
-            "title": "大连79岁“巧克力大爷”考云德海边救人：推着翻扣摩托艇救回两人",
-            "source_media": "大连晚报 / 新闻大连（ttzl-45354）",
-            "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45354",
-            "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45354.json",
-            "dates": {
-                "event_occurred_at": "2026-09-07",
-                "published_at": "2026-09-09",
-                "commentary_at": None,
-                "award_date": "2026-09-09"
-            },
-            "source_key_facts": [
-                "9月7日傍晚大连东港海边风浪大作，两人骑摩托艇翻扣在离岸百米深水区呼救；",
-                "79岁退休冬泳老人考云德刚游完泳路过，评估自身体能后果断脱衣跳海施救；",
-                "考大爷冷静叮嘱落水者抓紧艇身、切勿抓拽施救者，顺浪推艇将两人救向岸边，与消防民警接力脱险。"
-            ],
-            "workflow_status": {
-                "script_done": "已从 ttzl-45354.json 读取全文",
-                "agent_done": "已核实新闻事实要素齐全（事发09-07，报道09-09），替换原缺乏具体新闻事实的网红杂文",
-                "pending_signoff": "已确认替换并完成改写"
-            },
-            "action_decision": "replace_executed"
-        },
-        {
-            "unit_id": "R14",
-            "category": "社会热点",
-            "title": "柳州金沙角沙滩上有个“很凶的人”：德哥严守水域安全不退让",
-            "source_media": "南国今报（记者李宁琳/文 颜篁/图）",
-            "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45328",
-            "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45328.json",
-            "dates": {
-                "event_occurred_at": "2026年夏季",
-                "published_at": "2026-08-25",
-                "commentary_at": None,
-                "award_date": "2026-08-26"
-            },
-            "source_key_facts": [
-                "55岁游泳教练袁德军（德哥）带领柳州市江柏户外沙滩救援队，义务值守沙滩11年；",
-                "在金沙角严厉训斥不穿救生衣下水者，不讨好不退让，11年救回上百条生命，筑牢水上安全防线。"
-            ],
-            "workflow_status": {
-                "script_done": "已从 ttzl-45328.json 读取全文",
-                "agent_done": "已纠正姓名错误（真实姓名为袁德军，非黄继德）、年限纠正为11年、队名纠正为江柏户外",
-                "pending_signoff": "已确认修改"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "R15",
-            "category": "正向社会生活",
-            "title": "事关长江源！杭州女教师发起求助，上百名工程师自发“接单”研发",
-            "source_media": "潮新闻·钱江晚报",
-            "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45351",
-            "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45351.json",
-            "dates": {
-                "event_occurred_at": "2026年7月~9月",
-                "published_at": "2026-09-15",
-                "commentary_at": None,
-                "award_date": "2026-09-15",
-                "milestone_roadshow": "2026-09-13"
-            },
-            "source_key_facts": [
-                "杭州云谷学校教师于淼淼在青海海西州格尔木市唐古拉山镇沱沱河长江源水生态保护站（海拔4540米）志愿服务；",
-                "发现野外巡测数据与影像识别全靠手工整理，回杭后发帖求助，阿里发起公益挑战赛，上百名工程师自发接单；",
-                "9月13日31个小组进行路演评审，输出离线可用AI监测平台融合方案；9月15日钱江晚报刊发报道并获特别奖。"
-            ],
-            "workflow_status": {
-                "script_done": "已读取 ttzl-45351.json 全文（3628字）",
-                "agent_done": "已纠正地理错误（青海沱沱河，非西藏）；解释9-13路演与9-15报道的时间差；删除两周全面部署的夸大表述",
-                "pending_signoff": "已确认修改"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "R16",
-            "category": "暖文",
-            "title": "萧山17岁女职校生周子歆脱校服为摔倒老人止血，路人主动帮洗校服送还",
-            "source_media": "人民日报（2026-09-10）/ 潮新闻·钱江晚报",
-            "source_url": "https://society.people.com.cn/n1/2026/0910/c1008-40795830.html",
-            "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45353.json",
-            "dates": {
-                "event_occurred_at": "2026-09-03",
-                "published_at": "2026-09-10",
-                "commentary_at": "2026-09-11",
-                "award_date": "2026-09-11"
-            },
-            "source_key_facts": [
-                "17岁杭州女孩周子歆（萧山技师学院自动化天津班学生、班长）见老人摔倒后脑流血，现场四周无人；",
-                "周子歆立即上前扶起，按照120急救指导，脱下刚换的干净长袖校服外套折叠垫在后脑勺压迫止血，守护至救护车抵达；",
-                "路过市民朱女士见学生急着上课、外套沾血，主动带回家手洗烘干并专程送到学校归还。"
-            ],
-            "workflow_status": {
-                "script_done": "已从人民日报及钱江晚报提取报道",
-                "agent_done": "已纠正性别为女生；彻底删除心肺复苏、看客迟疑及救助者流血定性，联动更新文、图、题、解",
-                "pending_signoff": "已确认修改"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "R17",
-            "category": "正向社会生活",
-            "title": "柳州龙美村77岁老人定下乡规，全村集资给好学孩子奖学接力39年",
-            "source_media": "南国今报（记者李宁琳/文 何俊涛/图）",
-            "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45337",
-            "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45337.json",
-            "dates": {
-                "event_occurred_at": "2026-08-18",
-                "published_at": "2026-08-31",
-                "commentary_at": None,
-                "award_date": "2026-08-31"
-            },
-            "source_key_facts": [
-                "柳城县古砦仫佬族乡龙美村覃村，77岁覃记安1987年倡议集资成立奖学会，每年大榕树下给取得奖状的优秀孩子发奖；",
-                "2026年8月18日全村200多个孩子获奖，发放1.3万多元；39年走出120多名大学生。"
-            ],
-            "workflow_status": {
-                "script_done": "已读取 ttzl-45337.json 全文",
-                "agent_done": "已确认8月18日发奖、8月31日见报的时间线；收准奖励范围为成绩优秀/有奖状学子，删除夸大表述",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "retain_and_revise"
-        }
-    ]
-
-    commentaries_prep = [
-        {
-            "unit_id": "C07",
-            "retelling_ref": "R09",
-            "title": "大学宿舍搬迁：先把学生的处境当回事",
-            "core_issue": "高校在面临资源紧张时，如何平衡行政统筹与对学生生活秩序的体恤？",
-            "workflow_status": {
-                "script_done": "已建立与 R09 的映射关系",
-                "agent_done": "已确立生活空间属性与沟通前置的论述框架，剔除自评词汇",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "C08",
-            "retelling_ref": "R10",
-            "title": "点赞“敢扶”，也要让更多人不“怕扶”",
-            "core_issue": "如何看待战胜被讹顾虑的挺身而出，以及被救助者当场澄清与平台免罚机制的兜底价值？",
-            "workflow_status": {
-                "script_done": "已建立与 R10 的映射关系",
-                "agent_done": "已收准双细节对照，不把一次澄清推导为全部风险消失，讲清制度托底的必要性",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "C09",
-            "retelling_ref": "R11",
-            "title": "低保家庭装空调：社会救助要跳出“贫困苦行”的旧认知",
-            "core_issue": "社会救助如何与时俱进？如何界定基本生活需要与防范骗保的科学边界？",
-            "workflow_status": {
-                "script_done": "已建立与 R11 的映射关系",
-                "agent_done": "已严格界定部门政策核查事实 vs 救助温度价值理念，讲透时代发展对必需品定义的改变",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "C10",
-            "retelling_ref": "R15",
-            "title": "百名工程师接单：用专业技能为崇高理想铺路",
-            "core_issue": "专业技术如何赋能现代公益？怎样理解用具体技能解决痛点的务实担当？",
-            "workflow_status": {
-                "script_done": "已建立与 R15 的映射关系",
-                "agent_done": "已剔除贬低体力劳动的表达，讲清算法代码为高原生态保护一线减负的现实路径",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "C11",
-            "retelling_ref": "R16",
-            "title": "脱下校服与洗净衣服：善意生态需要彼此托底",
-            "core_issue": "从女学生的果断止血到市民的主动洗衣，善意为何需要彼此回护？",
-            "workflow_status": {
-                "script_done": "已建立与 R16 的映射关系",
-                "agent_done": "已纠正代词为女孩；彻底删除心肺复苏与看客冷漠对比；不作无条件的制度兜底虚假保证",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "retain_and_revise"
-        },
-        {
-            "unit_id": "C12",
-            "retelling_ref": "R17",
-            "title": "村口大榕树下的39年：把重视教育写进村规的生命力",
-            "core_issue": "乡村共同体如何通过质朴长久的仪式，将崇学风尚转化为凝聚力？",
-            "workflow_status": {
-                "script_done": "已建立与 R17 的映射关系",
-                "agent_done": "已收准奖励对象范围，去除夸大的单一因果归因与无据对比",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "retain_and_revise"
-        }
-    ]
-
-    excerpts_prep = [
-        {
-            "unit_id": "F07",
-            "topic": "社会救助 · 类比说理",
-            "source_name": "新京报快评《低保户能不能装空调，社会救助要跳出旧认知》",
-            "source_date": "2026-09-11",
-            "source_url": "https://www.bjnews.com.cn/detail/172602111114.html",
-            "quote_facts": "高校宿舍过去不装空调被视作享受，后来成为基础设施；低保家庭空调争议道理相通。",
-            "reuse_note": "完全复用自 sample-01-rev5 之 F01，保留成熟教法",
-            "workflow_status": {
-                "script_done": "已提取原段与技法分析",
-                "agent_done": "如实记录复用自 F01，题材与 R11/C09 重合，保留教学示范",
-                "pending_signoff": "等待教师确认是否继续复用或替换独立社论"
-            },
-            "action_decision": "mark_reused"
-        },
-        {
-            "unit_id": "F08",
-            "topic": "凡人善举 · 细节对照",
-            "source_name": "澎湃新闻·马上评《点赞“敢扶”，也要让更多人不“怕扶”》",
-            "source_date": "2026-09-11",
-            "source_url": "https://www.thepaper.cn/newsDetail_forward_28712345",
-            "quote_facts": "蒋明昊犹豫片刻仍上前救人；老人到院毫不犹豫主动说明'是他好心'。",
-            "reuse_note": "完全复用自 sample-01-rev5 之 F02，题材与 R10/C08 重合",
-            "workflow_status": {
-                "script_done": "已提取原段与技法分析",
-                "agent_done": "如实记录复用自 F02",
-                "pending_signoff": "等待教师确认"
-            },
-            "action_decision": "mark_reused"
-        },
-        {
-            "unit_id": "F09",
-            "topic": "校园治理 · 影响推演",
-            "source_name": "澎湃新闻·马上评《开学季别成学生宿舍“问题暴露季”》",
-            "source_date": "2026-09-11",
-            "source_url": "https://www.thepaper.cn/newsDetail_forward_28713456",
-            "quote_facts": "宿舍不仅是基础设施更是生活空间；仓促搬离打乱大四考研论文与实习秩序。",
-            "reuse_note": "完全复用自 sample-01-rev5 之 F03，题材与 R09/C07 重合",
-            "workflow_status": {
-                "script_done": "已提取原段与技法分析",
-                "agent_done": "如实记录复用自 F03",
-                "pending_signoff": "等待教师确认"
-            },
-            "action_decision": "mark_reused"
-        },
-        {
-            "unit_id": "F10",
-            "topic": "青年价值 · 逻辑工具",
-            "source_name": "浙江宣传《“争当网红”的喧嚣该降降温了》",
-            "source_date": "2026-09-06",
-            "source_url": "https://mp.weixin.qq.com/s/zjxc_wanghong_20260906",
-            "quote_facts": "只看头部主播光鲜忽视巨大幸存者偏差；读书不是保证大富大贵，而是赋予抵御风浪的专业本领。",
-            "reuse_note": "完全复用自 sample-01-rev5 之 F04",
-            "workflow_status": {
-                "script_done": "已提取原段与技法分析",
-                "agent_done": "如实记录复用自 F04",
-                "pending_signoff": "等待教师确认"
-            },
-            "action_decision": "mark_reused"
-        },
-        {
-            "unit_id": "F11",
-            "topic": "公共服务 · 关系辨析",
-            "source_name": "浙江宣传《别把“服务态度好”当成了“无理取闹的免死金牌”》",
-            "source_date": "2026-09-09",
-            "source_url": "https://mp.weixin.qq.com/s/zjxc_service_20260909",
-            "quote_facts": "形式上的便利不等于实质上的减负；公共服务要解决深层现实压力。",
-            "reuse_note": "完全复用自 sample-01-rev5 之 F05，独立选文",
-            "workflow_status": {
-                "script_done": "已提取原段与技法分析",
-                "agent_done": "如实记录复用自 F05",
-                "pending_signoff": "等待教师确认"
-            },
-            "action_decision": "mark_reused"
-        },
-        {
-            "unit_id": "F12",
-            "topic": "青年担当 · 信物叙事与时空交织",
-            "source_name": "中国青年报·中国青年网《一所大学、一座城市和一代青年的精神接力》",
-            "source_date": "2026-09-11",
-            "source_url": "https://pinglun.youth.cn/wztt/202609/t20260911_16864489.htm",
-            "quote_facts": "真实第4段：校长常进院士用郭永怀两弹一星功勋奖章、1970年合肥南迁建校红砖、大国重器照片（悟空、墨子、九章、祖冲之）三件物品，勾勒国之所需我之所向的精神谱系。",
-            "reuse_note": "全新取得真实权威原段，彻底废除前稿伪造段落",
-            "workflow_status": {
-                "script_done": "已通过 curl 从中国青年网完整抓取 gb18030 原文并解析全篇段落",
-                "agent_done": "已剔除戈壁土坯房等虚构文字，选定真实第4段信物叙事，已重写配套教学讲解",
-                "pending_signoff": "等待教师终审选材"
-            },
-            "action_decision": "replace_real_source"
-        }
-    ]
+            "action_decision": "pending_review"
+        })
 
     manifest = {
         "schema_version": "1.0",
-        "issue_id": "issue-2026-w37",
-        "time_window": "2026-09-07 ~ 2026-09-13",
+        "issue_id": issue_id,
+        "time_window": time_window,
         "generated_at": datetime.now().isoformat(),
         "editorial_policy": {
             "standards_doc": "CURRENT_REQUIREMENTS.md",
@@ -492,37 +154,82 @@ def build_issue_w37_manifest(out_file: str) -> Dict[str, Any]:
             "reuse_policy": "复用篇目必须明示，不可用新编号伪装全新采编"
         },
         "statistics": {
-            "retellings_count": len(retellings_prep),
-            "commentaries_count": len(commentaries_prep),
-            "excerpts_count": len(excerpts_prep)
+            "candidates_scanned": len(candidates),
+            "selected_count": 0,
+            "retellings_count": 0,
+            "commentaries_count": 0,
+            "excerpts_count": 0
         },
-        "retellings": retellings_prep,
-        "commentaries": commentaries_prep,
-        "excerpts": excerpts_prep
+        "candidates": items,
+        "retellings": [],
+        "commentaries": [],
+        "excerpts": []
     }
 
-    os.makedirs(os.path.dirname(out_file), exist_ok=True)
-    with open(out_file, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
+    if out_file:
+        os.makedirs(os.path.dirname(os.path.abspath(out_file)), exist_ok=True)
+        with open(out_file, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, ensure_ascii=False, indent=2)
+        print(f"✅ 成功生成候选备料清单: {out_file} (包含 {len(items)} 条待审核候选资料)")
 
-    print(f"✅ 成功生成结构化备料清单: {out_file} (包含 {len(retellings_prep)} 复述, {len(commentaries_prep)} 评论, {len(excerpts_prep)} 原文拆解)")
     return manifest
 
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="周刊最小备料连接工具")
+def load_curated_manifest(curated_file: str, out_file: Optional[str] = None) -> Dict[str, Any]:
+    """
+    加载由 Agent/人工完成事实核验的显式权威备料数据。
+    数据外置为独立 JSON，不再硬编码在 Python 逻辑中。
+    """
+    if not os.path.exists(curated_file):
+        raise FileNotFoundError(f"已核验备料数据文件不存在: {curated_file}")
+    with open(curated_file, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+    manifest["generated_at"] = datetime.now().isoformat()
+    if out_file:
+        os.makedirs(os.path.dirname(os.path.abspath(out_file)), exist_ok=True)
+        with open(out_file, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, ensure_ascii=False, indent=2)
+        print(f"✅ 成功输出已核验备料清单: {out_file} (包含 {len(manifest.get('retellings', []))} 复述, {len(manifest.get('commentaries', []))} 评论, {len(manifest.get('excerpts', []))} 原文拆解)")
+    return manifest
+
+def main():
+    parser = argparse.ArgumentParser(description="周刊备料管线连接工具")
     parser.add_argument("--raw-dir", default="aggr-site/data/wenwen/raw", help="raw 资料库路径")
     parser.add_argument("--start-date", default="2026-09-01", help="起始日期 (YYYY-MM-DD)")
     parser.add_argument("--end-date", default="2026-09-15", help="截止日期 (YYYY-MM-DD)")
     parser.add_argument("--issue-id", default="issue-2026-w37", help="期刊 ID")
-    parser.add_argument("--out", default="issues/issue-2026-w37/manifest_prep.json", help="输出清单路径")
+    parser.add_argument("--curated-file", default=None, help="显式已核验编辑数据路径 (JSON)")
+    parser.add_argument("--apply-curated", action="store_true", help="若指定且存在已核验文件则应用")
+    parser.add_argument("--out", default=None, help="输出清单路径")
     args = parser.parse_args()
-    
-    print(f"正在扫描本地 raw 资料库: {args.raw_dir} (窗口: {args.start_date} ~ {args.end_date})...")
+
+    # 默认输出路径
+    out_file = args.out or f"issues/{args.issue_id}/manifest_prep.json"
+
+    # 若指定使用已核验数据
+    if args.curated_file or args.apply_curated:
+        curated_path = args.curated_file or f"publishing/weekly_pipeline/data/manifest_{args.issue_id.replace('-', '_')}_curated.json"
+        if os.path.exists(curated_path):
+            print(f"正在应用已核验备料数据: {curated_path} -> {out_file}...")
+            load_curated_manifest(curated_path, out_file)
+            return
+        else:
+            if args.curated_file:
+                print(f"❌ 找不到指定的已核验数据: {curated_path}", file=sys.stderr)
+                sys.exit(1)
+
+    # 正常扫描流程：严格依据输入 raw 资料与时间窗
+    if not os.path.exists(args.raw_dir):
+        print(f"❌ 原始资料库不存在: {args.raw_dir}，跳过生成以保护已有清单交付。", file=sys.stderr)
+        sys.exit(1)
+
+    time_window = f"{args.start_date} ~ {args.end_date}"
+    print(f"正在扫描本地 raw 资料库: {args.raw_dir} (期号: {args.issue_id}, 窗口: {time_window})...")
     cands = scan_raw_candidates(args.raw_dir, args.start_date, args.end_date)
     print(f"  🔍 发现 {len(cands)} 条候选资料。")
-    
-    print(f"正在生成并落地权威备料清单至: {args.out}...")
-    manifest = build_issue_w37_manifest(args.out)
-    print("  ✅ 备料输出完成。")
 
+    print(f"正在生成候选备料清单至: {out_file}...")
+    build_manifest_from_candidates(cands, args.issue_id, time_window, out_file)
+    print("  ✅ 备料候选输出完成。")
+
+if __name__ == "__main__":
+    main()

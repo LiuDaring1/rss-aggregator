@@ -15,7 +15,10 @@ import datetime
 import tempfile
 import hashlib
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from weekly_pipeline.models import (
     RetellingUnit, CommentaryUnit, ExcerptUnit, IssueManifest
@@ -153,6 +156,42 @@ def export_excerpt_markdown(unit: ExcerptUnit, edition: str = "teacher") -> str:
     lines.append(f"> {unit.demo_text}")
     return "\n".join(lines)
 
+def compute_page_map(manifest: IssueManifest) -> Tuple[Dict[str, int], int, int]:
+    """
+    统一计算周刊页码映射与各板块起始页。
+    封面: 第 1 页
+    目录: 第 2 页
+    复述: 每个 2 页 (从第 3 页起)
+    答案: 依复述篇数计算，>=8 篇占 3 页，>=5 篇占 2 页，其他占 1 页
+    评论: 每个 3 页
+    原文拆解: 每个 1 页
+    附录: 占 1 页
+    
+    返回: (page_map, ans_pages, total_pages)
+    """
+    page_map: Dict[str, int] = {}
+    cur_p = 3
+    for rid in manifest.retelling_ids:
+        page_map[rid] = cur_p
+        cur_p += 2
+        
+    page_map["复述参考"] = cur_p
+    num_retellings = len(manifest.retelling_ids)
+    ans_pages = 3 if num_retellings >= 8 else (2 if num_retellings >= 5 else 1)
+    cur_p += ans_pages
+    
+    for cid in manifest.commentary_ids:
+        page_map[cid] = cur_p
+        cur_p += 3
+        
+    for fid in manifest.excerpt_ids:
+        page_map[fid] = cur_p
+        cur_p += 1
+        
+    page_map["附录"] = cur_p
+    total_pages = cur_p
+    return page_map, ans_pages, total_pages
+
 def export_full_issue_markdown(
     manifest: IssueManifest,
     content_dir: str = "content",
@@ -176,22 +215,10 @@ def export_full_issue_markdown(
     lines.append("")
     
     # 2. 动态计算页码映射（若未传入）
+    num_retellings = len(manifest.retelling_ids)
+    computed_map, ans_pages, _ = compute_page_map(manifest)
     if not page_map:
-        page_map = {}
-        cur_p = 3
-        for rid in manifest.retelling_ids:
-            page_map[rid] = cur_p
-            cur_p += 2
-        page_map["复述参考"] = cur_p
-        ans_pages = 2 if len(manifest.retelling_ids) >= 5 else 1
-        cur_p += ans_pages
-        for cid in manifest.commentary_ids:
-            page_map[cid] = cur_p
-            cur_p += 3
-        for fid in manifest.excerpt_ids:
-            page_map[fid] = cur_p
-            cur_p += 1
-        page_map["附录"] = cur_p
+        page_map = computed_map
 
     # 3. 目录
     lines.append("## 目录")
@@ -200,7 +227,7 @@ def export_full_issue_markdown(
         p = page_map.get(rid, 0)
         r_toc.append(f"{rid}（{p}–{p+1} 页）")
     ans_p = page_map.get("复述参考", 0)
-    ans_rng = f"{ans_p}–{ans_p+1} 页" if len(manifest.retelling_ids) >= 5 else f"{ans_p} 页"
+    ans_rng = f"{ans_p}–{ans_p+ans_pages-1} 页" if ans_pages > 1 else f"{ans_p} 页"
     r_toc.append(f"复述参考（{ans_rng}）")
     lines.append(f"**复述**：{' ｜ '.join(r_toc)}")
     lines.append("")
@@ -349,7 +376,7 @@ def export_full_issue_markdown(
         lines.append(f"### 第 3 页（第 {cp+2} 页）：口语范本与教学拆解")
         spoken_text = c.get_full_spoken_text()
         cn_len = count_chinese_chars(spoken_text)
-        lines.append(f"**【口语范本（两段主体展开）】**（正文约 {cn_len} 汉字，适合考场从容表达）：")
+        lines.append(f"**【口语范本（两段主体展开）】**（正文约 {cn_len} 汉字）：")
         lines.append("")
         lines.append(f"> **【破题总述】** {c.speech.main_claim.strip()}")
         lines.append(">")
