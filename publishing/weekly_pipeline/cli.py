@@ -279,31 +279,52 @@ def cmd_build(args):
             f_start = page_map[excerpts[0].id]
             app_start = page_map.get("附录", len(reader.pages) + 1)
             
+            # 各板块预期精确物理页数
+            exp_r_pages = c_start - 3
+            exp_c_pages = f_start - c_start
+            exp_f_pages = app_start - f_start
+            
+            # 严格防止整刊 PDF 打印截断或页数不足
+            if len(reader.pages) < total_pages:
+                raise RuntimeError(
+                    f"整刊 PDF 实际页数 ({len(reader.pages)}) 小于静态规划总页数 ({total_pages})，构建终止！"
+                )
+
             w_r = pypdf.PdfWriter()
             for p_idx in range(2, c_start - 1):
-                if p_idx < len(reader.pages):
-                    w_r.add_page(reader.pages[p_idx])
+                w_r.add_page(reader.pages[p_idx])
             with open(split_files["retelling"], "wb") as fp:
                 w_r.write(fp)
                 
             w_c = pypdf.PdfWriter()
             for p_idx in range(c_start - 1, f_start - 1):
-                if p_idx < len(reader.pages):
-                    w_c.add_page(reader.pages[p_idx])
+                w_c.add_page(reader.pages[p_idx])
             with open(split_files["commentary"], "wb") as fp:
                 w_c.write(fp)
                 
             w_f = pypdf.PdfWriter()
             for p_idx in range(f_start - 1, app_start - 1):
-                if p_idx < len(reader.pages):
-                    w_f.add_page(reader.pages[p_idx])
+                w_f.add_page(reader.pages[p_idx])
             with open(split_files["excerpt"], "wb") as fp:
                 w_f.write(fp)
 
-            # 产物完整性与非空硬断言
-            for sp_key, sp_path in split_files.items():
+            # 产物完整性与物理页数硬断言（不仅检查文件存在，更严格核验实际页数完全符合本期范围）
+            expected_splits = {
+                "retelling": (split_files["retelling"], exp_r_pages, "复述分册"),
+                "commentary": (split_files["commentary"], exp_c_pages, "评论分册"),
+                "excerpt": (split_files["excerpt"], exp_f_pages, "原文拆解分册"),
+            }
+            for sp_key, (sp_path, exp_pg, sp_label) in expected_splits.items():
                 if not os.path.exists(sp_path) or os.path.getsize(sp_path) == 0:
                     raise RuntimeError(f"模块分册 PDF 导出失败或为空文件: {sp_path}")
+                sp_reader = pypdf.PdfReader(sp_path)
+                act_pg = len(sp_reader.pages)
+                if act_pg == 0:
+                    raise RuntimeError(f"模块分册 {sp_label} 实际物理页数为 0 页（空 PDF）: {sp_path}")
+                if act_pg != exp_pg:
+                    raise RuntimeError(
+                        f"模块分册 {sp_label} 物理页数异常: 实际 {act_pg} 页 != 预期规划 {exp_pg} 页 ({sp_path})"
+                    )
 
             print(f"  ✅ 模块分册 PDF 导出完成: 复述 ({len(w_r.pages)}页) / 评论 ({len(w_c.pages)}页) / 原文拆解与积累 ({len(w_f.pages)}页)")
         except Exception as se:
