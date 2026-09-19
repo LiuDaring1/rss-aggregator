@@ -324,6 +324,13 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
   flex: 1;
   line-height: 1.45;
 }
+.cuhead .backref {
+  max-width: 55%;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .cu-blk {
   margin: 2.8mm 0;
 }
