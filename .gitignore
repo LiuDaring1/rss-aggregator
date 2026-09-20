@@ -22,6 +22,9 @@ dist/
 *.tmp
 issues/*/*_pages/
 issues/*/*.html
+aggr-site/public/data
+aggr-site/public/dist
+aggr-site/public/issues
 
 # 运行数据与日志（本机留档）
 aggr-site/data/

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>口语素材周刊 · 生产出刊台与资料库</title>
+  <style>
+    :root {
+      --primary: #1d4ed8;
+      --primary-light: #eff6ff;
+      --text: #1f2937;
+      --text-muted: #6b7280;
+      --bg: #f9fafb;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --warn: #d97706;
+      --warn-bg: #fef3c7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+    
+    header { background: #ffffff; border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+    .brand h1 { font-size: 1.25rem; font-weight: 700; color: #111827; }
+    .brand p { font-size: 0.85rem; color: var(--text-muted); }
+    .nav-links a { color: var(--primary); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-left: 1.2rem; }
+    .nav-links a:hover { text-decoration: underline; }
+
+    .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
+    
+    /* 板块通用 */
+    .section-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+    /* 本期出刊横幅 */
+    .issue-banner { display: grid; grid-template-columns: 1.2fr 2fr; gap: 1.5rem; }
+    .issue-meta { border-right: 1px solid var(--border); padding-right: 1.5rem; }
+    .issue-tag { display: inline-block; background: #e0e7ff; color: #3730a3; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .download-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .dl-btn { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--text); background: #fdfdfd; transition: all 0.2s; font-size: 0.9rem; }
+    .dl-btn:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+    .dl-btn.primary { grid-column: span 2; background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 600; }
+    .dl-btn.primary:hover { background: #1e40af; color: #fff; }
+
+    /* 采编单元卡片 */
+    .units-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+    .unit-card { border: 1px solid var(--border); border-radius: 6px; padding: 1.2rem; background: #fafafa; }
+    .unit-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem; }
+    .unit-id { font-weight: 700; color: var(--primary); }
+    .unit-badge { font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 500; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-orange { background: var(--warn-bg); color: var(--warn); }
+    .unit-desc { font-size: 0.85rem; color: #4b5563; margin-top: 0.5rem; line-height: 1.5; }
+
+    /* 资料库表格与查看器 */
+    .filter-bar { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filter-bar select, .filter-bar input { padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; outline: none; }
+    .table-wrap { max-height: 520px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th { background: #f3f4f6; padding: 0.75rem 1rem; font-weight: 600; color: #374151; position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--border); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: #1f2937; }
+    tr:hover { background: #f9fafb; cursor: pointer; }
+    .status-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .status-full { background: var(--success-bg); color: var(--success); }
+    .status-summary { background: var(--warn-bg); color: var(--warn); }
+    
+    /* 抽屉阅读弹窗 */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; justify-content: center; align-items: center; }
+    .modal-content { background: #fff; width: 850px; max-width: 90vw; max-height: 85vh; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
+    .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-body { padding: 1.5rem; overflow-y: auto; font-size: 0.95rem; line-height: 1.8; color: #1f2937; }
+    .modal-body p { margin-bottom: 1.2rem; }
+    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>口语素材周刊 · 生产出刊台与正文资料库</h1>
+      <p>权威时评雷达 · 暖文事实备料 · 离线排版出刊标准控制台</p>
+    </div>
+    <nav class="nav-links">
+      <a href="/">📡 返回聚合站首页</a>
+      <a href="#issue-section">📖 本期出刊</a>
+      <a href="#explorer-section">📚 评论正文库</a>
+      <a href="#status-section">📊 信源状态</a>
+    </nav>
+  </header>
+
+  <div class="container">
+
+    <!-- 本期成果与下载直取 -->
+    <div class="card" id="issue-section">
+      <div class="issue-banner">
+        <div class="issue-meta">
+          <span class="issue-tag">正式发行版 · 现行生效</span>
+          <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem;">2026年第38周 (2026-w38)</h2>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">出刊时段：2026-09-14 ~ 2026-09-20<br>物理页数：严格 16 页（无裁字截断）</p>
+          <div style="font-size: 0.85rem; background: var(--primary-light); padding: 0.75rem; border-radius: 6px; border: 1px solid #bfdbfe;">
+            <strong>📁 桌面交付直取目录：</strong><br>
+            <code style="word-break: break-all; font-size: 0.8rem;">/Users/baiyanglin/Desktop/口语素材周刊_正式生产发布_2026-w38/</code>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: #374151;">📄 本地出版成品直接打开与查阅：</h3>
+          <div class="download-grid">
+            <a class="dl-btn primary" href="/dist/issue-2026-w38/issue-2026-w38.pdf" target="_blank">
+              <span>📖 整刊印刷合订本 (16 页完整 PDF)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="/dist/issue-2026-w38/issue-2026-w38-复述.pdf" target="_blank">
+              <span>🗣️ 复述教学分册 (5 页)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="/dist/issue-2026-w38/issue-2026-w38-评论.pdf" target="_blank">
+              <span>🎙️ 口语评论分册 (6 页)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="/dist/issue-2026-w38/issue-2026-w38-原文拆解与积累.pdf" target="_blank">
+              <span>📝 拆解积累分册 (2 页)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="/dist/issue-2026-w38/issue-2026-w38.md" target="_blank">
+              <span>📃 学生端 Markdown 纯文本</span>
+              <span>打开 ↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 本期采编单元明细 -->
+    <div class="card">
+      <div class="section-title">🔍 本期采编单元与真实证据链</div>
+      <div class="units-grid">
+        <div class="unit-card">
+          <div class="unit-header">
+            <span class="unit-id">R27 / C19</span>
+            <span class="unit-badge badge-blue">社会热点 · 新京报快评</span>
+          </div>
+          <h4>三甲医院女医生离职送外卖：撕掉职业滤镜，寻找踏实节奏</h4>
+          <p class="unit-desc">
+            <strong>事实出处：</strong>扬子晚报报道、新京报快评（2026-09-19）<br>
+            <strong>口语范本：</strong>432 汉字，双主体段展开。主体一剖析其卸下光环、靠双手自立的从容；主体二倡导社会摘下职业偏见、尊重多元选择。<br>
+            <strong>门禁核验：</strong>符合自然青年口语规范，开门见山立意，无说教套话。
+          </p>
+        </div>
+
+        <div class="unit-card">
+          <div class="unit-header">
+            <span class="unit-id">R28 / C20</span>
+            <span class="unit-badge badge-orange">暖文救人 · 往期经典复用</span>
+          </div>
+          <h4>萧山学生脱下校服止血：清晨街头的热忱与彼此托举</h4>
+          <p class="unit-desc">
+            <strong>事实出处：</strong>潮新闻（2026-09-04）、天天正能量（TTZL-45353）<br>
+            <strong>复用说明：</strong>事发09-03/报道09-04/获奖09-11，早于本周；复用往期已核实的权威救人事实用于正式出刊示范。<br>
+            <strong>口语范本：</strong>452 汉字。主体一剖析危急关头不顾校服弄脏的朴素血性；主体二呼吁完善急救普及与见义勇为善后关怀。
+          </p>
+        </div>
+
+        <div class="unit-card">
+          <div class="unit-header">
+            <span class="unit-id">F19（拆解）</span>
+            <span class="unit-badge badge-blue">浙江宣传 · 权威原段</span>
+          </div>
+          <h4>《年轻人依然需要一股子“血性”》（2026-09-20）</h4>
+          <p class="unit-desc">
+            <strong>原载链接：</strong><a href="https://zjnews.zjol.com.cn/zjxc/202609/t20260920_31920425.shtml" target="_blank">官网原载 ↗</a><br>
+            <strong>摘录段落：</strong>“对今天的年轻人而言，血性就蕴藏在日常生活之中……”<br>
+            <strong>门禁核验：</strong>140 字符与 `F19_source.txt` 100% 连续子串精准匹配，拆解四组排比递进法。
+          </p>
+        </div>
+
+        <div class="unit-card">
+          <div class="unit-header">
+            <span class="unit-id">F20（拆解）</span>
+            <span class="unit-badge badge-blue">南方周末·自由谈 · 权威原段</span>
+          </div>
+          <h4>熊丙奇《“博士多于驴”？读懂调侃背后的真实焦虑》（2026-09-19）</h4>
+          <p class="unit-desc">
+            <strong>原载链接：</strong><a href="https://www.infzm.com/contents/331118" target="_blank">官网原载 ↗</a><br>
+            <strong>摘录段落：</strong>“从总量层面看，我国博士人才并非总量过剩，而是分布不均、供需错配……”<br>
+            <strong>门禁核验：</strong>143 字符与 `F20_source.txt` 100% 连续子串精准匹配，拆解结构归因分析法。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 本地权威时评资料库浏览器 -->
+    <div class="card" id="explorer-section">
+      <div class="section-title">
+        <span>📚 本地权威时评正文资料库</span>
+        <span id="db-summary" style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted); margin-left: auto;">加载中…</span>
+      </div>
+
+      <div class="filter-bar">
+        <select id="source-filter">
+          <option value="">全部信源 (11 家)</option>
+        </select>
+        <select id="type-filter">
+          <option value="">全部状态</option>
+          <option value="full_text" selected>完整正文 (188 篇)</option>
+          <option value="summary_only">仅摘要</option>
+        </select>
+        <input type="text" id="keyword-search" placeholder="输入关键词搜索标题…" style="width: 260px;">
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 140px;">媒体出处</th>
+              <th>文章标题</th>
+              <th style="width: 110px;">发表日期</th>
+              <th style="width: 80px;">字数</th>
+              <th style="width: 100px;">正文质量</th>
+              <th style="width: 80px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="articles-tbody">
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">正在加载本地正文资料库…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 信源采集与雷达状态表 -->
+    <div class="card" id="status-section">
+      <div class="section-title">📊 上游信源雷达与持久化真实执行状态表</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>信源ID</th>
+              <th>信源名称</th>
+              <th>状态</th>
+              <th>总条目</th>
+              <th>完整长文</th>
+              <th>最新报道</th>
+              <th>抓取耗时</th>
+              <th>配置路由</th>
+            </tr>
+          </thead>
+          <tbody id="sources-tbody">
+            <tr><td colspan="8" style="text-align: center;">加载中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 正文阅读抽屉弹窗 -->
+  <div class="modal-overlay" id="article-modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-title" style="font-size: 1.15rem; color: #111827;">-</h3>
+          <p id="modal-meta" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">-</p>
+        </div>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        加载中…
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allArticles = [];
+    let currentFiltered = [];
+
+    async function loadDb() {
+      try {
+        const res = await fetch('/data/commentaries/db.json');
+        const db = await res.json();
+        
+        document.getElementById('db-summary').textContent = 
+          `累积入库: ${db.totalArticles} 篇 | 具备完整长文: ${db.fullTextArticles} 篇 | 更新时间: ${db.updatedAt.slice(0, 16).replace('T', ' ')}`;
+        
+        // 渲染信源列表与过滤下拉框
+        const sourceMap = new Map();
+        const sourcesTbody = document.getElementById('sources-tbody');
+        sourcesTbody.innerHTML = '';
+        
+        (db.sourceStats || []).forEach(s => {
+          sourceMap.set(s.id, s.name);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><code>${s.id}</code></td>
+            <td><strong>${s.name}</strong></td>
+            <td><span class="status-pill status-${s.status === 'OK' ? 'full' : 'summary'}">${s.status}</span></td>
+            <td>${s.total_items}</td>
+            <td><strong>${s.full_text_items}</strong></td>
+            <td>${s.latest_published_at || '-'}</td>
+            <td>${s.duration}s</td>
+            <td><a href="${s.url}" target="_blank" style="font-size:0.8rem; color:#4b5563;">${s.url}</a></td>
+          `;
+          sourcesTbody.appendChild(tr);
+        });
+
+        const filterSelect = document.getElementById('source-filter');
+        sourceMap.forEach((name, id) => {
+          const opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = name;
+          filterSelect.appendChild(opt);
+        });
+
+        // 收集所有文章
+        allArticles = Object.values(db.articles || []).sort((a, b) => (b.publishedAt || '').localeCompare(a.publishedAt || ''));
+        applyFilters();
+      } catch (err) {
+        document.getElementById('articles-tbody').innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">加载资料库失败: ${err.message}</td></tr>`;
+      }
+    }
+
+    function applyFilters() {
+      const sourceId = document.getElementById('source-filter').value;
+      const type = document.getElementById('type-filter').value;
+      const kw = document.getElementById('keyword-search').value.trim().toLowerCase();
+
+      currentFiltered = allArticles.filter(a => {
+        if (sourceId && a.sourceId !== sourceId) return false;
+        if (type && a.textType !== type) return false;
+        if (kw && !a.title.toLowerCase().includes(kw)) return false;
+        return true;
+      });
+
+      renderArticlesTable(currentFiltered);
+    }
+
+    function renderArticlesTable(articles) {
+      const tbody = document.getElementById('articles-tbody');
+      tbody.innerHTML = '';
+      if (!articles.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">未找到符合条件的文章</td></tr>';
+        return;
+      }
+
+      articles.slice(0, 100).forEach(a => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${a.sourceName}</strong></td>
+          <td>${a.title}</td>
+          <td>${a.publishedAt || '-'}</td>
+          <td>${a.contentLength || 0}</td>
+          <td><span class="status-pill status-${a.hasFullText ? 'full' : 'summary'}">${a.hasFullText ? '完整正文' : '仅摘要'}</span></td>
+          <td><button style="padding: 0.2rem 0.6rem; font-size: 0.8rem; cursor: pointer;" onclick="openArticle('${a.id}')">阅读</button></td>
+        `;
+        tr.onclick = () => openArticle(a.id);
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function openArticle(id) {
+      const modal = document.getElementById('article-modal');
+      const titleEl = document.getElementById('modal-title');
+      const metaEl = document.getElementById('modal-meta');
+      const bodyEl = document.getElementById('modal-body');
+
+      modal.style.display = 'flex';
+      bodyEl.innerHTML = '正在加载文章全文…';
+
+      try {
+        const res = await fetch(`/data/commentaries/raw/${id}.json`);
+        const art = await res.json();
+        titleEl.textContent = art.title;
+        metaEl.innerHTML = `
+          媒体：<strong>${art.sourceName}</strong> | 
+          作者：${art.author || '评论员'} | 
+          日期：${art.publishedAt} | 
+          字数：${art.contentLength} 字符 | 
+          <a href="${art.sourceUrl || art.url}" target="_blank" style="color: var(--primary);">官方原文链接 ↗</a>
+        `;
+        
+        const paras = (art.content || '').split('\n\n');
+        bodyEl.innerHTML = paras.map(p => `<p>${p.trim()}</p>`).join('');
+      } catch (e) {
+        bodyEl.innerHTML = `<p style="color:red;">加载全文失败: ${e.message}</p>`;
+      }
+    }
+
+    function closeModal(e) {
+      if (!e || e.target === document.getElementById('article-modal')) {
+        document.getElementById('article-modal').style.display = 'none';
+      }
+    }
+
+    document.getElementById('source-filter').addEventListener('change', applyFilters);
+    document.getElementById('type-filter').addEventListener('change', applyFilters);
+    document.getElementById('keyword-search').addEventListener('input', applyFilters);
+
+    loadDb();
+  </script>
+</body>
+</html>

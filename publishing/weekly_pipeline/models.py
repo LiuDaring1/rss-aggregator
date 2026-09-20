@@ -213,6 +213,7 @@ class ExcerptUnit(BaseModel):
     source_name: str = Field(..., description="媒体名称，如 新京报·快评")
     source_date: str = Field(..., description="发表日期，如 2026-08-15")
     source_url: Optional[str] = Field(None, description="原文链接")
+    feed_url: Optional[str] = Field(None, description="RSS抓取入口链接")
     context: str = Field(..., description="前因后果与事件背景")
     quote_paragraphs: List[str] = Field(..., description="真实原文摘录段落")
     analyze: str = Field(..., description="重点拆解：作者为何这样论述、因果推演机制")

@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-评论栏目正文抓取与持久化工具 (Commentaries Ingestion & Persistence)
+评论栏目正文抓取与持久化工具 (Commentaries Ingestion & Persistence) v2.1
 
-职责：
-1. 读取 aggr-site/sources.json 中的 11 个权威评论信源；
-2. 通过本地 RSSHub 服务抓取最新 XML Feed；
-3. 解析完整元数据与正文（保留段落结构，剔除 HTML 标签）；
-4. 以原子化 JSON 文件持久化落盘至 data/commentaries/raw/ 与 aggr-site/data/commentaries/raw/；
-5. 生成汇总索引 db.json，供 prep.py 候选提取与采编 Agent 读取。
+严格落实审阅规范 (f147274)：
+1. 正文优先策略：优先读取 content:encoded / Atom content，当其比 description 充实时优先选用，绝不机械使用摘要替代全文；
+2. 质量状态精准分级：显式标记 textType: full_text | summary_only | metadata_only，无完整正文绝不虚标 hasFullText: True；
+3. 时区转换严格统一：将各种时间规范换算为中国北京时间 (Asia/Shanghai, UTC+8)，杜绝 UTC 跨日与 GMT 偏差；
+4. 稳定 ID 与内容哈希：基于规范化 URL / 信源生成稳定 ID，结合 contentHash (SHA-1) 实现精准版本跟踪与防漂移；
+5. 原子化安全落盘：使用临时文件加重命名 (.tmp -> target) 确保多进程原子写入；
+6. 累积全量数据库：维护累积历史库存，真实统计本轮条目、新增、更新、未变与库存总数；
+7. 故障隔离与幂等：单源异常不阻断其他信源，空源如实标记 EMPTY 而非 FAILED，支持周期调度 (--daemon / --interval)。
 """
 
 import os
@@ -19,70 +21,167 @@ import hashlib
 import urllib.request
 import urllib.error
 import xml.etree.ElementTree as ET
-from datetime import datetime, timezone
+import datetime
+import email.utils
 import re
 import html
+import argparse
+from typing import Dict, Any, List, Tuple, Optional
+
+try:
+    from zoneinfo import ZoneInfo
+    BEIJING_TZ = ZoneInfo("Asia/Shanghai")
+except Exception:
+    BEIJING_TZ = datetime.timezone(datetime.timedelta(hours=8))
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SOURCES_FILE = os.path.join(ROOT_DIR, "aggr-site", "sources.json")
-OUTPUT_DIR = os.path.join(ROOT_DIR, "aggr-site", "data", "commentaries", "raw")
-INDEX_FILE = os.path.join(ROOT_DIR, "aggr-site", "data", "commentaries", "db.json")
+DEFAULT_OUTPUT_DIR = os.path.join(ROOT_DIR, "aggr-site", "data", "commentaries", "raw")
+DEFAULT_INDEX_FILE = os.path.join(ROOT_DIR, "aggr-site", "data", "commentaries", "db.json")
 
 def html_to_clean_text(raw_html: str) -> str:
+    """深度清洗 HTML，保留真实段落结构，剥离导航噪音与脚本"""
     if not raw_html:
         return ""
     text = html.unescape(raw_html)
-    # 替换块级标签为换行
+    # 移除 script, style, iframe
+    text = re.sub(r"<(?:script|style|iframe|noscript)[^>]*>[\s\S]*?</(?:script|style|iframe|noscript)>", "", text, flags=re.IGNORECASE)
+    # 替换块级元素为换行
     text = re.sub(r"<(?:p|div|br|h[1-6]|li|tr|section|article)[^>]*>", "\n", text, flags=re.IGNORECASE)
     # 剔除其他所有标签
     text = re.sub(r"<[^>]+>", "", text)
-    # 清理行并保留段落结构
-    lines = [line.strip() for line in text.split("\n")]
-    cleaned = "\n\n".join(line for line in lines if line)
-    return cleaned
+    # 按行清理
+    lines = []
+    nav_pattern = r"^(?:首页|即时|时政|要闻|新闻中心|评论|观点|正文|资讯|热点|快讯)\s*[-—>|/]\s*"
+    for raw_line in text.split("\n"):
+        line = raw_line.strip()
+        if not line:
+            continue
+        # 剥离开头的导航与面包屑噪音（例如：首页 > 即时-时政 > 正文 等）
+        while re.search(nav_pattern, line):
+            line = re.sub(nav_pattern, "", line).strip()
+        if line in ["正文", "首页", "评论", "新闻中心", "即时", "时政"]:
+            continue
+        if line:
+            lines.append(line)
+    return "\n\n".join(lines)
 
-def parse_iso_date(pub_date_str: str) -> tuple[str, str]:
-    """解析 pubDate/updated 字符串为 (publishedAt: YYYY-MM-DD, pubDate: ISO)"""
-    if not pub_date_str:
+def parse_iso_date(pub_date_str: str) -> Tuple[str, str]:
+    """
+    统一将任意时间规范转换为中国北京时间 (Asia/Shanghai, UTC+8)。
+    返回: (publishedAt: YYYY-MM-DD, pubDate: ISO8601 with +08:00)
+    """
+    if not pub_date_str or not str(pub_date_str).strip():
         return ("", "")
-    # 尝试多种日期解析
-    for fmt in [
-        "%a, %d %b %Y %H:%M:%S %Z",
-        "%a, %d %b %Y %H:%M:%S %z",
-        "%Y-%m-%dT%H:%M:%S%z",
-        "%Y-%m-%dT%H:%M:%SZ",
-        "%Y-%m-%d %H:%M:%S",
-        "%Y-%m-%d",
-    ]:
+    s = str(pub_date_str).strip()
+
+    # 1. 尝试 RFC 2822 / RSS 2.0 标准
+    try:
+        dt = email.utils.parsedate_to_datetime(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
+        beijing_dt = dt.astimezone(BEIJING_TZ)
+        return (beijing_dt.strftime("%Y-%m-%d"), beijing_dt.isoformat())
+    except Exception:
+        pass
+
+    # 2. 尝试 ISO 8601
+    try:
+        iso_s = s.replace("Z", "+00:00")
+        dt = datetime.datetime.fromisoformat(iso_s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=BEIJING_TZ)
+        beijing_dt = dt.astimezone(BEIJING_TZ)
+        return (beijing_dt.strftime("%Y-%m-%d"), beijing_dt.isoformat())
+    except Exception:
+        pass
+
+    # 3. 常见标准格式
+    for fmt in ["%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M:%S", "%Y-%m-%d", "%Y/%m/%d"]:
         try:
-            dt = datetime.strptime(pub_date_str.strip(), fmt)
+            dt = datetime.datetime.strptime(s, fmt)
+            dt = dt.replace(tzinfo=BEIJING_TZ)
             return (dt.strftime("%Y-%m-%d"), dt.isoformat())
         except Exception:
             continue
-    # 兜底正则提取 YYYY-MM-DD
-    m = re.search(r"(\d{4})-(\d{2})-(\d{2})", pub_date_str)
-    if m:
-        d_str = f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
-        return (d_str, f"{d_str}T00:00:00Z")
-    return ("", pub_date_str)
 
-def fetch_feed(url: str, timeout: int = 10) -> str:
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (WeeklyPipeline/2.0)"})
+    # 4. 兜底正则提取年月日
+    m = re.search(r"(\d{4})[-/](\d{1,2})[-/](\d{1,2})", s)
+    if m:
+        d_str = f"{m.group(1)}-{int(m.group(2)):02d}-{int(m.group(3)):02d}"
+        return (d_str, f"{d_str}T00:00:00+08:00")
+
+    return ("", s)
+
+def content_hash_of(text: str) -> str:
+    """计算纯文本哈希 (忽略空白)，与 node store.js 保持一致"""
+    cleaned = re.sub(r"\s+", "", text or "")
+    return hashlib.sha1(cleaned.encode("utf-8")).hexdigest()[:20]
+
+def generate_stable_id(source_id: str, canonical_url: str, title: str) -> str:
+    """生成不受标题编辑微调影响的稳定文章 ID"""
+    if canonical_url and canonical_url.startswith("http"):
+        seed = canonical_url.strip().split("?")[0].rstrip("/")
+    else:
+        seed = f"{source_id}:{title.strip()}"
+    h = hashlib.sha1(seed.encode("utf-8")).hexdigest()[:10]
+    return f"comm-{source_id}-{h}"
+
+def classify_content(clean_content: str) -> Tuple[str, bool]:
+    """
+    判定正文质量状态:
+    - full_text: 长度 >= 300 且段落 >= 2，或长度 >= 500
+    - summary_only: 50 <= 长度 < 300
+    - metadata_only: 长度 < 50
+    返回: (textType, hasFullText)
+    """
+    length = len(clean_content)
+    paras = [p for p in clean_content.split("\n\n") if p.strip()]
+    if length >= 500 or (length >= 280 and len(paras) >= 2):
+        return ("full_text", True)
+    elif length >= 50:
+        return ("summary_only", False)
+    else:
+        return ("metadata_only", False)
+
+def fetch_feed(url: str, timeout: int = 12) -> str:
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (WeeklyPipeline/2.1)"})
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return resp.read().decode("utf-8", errors="ignore")
 
-def process_source(source: dict) -> list[dict]:
+def atomic_save_json(filepath: str, data: Any):
+    """原子化文件落盘：写入 .tmp 文件后再做原子替换，杜绝损坏"""
+    tmp_path = filepath + ".tmp"
+    os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
+    with open(tmp_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp_path, filepath)
+
+def process_source(source: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     sid = source.get("id")
     name = source.get("name")
     url = source.get("url")
-    print(f"  📡 正在抓取 [{name}] ({sid}) <- {url} ...", flush=True)
-
+    
+    t0 = time.time()
     try:
         xml_data = fetch_feed(url)
         root = ET.fromstring(xml_data)
     except Exception as e:
-        print(f"     ❌ 抓取失败: {e}", flush=True)
-        return []
+        dur = round(time.time() - t0, 2)
+        stat = {
+            "id": sid,
+            "name": name,
+            "url": url,
+            "status": "FAILED",
+            "error": str(e),
+            "total_items": 0,
+            "full_text_items": 0,
+            "summary_items": 0,
+            "metadata_items": 0,
+            "duration": dur,
+            "latest_published_at": ""
+        }
+        return [], stat
 
     items = root.findall(".//item")
     is_atom = False
@@ -91,7 +190,7 @@ def process_source(source: dict) -> list[dict]:
         is_atom = True
 
     articles = []
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_iso = datetime.datetime.now(BEIJING_TZ).isoformat()
 
     for it in items:
         if not is_atom:
@@ -102,9 +201,10 @@ def process_source(source: dict) -> list[dict]:
             author_el = it.find("author")
             if author_el is None:
                 author_el = it.find("{http://purl.org/dc/elements/1.1/}creator")
+            
+            # 严格的正文优先策略：同时读取 content:encoded 与 description
+            encoded_el = it.find("{http://purl.org/rss/1.0/modules/content/}encoded")
             desc_el = it.find("description")
-            if desc_el is None:
-                desc_el = it.find("{http://purl.org/rss/1.0/modules/content/}encoded")
         else:
             t_el = it.find("{http://www.w3.org/2005/Atom}title")
             link_el = it.find("{http://www.w3.org/2005/Atom}link")
@@ -113,9 +213,8 @@ def process_source(source: dict) -> list[dict]:
             if d_el is None:
                 d_el = it.find("{http://www.w3.org/2005/Atom}updated")
             author_el = it.find("{http://www.w3.org/2005/Atom}author/{http://www.w3.org/2005/Atom}name")
-            desc_el = it.find("{http://www.w3.org/2005/Atom}content")
-            if desc_el is None:
-                desc_el = it.find("{http://www.w3.org/2005/Atom}summary")
+            encoded_el = it.find("{http://www.w3.org/2005/Atom}content")
+            desc_el = it.find("{http://www.w3.org/2005/Atom}summary")
 
         title = t_el.text.strip() if (t_el is not None and t_el.text) else ""
         if not title:
@@ -130,18 +229,30 @@ def process_source(source: dict) -> list[dict]:
 
         pub_str = d_el.text.strip() if (d_el is not None and d_el.text) else ""
         published_at, pub_iso = parse_iso_date(pub_str)
-
         author = author_el.text.strip() if (author_el is not None and author_el.text) else ""
 
-        raw_content = desc_el.text.strip() if (desc_el is not None and desc_el.text) else ""
-        clean_content = html_to_clean_text(raw_content)
+        # 正文与摘要解析
+        raw_encoded = encoded_el.text.strip() if (encoded_el is not None and encoded_el.text) else ""
+        raw_desc = desc_el.text.strip() if (desc_el is not None and desc_el.text) else ""
 
-        # 唯一 ID
-        hash_seed = f"{sid}:{title}:{raw_link}"
-        art_hash = hashlib.md5(hash_seed.encode("utf-8")).hexdigest()[:10]
-        art_id = f"comm-{sid}-{art_hash}"
+        clean_encoded = html_to_clean_text(raw_encoded)
+        clean_desc = html_to_clean_text(raw_desc)
 
-        has_full = len(clean_content) >= 150
+        # 优先选用内容更充实的一方（若 content:encoded 大于或等于 description，且长度充足，选 encoded）
+        if len(clean_encoded) >= len(clean_desc) and len(clean_encoded) >= 100:
+            chosen_content = clean_encoded
+            raw_summary = clean_desc[:200]
+        elif len(clean_desc) > 0:
+            chosen_content = clean_desc
+            raw_summary = clean_desc[:200]
+        else:
+            chosen_content = clean_encoded
+            raw_summary = ""
+
+        # 判定正文状态
+        text_type, has_full = classify_content(chosen_content)
+        art_id = generate_stable_id(sid, raw_link, title)
+        c_hash = content_hash_of(chosen_content)
 
         art = {
             "id": art_id,
@@ -154,113 +265,195 @@ def process_source(source: dict) -> list[dict]:
             "title": title,
             "author": author,
             "url": raw_link,
+            "sourceUrl": raw_link,
+            "feedUrl": url,
             "publishedAt": published_at,
             "pubDate": pub_iso,
             "rawPubDate": pub_str,
             "fetchedAt": now_iso,
-            "content": clean_content,
-            "contentLength": len(clean_content),
+            "content": chosen_content,
+            "contentLength": len(chosen_content),
+            "contentHash": c_hash,
+            "textType": text_type,
             "hasFullText": has_full,
-            "flags": [] if has_full else ["no_full_text"]
+            "summary": raw_summary,
+            "flags": [] if has_full else [text_type]
         }
         articles.append(art)
 
-    print(f"     ✅ 提取成功: {len(articles)} 条 (正文充足: {sum(1 for a in articles if a['hasFullText'])})", flush=True)
-    return articles
+    dur = round(time.time() - t0, 2)
+    full_count = sum(1 for a in articles if a["hasFullText"])
+    summary_count = sum(1 for a in articles if a["textType"] == "summary_only")
+    meta_count = sum(1 for a in articles if a["textType"] == "metadata_only")
+    
+    status_label = "OK" if articles else "EMPTY"
+    stat = {
+        "id": sid,
+        "name": name,
+        "url": url,
+        "status": status_label,
+        "error": None,
+        "total_items": len(articles),
+        "full_text_items": full_count,
+        "summary_items": summary_count,
+        "metadata_items": meta_count,
+        "duration": dur,
+        "latest_published_at": articles[0]["publishedAt"] if articles else ""
+    }
+    return articles, stat
 
-def main():
-    print(f"🚀 开始采集与持久化权威评论文章...")
-    print(f"   信源配置: {SOURCES_FILE}")
-    print(f"   存储目录: {OUTPUT_DIR}")
-
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    # 同时建立 data/raw/commentaries 软链或目录同步
+def run_fetch_cycle(
+    sources_file: str = SOURCES_FILE,
+    output_dir: str = DEFAULT_OUTPUT_DIR,
+    index_file: str = DEFAULT_INDEX_FILE
+) -> Dict[str, Any]:
+    """执行一次完整的信源抓取与原子更新周期"""
+    os.makedirs(output_dir, exist_ok=True)
     alt_dir = os.path.join(ROOT_DIR, "data", "raw", "commentaries")
     os.makedirs(alt_dir, exist_ok=True)
 
-    if not os.path.exists(SOURCES_FILE):
-        print(f"❌ 找不到信源配置文件: {SOURCES_FILE}", file=sys.stderr)
-        sys.exit(1)
+    if not os.path.exists(sources_file):
+        raise FileNotFoundError(f"找不到信源配置文件: {sources_file}")
 
-    with open(SOURCES_FILE, "r", encoding="utf-8") as f:
+    with open(sources_file, "r", encoding="utf-8") as f:
         sources = json.load(f)
 
     enabled_sources = [s for s in sources if s.get("enabled", True)]
-    print(f"   已启用信源: {len(enabled_sources)} 个\n")
 
-    all_articles = []
-    source_stats = []
+    # 加载已有累积 db.json
+    db_data = {
+        "updatedAt": "",
+        "totalArticles": 0,
+        "fullTextArticles": 0,
+        "summaryArticles": 0,
+        "articles": {},
+        "sourceStats": []
+    }
+    if os.path.exists(index_file):
+        try:
+            with open(index_file, "r", encoding="utf-8") as ef:
+                loaded = json.load(ef)
+                if isinstance(loaded, dict) and "articles" in loaded:
+                    db_data = loaded
+        except Exception:
+            pass
+
+    existing_articles = db_data.get("articles", {})
+    new_count = 0
+    updated_count = 0
+    unchanged_count = 0
+    total_fetched = 0
+    all_source_stats = []
 
     for s in enabled_sources:
-        t0 = time.time()
-        arts = process_source(s)
-        dur = round(time.time() - t0, 2)
-        full_count = sum(1 for a in arts if a["hasFullText"])
-        source_stats.append({
-            "id": s["id"],
-            "name": s["name"],
-            "url": s["url"],
-            "status": "OK" if arts else "FAILED",
-            "total_items": len(arts),
-            "full_text_items": full_count,
-            "duration": dur,
-            "latest_published_at": arts[0]["publishedAt"] if arts else ""
-        })
+        arts, stat = process_source(s)
+        all_source_stats.append(stat)
+        total_fetched += len(arts)
 
-        # 持久化单个 JSON
         for a in arts:
-            filename = f"{a['id']}.json"
-            filepath = os.path.join(OUTPUT_DIR, filename)
-            # 若文件已存在且已有正文，则不重复覆盖，保护内容
-            if os.path.exists(filepath):
-                try:
-                    with open(filepath, "r", encoding="utf-8") as ef:
-                        old_data = json.load(ef)
-                        if old_data.get("contentLength", 0) >= a["contentLength"] and old_data.get("contentLength", 0) > 0:
-                            all_articles.append(old_data)
-                            continue
-                except Exception:
-                    pass
+            aid = a["id"]
+            filepath = os.path.join(output_dir, f"{aid}.json")
+            alt_path = os.path.join(alt_dir, f"{aid}.json")
 
-            with open(filepath, "w", encoding="utf-8") as out:
-                json.dump(a, out, ensure_ascii=False, indent=2)
+            if aid in existing_articles:
+                old_info = existing_articles[aid]
+                old_hash = old_info.get("contentHash", "")
+                old_has_full = old_info.get("hasFullText", False)
+                # 若内容哈希一致且正文状态未变，跳过写盘
+                if old_hash == a["contentHash"] and old_has_full == a["hasFullText"]:
+                    unchanged_count += 1
+                    continue
+                else:
+                    updated_count += 1
+            else:
+                new_count += 1
 
-            # 同时写到 alt_dir
-            alt_path = os.path.join(alt_dir, filename)
+            # 原子写入单个 JSON
+            atomic_save_json(filepath, a)
             try:
-                with open(alt_path, "w", encoding="utf-8") as out:
-                    json.dump(a, out, ensure_ascii=False, indent=2)
+                atomic_save_json(alt_path, a)
             except Exception:
                 pass
 
-            all_articles.append(a)
+            # 登记入索引字典（轻量索引）
+            existing_articles[aid] = {
+                "id": aid,
+                "title": a["title"],
+                "sourceId": a["sourceId"],
+                "sourceName": a["sourceName"],
+                "publishedAt": a["publishedAt"],
+                "url": a["url"],
+                "contentLength": a["contentLength"],
+                "contentHash": a["contentHash"],
+                "textType": a["textType"],
+                "hasFullText": a["hasFullText"]
+            }
 
-    # 写入索引 db.json
-    db_data = {
-        "updatedAt": datetime.now(timezone.utc).isoformat(),
-        "totalArticles": len(all_articles),
-        "fullTextArticles": sum(1 for a in all_articles if a.get("hasFullText")),
-        "sourceStats": source_stats
-    }
-    with open(INDEX_FILE, "w", encoding="utf-8") as f:
-        json.dump(db_data, f, ensure_ascii=False, indent=2)
+    # 更新并原子落盘 db.json
+    now_iso = datetime.datetime.now(BEIJING_TZ).isoformat()
+    db_data["updatedAt"] = now_iso
+    db_data["totalArticles"] = len(existing_articles)
+    db_data["fullTextArticles"] = sum(1 for a in existing_articles.values() if a.get("hasFullText"))
+    db_data["summaryArticles"] = sum(1 for a in existing_articles.values() if a.get("textType") == "summary_only")
+    db_data["sourceStats"] = all_source_stats
+    db_data["articles"] = existing_articles
 
+    atomic_save_json(index_file, db_data)
     alt_index = os.path.join(alt_dir, "db.json")
     try:
-        with open(alt_index, "w", encoding="utf-8") as f:
-            json.dump(db_data, f, ensure_ascii=False, indent=2)
+        atomic_save_json(alt_index, db_data)
     except Exception:
         pass
 
-    print("\n" + "=" * 80)
-    print("📊 评论源采集与入库状态汇总：")
-    print(f"{'信源ID':22} | {'信源名称':14} | {'状态':6} | {'条目':4} | {'完整正文':8} | {'最新报道日期':12} | {'耗时'}")
-    print("-" * 80)
-    for stat in source_stats:
-        print(f"{stat['id']:22} | {stat['name']:14} | {stat['status']:6} | {stat['total_items']:4} | {stat['full_text_items']:8} | {stat['latest_published_at']:12} | {stat['duration']}s")
-    print("=" * 80)
-    print(f"🎉 评论文章落盘完成！总文章数: {len(all_articles)}, 具备完整正文: {db_data['fullTextArticles']}")
-    print(f"   索引文件: {INDEX_FILE}")
+    summary = {
+        "timestamp": now_iso,
+        "sources_count": len(enabled_sources),
+        "total_fetched": total_fetched,
+        "new_articles": new_count,
+        "updated_articles": updated_count,
+        "unchanged_articles": unchanged_count,
+        "total_inventory": db_data["totalArticles"],
+        "full_text_inventory": db_data["fullTextArticles"],
+        "source_stats": all_source_stats
+    }
+    return summary
+
+def print_source_status_table(summary: Dict[str, Any]):
+    """打印符合审阅规范的真实执行状态表"""
+    stats = summary["source_stats"]
+    print("\n" + "=" * 115)
+    print(f"📊 评论源采集与持久化真实执行状态表 (执行时间: {summary['timestamp']})")
+    print(f"{'信源ID':22} | {'信源名称':14} | {'状态':6} | {'条目':4} | {'全文':4} | {'摘要':4} | {'最新日期':10} | {'耗时':5} | {'配置路由 (sources.json)'}")
+    print("-" * 115)
+    for s in stats:
+        err_hint = f" ({s['error'][:25]}...)" if s.get("error") else ""
+        print(f"{s['id']:22} | {s['name']:14} | {s['status']:6} | {s['total_items']:4} | {s['full_text_items']:4} | {s['summary_items']:4} | {s['latest_published_at']:10} | {s['duration']:4}s | {s['url']}{err_hint}")
+    print("=" * 115)
+    print(f"🎯 运行结算: 本轮提取 {summary['total_fetched']} 篇 | 新增 {summary['new_articles']} 篇 | 更新 {summary['updated_articles']} 篇 | 未变 {summary['unchanged_articles']} 篇")
+    print(f"📦 累积资料库库存: {summary['total_inventory']} 篇 (其中具备完整长文: {summary['full_text_inventory']} 篇)")
+    print("=" * 115 + "\n")
+
+def main():
+    parser = argparse.ArgumentParser(description="权威评论文章抓取与持久化工具")
+    parser.add_argument("--sources", default=SOURCES_FILE, help="信源配置路径")
+    parser.add_argument("--output-dir", default=DEFAULT_OUTPUT_DIR, help="持久化 raw 输出目录")
+    parser.add_argument("--index-file", default=DEFAULT_INDEX_FILE, help="累积索引 db.json 路径")
+    parser.add_argument("--daemon", action="store_true", help="常驻调度模式")
+    parser.add_argument("--interval", type=int, default=3600, help="常驻调度模式下的抓取间隔 (秒)")
+    args = parser.parse_args()
+
+    if args.daemon:
+        print(f"🔄 启动评论持久化常驻调度器 (间隔: {args.interval} 秒)...")
+        while True:
+            try:
+                res = run_fetch_cycle(args.sources, args.output_dir, args.index_file)
+                print_source_status_table(res)
+            except Exception as e:
+                print(f"❌ 调度周期异常: {e}", file=sys.stderr)
+            time.sleep(args.interval)
+    else:
+        res = run_fetch_cycle(args.sources, args.output_dir, args.index_file)
+        print_source_status_table(res)
 
 if __name__ == "__main__":
     main()

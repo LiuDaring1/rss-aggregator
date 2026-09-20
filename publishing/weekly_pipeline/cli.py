@@ -161,9 +161,10 @@ def cmd_preview(args):
             print(f"  - {k.upper()}: {v}")
 
 def cmd_build(args):
-    issue_id = args.issue
-    out_dir = args.outdir
-    formats = args.formats.split(",")
+    raw_issue = getattr(args, "issue_pos", None) or getattr(args, "issue", None) or "sample-01-rev5"
+    issue_id = raw_issue.strip("/").split("/")[-1]
+    out_dir = args.outdir or os.path.join("dist", issue_id)
+    formats = [f.strip() for f in args.formats.split(",") if f.strip()]
     os.makedirs(out_dir, exist_ok=True)
     
     issue_yaml = os.path.join("issues", issue_id, "issue.yaml")
@@ -426,10 +427,11 @@ def main():
     p_prev.set_defaults(func=cmd_preview)
     
     # build
-    p_bld = subparsers.add_parser("build", help="构建整刊")
-    p_bld.add_argument("--issue", default="sample-01-rev5", help="期刊ID")
-    p_bld.add_argument("--outdir", default="outputs")
-    p_bld.add_argument("--formats", default="html,pdf,png")
+    p_bld = subparsers.add_parser("build", help="构建整刊 (离线确定性渲染与双向门禁核验)")
+    p_bld.add_argument("issue_pos", nargs="?", default=None, help="期刊ID或路径（如 issues/issue-2026-w38 或 issue-2026-w38）")
+    p_bld.add_argument("--issue", default=None, help="期刊ID (如 issue-2026-w38)")
+    p_bld.add_argument("--outdir", default=None, help="输出目录 (默认: dist/<issue_id>)")
+    p_bld.add_argument("--formats", default="html,pdf", help="输出格式: html,pdf,png")
     p_bld.add_argument("--offline", action="store_true", default=True, help="离线构建模式")
     p_bld.set_defaults(func=cmd_build)
     
