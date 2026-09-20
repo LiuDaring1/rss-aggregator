@@ -76,41 +76,66 @@ def extract_dates_from_raw(data: Dict[str, Any]) -> Dict[str, Optional[str]]:
     }
 
 def scan_raw_candidates(
-    raw_dir: str,
+    raw_dirs: Any,
     start_date: str = "2026-09-01",
     end_date: str = "2026-09-15"
 ) -> List[Dict[str, Any]]:
     """
-    扫描本地 raw 资料库，提取规范化元数据并按时间窗过滤。
-    若 raw_dir 不存在，抛出 FileNotFoundError 以保护下游交付。
+    扫描本地 raw 资料库（支持逗号分隔或列表形式的多个目录），
+    提取规范化元数据并按时间窗过滤。
     """
-    if not os.path.exists(raw_dir):
-        raise FileNotFoundError(f"原始资料库目录不存在: {raw_dir}")
+    if isinstance(raw_dirs, str):
+        dirs = [d.strip() for d in raw_dirs.split(",") if d.strip()]
+    else:
+        dirs = list(raw_dirs)
+
+    valid_dirs = [d for d in dirs if os.path.exists(d)]
+    if not valid_dirs:
+        raise FileNotFoundError(f"原始资料库目录均不存在: {raw_dirs}")
 
     candidates = []
-    files = glob.glob(os.path.join(raw_dir, "*.json"))
-    for f in sorted(files):
-        data = load_raw_json(f)
-        if not data:
-            continue
-        dates = extract_dates_from_raw(data)
-        
-        # 主参照日期优先看原报道时间或事件时间，次看获奖时间
-        primary_date = dates["published_at"] or dates["event_occurred_at"] or dates["award_date"] or ""
-        if start_date <= primary_date <= end_date:
-            content = data.get("content") or ""
-            paras = [p.strip() for p in content.split("\n") if p.strip()]
-            candidates.append({
-                "raw_id": data.get("id"),
-                "file_path": f,
-                "title": data.get("title", ""),
-                "media": data.get("media") or data.get("origin") or "未知媒体",
-                "url": data.get("url", ""),
-                "dates": dates,
-                "category": data.get("category", ""),
-                "sample_paragraphs": paras[:3],
-                "char_count": len(content)
-            })
+    seen_ids = set()
+
+    for r_dir in valid_dirs:
+        files = glob.glob(os.path.join(r_dir, "*.json"))
+        for f in sorted(files):
+            if os.path.basename(f) in ["db.json", "index.json"]:
+                continue
+            data = load_raw_json(f)
+            if not data:
+                continue
+            
+            raw_id = str(data.get("id") or "")
+            if raw_id in seen_ids:
+                continue
+            seen_ids.add(raw_id)
+
+            dates = extract_dates_from_raw(data)
+            
+            # 主参照日期优先看原报道时间或事件时间，次看获奖时间
+            primary_date = dates["published_at"] or dates["event_occurred_at"] or dates["award_date"] or ""
+            if start_date <= primary_date <= end_date:
+                content = data.get("content") or ""
+                paras = [p.strip() for p in content.split("\n") if p.strip()]
+                origin = data.get("origin") or data.get("sourceType") or ""
+                is_comm = (origin == "commentary") or raw_id.startswith("comm-")
+                content_type = "commentary" if is_comm else "warm_story"
+                has_full = data.get("hasFullText", len(content) >= 150)
+
+                candidates.append({
+                    "raw_id": raw_id,
+                    "content_type": content_type,
+                    "file_path": f,
+                    "title": data.get("title", ""),
+                    "media": data.get("media") or data.get("sourceName") or data.get("origin") or "未知媒体",
+                    "author": data.get("author", ""),
+                    "url": data.get("url", ""),
+                    "dates": dates,
+                    "category": data.get("category", ""),
+                    "has_full_text": has_full,
+                    "sample_paragraphs": paras[:3],
+                    "char_count": len(content)
+                })
     return candidates
 
 def build_manifest_from_candidates(
@@ -127,11 +152,14 @@ def build_manifest_from_candidates(
     for c in candidates:
         items.append({
             "raw_id": c["raw_id"],
+            "content_type": c.get("content_type", "warm_story"),
             "title": c["title"],
             "source_media": c["media"],
+            "author": c.get("author", ""),
             "source_url": c["url"],
             "dates": c["dates"],
             "category": c["category"],
+            "has_full_text": c.get("has_full_text", True),
             "sample_paragraphs": c["sample_paragraphs"],
             "char_count": c["char_count"],
             "workflow_status": {
@@ -141,6 +169,9 @@ def build_manifest_from_candidates(
             },
             "action_decision": "pending_review"
         })
+
+    comm_count = sum(1 for c in candidates if c.get("content_type") == "commentary")
+    warm_count = sum(1 for c in candidates if c.get("content_type") == "warm_story")
 
     manifest = {
         "schema_version": "1.0",
@@ -155,6 +186,8 @@ def build_manifest_from_candidates(
         },
         "statistics": {
             "candidates_scanned": len(candidates),
+            "commentaries_scanned": comm_count,
+            "warm_stories_scanned": warm_count,
             "selected_count": 0,
             "retellings_count": 0,
             "commentaries_count": 0,
@@ -170,7 +203,7 @@ def build_manifest_from_candidates(
         os.makedirs(os.path.dirname(os.path.abspath(out_file)), exist_ok=True)
         with open(out_file, "w", encoding="utf-8") as f:
             json.dump(manifest, f, ensure_ascii=False, indent=2)
-        print(f"✅ 成功生成候选备料清单: {out_file} (包含 {len(items)} 条待审核候选资料)")
+        print(f"✅ 成功生成候选备料清单: {out_file} (包含 {len(items)} 条待审核候选资料: {comm_count} 篇评论, {warm_count} 篇暖性故事)")
 
     return manifest
 
@@ -209,10 +242,10 @@ def resolve_curated_path(issue_id: str, curated_file: Optional[str] = None) -> s
 
 def main():
     parser = argparse.ArgumentParser(description="周刊备料管线连接工具")
-    parser.add_argument("--raw-dir", default="aggr-site/data/wenwen/raw", help="raw 资料库路径")
+    parser.add_argument("--raw-dir", default="aggr-site/data/wenwen/raw,aggr-site/data/commentaries/raw", help="raw 资料库路径（支持逗号分隔多个目录）")
     parser.add_argument("--start-date", default="2026-09-01", help="起始日期 (YYYY-MM-DD)")
-    parser.add_argument("--end-date", default="2026-09-15", help="截止日期 (YYYY-MM-DD)")
-    parser.add_argument("--issue-id", default="issue-2026-w37", help="期刊 ID")
+    parser.add_argument("--end-date", default="2026-09-20", help="截止日期 (YYYY-MM-DD)")
+    parser.add_argument("--issue-id", default="issue-2026-w38", help="期刊 ID")
     parser.add_argument("--curated-file", default=None, help="显式已核验编辑数据路径 (JSON)")
     parser.add_argument("--apply-curated", action="store_true", help="若指定且存在已核验文件则应用")
     parser.add_argument("--force", action="store_true", help="强制覆盖已存在的选材清单")
@@ -252,8 +285,9 @@ def main():
             pass
 
     # 严格依据输入 raw 资料与时间窗
-    if not os.path.exists(args.raw_dir):
-        print(f"❌ 原始资料库不存在: {args.raw_dir}，跳过生成以保护已有清单交付。", file=sys.stderr)
+    valid_dirs = [d.strip() for d in args.raw_dir.split(",") if os.path.exists(d.strip())]
+    if not valid_dirs:
+        print(f"❌ 原始资料库均不存在: {args.raw_dir}，跳过生成以保护已有清单交付。", file=sys.stderr)
         sys.exit(1)
 
     time_window = f"{args.start_date} ~ {args.end_date}"

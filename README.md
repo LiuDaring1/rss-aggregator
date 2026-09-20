@@ -67,28 +67,25 @@ flowchart TD
 
 ---
 
-## 🛠️ 当前标准运行与构建命令
+## 🛠️ 当前标准端到端出刊工作流
 
-所有命令均在项目根目录下通过 CLI 执行：
+所有命令均在项目根目录下执行：
 
 ```bash
-# 1. 环境与工具链体检（检查 Python 依赖、Node.js、Chromium 浏览器）
-python3 publishing/weekly_pipeline/cli.py doctor
+# 1. 采集并持久化 11 家权威评论栏目最新全文到本地资料库
+python3 scripts/fetch_commentaries.py
 
-# 2. 全量素材单元 Schema 验证（校验 content/ 下所有 YAML）
-python3 publishing/weekly_pipeline/cli.py validate
+# 2. 扫描指定时间窗候选材料（自动汇总评论与暖文双路候选）
+python3 publishing/weekly_pipeline/prep.py --issue-id issue-2026-w38 --start-date 2026-09-14 --end-date 2026-09-20
 
-# 3. 运行完整自动化测试套件
-python3 -m unittest discover -s tests -v
+# 3. 全量素材单元 Schema 验证（校验 content/ 下所有 YAML）
+python3 publishing/weekly_pipeline/cli.py validate --content-dir content
 
 # 4. 构建指定期号周刊（生成 HTML、整刊 PDF、3本模块分册 PDF、同源 Markdown）
-python3 publishing/weekly_pipeline/cli.py build --issue issue-2026-w37 --outdir outputs/issue-2026-w37
+python3 publishing/weekly_pipeline/cli.py build --issue issue-2026-w38 --outdir dist/issue-2026-w38 --formats html,pdf
 
 # 5. 聚合站离线测试（15 项）
 cd aggr-site && npm test
-
-# 6. 历史样刊与基准参考（已归档为只读基准，非生产命令）
-# cd weekly/sample-01-rev5 && python3 build5.py toc-pages.json && ./render.sh
 ```
 
 ---

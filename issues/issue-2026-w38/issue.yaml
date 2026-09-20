@@ -1,0 +1,22 @@
+schema_version: '1.0'
+issue_id: issue-2026-w38
+title: 口语素材周刊
+kicker: 高中播音艺考口语素材周刊
+issue_no_label: 2026年第38周 · 正式发行版
+date_range: 2026年9月第3周（09.14-09.20）
+retelling_ids:
+- R27
+- R28
+commentary_ids:
+- C19
+- C20
+excerpt_ids:
+- F19
+- F20
+ai_prompt_path: ai-retelling-prompt.txt
+build_config:
+  pdf_render_timeout_ms: 15000
+  font_family_serif: '"Songti SC", "STSong", "SimSun", serif'
+  font_family_sans: '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
+  font_family_kaiti: '"Kaiti SC", "STKaiti", serif'
+  min_font_size_pt: 9.0

@@ -18,13 +18,14 @@ references/teaching-private/
 local-data/
 outputs/
 output/
+dist/
 *.tmp
 issues/*/*_pages/
 issues/*/*.html
 
 # 运行数据与日志（本机留档）
-aggr-site/data/wenwen/
-aggr-site/data/*.log
+aggr-site/data/
+data/raw/
 aggr-site/server.log
 aggr-site/pnpm-install.log
 rsshub/rsshub.log
