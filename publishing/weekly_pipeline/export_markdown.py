@@ -102,12 +102,16 @@ def export_commentary_markdown(unit: CommentaryUnit, edition: str = "teacher") -
     lines.append("")
     for b_idx, b in enumerate(unit.speech.body):
         ordinal = "一" if b_idx == 0 else "二"
-        lines.append(f"### 【主体段{ordinal}·{b.claim.strip()}】")
-        claim_clean = b.claim.strip()
+        claim_clean = re.sub(r'</?[a-zA-Z0-9]+[^>]*>', '', b.claim.strip())
+        lines.append(f"### 【主体段{ordinal}·{claim_clean}】")
         for p_idx, p in enumerate(b.paragraphs):
-            p_clean = p.strip()
-            if p_idx == 0 and not p_clean.startswith(claim_clean):
-                lines.append(f"> {claim_clean} {p_clean}")
+            p_clean = re.sub(r'</?[a-zA-Z0-9]+[^>]*>', '', p.strip())
+            if p_idx == 0:
+                if p_clean.startswith(claim_clean):
+                    rest = p_clean[len(claim_clean):].lstrip()
+                    lines.append(f"> **{claim_clean}**{rest}")
+                else:
+                    lines.append(f"> **{claim_clean}**{p_clean}")
             else:
                 lines.append(f"> {p_clean}")
         lines.append("")

@@ -38,8 +38,8 @@
       {{ illustration_html | safe }}
     {% else %}
     <div class="illhold">
-      <div class="ill-no">插画位 {{ unit.illustration_id | default("ILL-" ~ unit.id) }} · 插画待回传</div>
-      <div class="ill-note">{{ unit.illustration_brief | default("黑白报刊式叙事插画") }}</div>
+      <div class="ill-no">{% if unit.illustration_id %}插画位 {{ unit.illustration_id }} · {% endif %}插画待回传</div>
+      <div class="ill-note">{{ unit.illustration_brief or "黑白报刊式叙事插画" }}</div>
     </div>
     {% endif %}
   </div>

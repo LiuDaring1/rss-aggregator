@@ -112,9 +112,9 @@
           {% set p_clean = p.strip() %}
           {% if loop.first %}
             {% if p_clean.startswith(claim_clean) %}
-            <p><b>{{ claim_clean }}</b>{{ p_clean[claim_clean|length:] }}</p>
+            <p><b>{{ claim_clean }}</b>{{ p_clean[claim_clean|length:].lstrip() }}</p>
             {% else %}
-            <p><b>{{ claim_clean }}</b> {{ p_clean }}</p>
+            <p><b>{{ claim_clean }}</b>{{ p_clean }}</p>
             {% endif %}
           {% else %}
           <p>{{ p_clean }}</p>

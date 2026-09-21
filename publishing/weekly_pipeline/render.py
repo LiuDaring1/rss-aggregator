@@ -21,6 +21,7 @@ from weekly_pipeline.models import (
 )
 
 PACKAGE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.abspath(os.path.join(PACKAGE_DIR, "../.."))
 TEMPLATES_DIR = os.path.join(PACKAGE_DIR, "templates")
 ASSETS_DIR = os.path.join(PACKAGE_DIR, "assets")
 STYLE_CSS_PATH = os.path.join(ASSETS_DIR, "style.css")
@@ -86,63 +87,173 @@ def generate_keywords_svg(center: str, keywords: List[str]) -> str:
     parts.append("</svg>")
     return "".join(parts)
 
+def wrap_cjk_text(text: str, max_chars: int = 9) -> List[str]:
+    """对中文中心主题进行合理分行，避免文字过长越界或碰撞"""
+    if not text:
+        return [""]
+    s = str(text).strip()
+    if len(s) <= max_chars:
+        return [s]
+    delims = ["：", ":", "，", ",", "、", " ", "·", "-"]
+    for d in delims:
+        if d in s:
+            parts = s.split(d, 1)
+            p1 = parts[0].strip() + (d if d in ["：", ":", "·"] else "")
+            p2 = parts[1].strip()
+            if 3 <= len(p1) <= max_chars + 2:
+                if len(p2) <= max_chars:
+                    return [p1, p2]
+                return [p1] + wrap_cjk_text(p2, max_chars)
+    lines = []
+    for i in range(0, len(s), max_chars):
+        lines.append(s[i:i+max_chars])
+    return lines
+
 def generate_mindmap_svg(tree: MindmapTree) -> str:
-    """根据 MindmapTree 模型生成思维导图 SVG"""
+    """根据 MindmapTree 模型生成符合报刊标准的思维导图 SVG，彻底解决文字碰撞与连线遮挡"""
     root = tree.center
     branches = tree.branches
-    rows = []
+    
+    leaves_data = []
     for bi, br in enumerate(branches):
         for leaf in br.leaves:
-            # 兼容 tall 判断
-            tall = len(leaf.hint) > 10
-            rows.append((bi, leaf.hint, tall))
+            tall = len(leaf.hint) > 11
+            leaves_data.append((bi, leaf.hint, leaf.id, tall))
             
-    if not rows:
+    if not leaves_data:
         return f'<svg viewBox="0 0 720 100" xmlns="http://www.w3.org/2000/svg"><text x="360" y="50" text-anchor="middle">{esc(root)}</text></svg>'
         
-    H = 14 + sum((56 if t else 42) + 7 for _, _, t in rows) + 6
     W = 720
+    gap_leaf = 8
+    leaf_boxes = []
+    curr_y = 14
+    
+    for bi, hint, lid, tall in leaves_data:
+        h = 52 if tall else 44
+        leaf_boxes.append((bi, hint, lid, curr_y, h))
+        curr_y += h + gap_leaf
+        
+    H = curr_y + 12
+    
+    branch_spans: Dict[int, List[float]] = {}
+    for bi, hint, lid, ly, lh in leaf_boxes:
+        branch_spans.setdefault(bi, []).append(ly + lh / 2)
+        
+    branch_centers: Dict[int, float] = {}
+    for bi, y_list in branch_spans.items():
+        branch_centers[bi] = sum(y_list) / len(y_list)
+        
+    cx, cw = 12, 164
+    spine1_x = 196
+    bx, bw = 216, 104
+    spine2_x = 338
+    lx, lw = 356, 356
+    
+    root_lines = wrap_cjk_text(root, max_chars=9)
+    ch = max(44, 20 + len(root_lines) * 18)
+    cy = H / 2
+    c_top = max(10, cy - ch / 2)
+    c_right = cx + cw
+    
+    lines_svg = []
+    nodes_svg = []
+    
+    # 1. 底层连线绘制：中心卡片 -> Spine 1
+    lines_svg.append(f'<path d="M {c_right} {cy:.1f} H {spine1_x}" stroke="#334155" stroke-width="1.3" fill="none"/>')
+    
+    if branch_centers:
+        min_by = min(branch_centers.values())
+        max_by = max(branch_centers.values())
+        lines_svg.append(f'<path d="M {spine1_x} {min_by:.1f} V {max_by:.1f}" stroke="#334155" stroke-width="1.3" fill="none"/>')
+        
+        for bi, by in branch_centers.items():
+            lines_svg.append(f'<path d="M {spine1_x} {by:.1f} H {bx}" stroke="#334155" stroke-width="1.3" fill="none"/>')
+            
+    # 2. 底层连线绘制：主枝卡片 -> Spine 2 -> 各具体子叶框
+    b_right = bx + bw
+    for bi, y_list in branch_spans.items():
+        by = branch_centers[bi]
+        lines_svg.append(f'<path d="M {b_right} {by:.1f} H {spine2_x}" stroke="#334155" stroke-width="1.1" fill="none"/>')
+        min_ly = min(y_list)
+        max_ly = max(y_list)
+        if len(y_list) > 1:
+            lines_svg.append(f'<path d="M {spine2_x} {min_ly:.1f} V {max_ly:.1f}" stroke="#334155" stroke-width="1.1" fill="none"/>')
+        for ly in y_list:
+            lines_svg.append(f'<path d="M {spine2_x} {ly:.1f} H {lx}" stroke="#334155" stroke-width="1.1" fill="none"/>')
+            
+    # 3. 顶层节点绘制：中心卡片
+    nodes_svg.append(f'<rect x="{cx}" y="{c_top:.1f}" width="{cw}" height="{ch}" fill="#f8fafc" stroke="#0f172a" stroke-width="1.8" rx="4"/>')
+    line_spacing = 18
+    text_start_y = c_top + (ch - len(root_lines) * line_spacing) / 2 + 13
+    for li, rline in enumerate(root_lines):
+        nodes_svg.append(text_el(cx + cw / 2, text_start_y + li * line_spacing, rline, size=12.5, weight="700", anchor="middle", fill="#0f172a"))
+        
+    # 4. 顶层节点绘制：主枝卡片
+    for bi, br in enumerate(branches):
+        if bi not in branch_centers:
+            continue
+        by = branch_centers[bi]
+        bh = 32
+        bt = by - bh / 2
+        nodes_svg.append(f'<rect x="{bx}" y="{bt:.1f}" width="{bw}" height="{bh}" fill="#f1f5f9" stroke="#334155" stroke-width="1.2" rx="3"/>')
+        bname = br.name
+        bsize = 12 if len(bname) <= 6 else 11
+        nodes_svg.append(text_el(bx + bw / 2, by + 4.5, bname, size=bsize, weight="700", anchor="middle", fill="#1e293b"))
+        
+    # 5. 顶层节点绘制：子叶虚线框与书写横线
+    for bi, hint, lid, ly, lh in leaf_boxes:
+        nodes_svg.append(f'<rect x="{lx}" y="{ly}" width="{lw}" height="{lh}" fill="#ffffff" stroke="#475569" stroke-width="1.2" stroke-dasharray="5,3" rx="3"/>')
+        hint_label = f"[{lid}] {hint}" if lid else hint
+        nodes_svg.append(text_el(lx + 10, ly + 16, hint_label, size=11, weight="600", fill="#475569", anchor="start"))
+        nodes_svg.append(f'<line x1="{lx + 10}" y1="{ly + lh - 12}" x2="{lx + lw - 10}" y2="{ly + lh - 12}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2,2"/>')
+        
+    nodes_svg.append(text_el(W - 8, H - 4, "虚线框＝待补写（要点见「复述参考」导图参照）", size=9.5, fill="#64748b", anchor="end"))
+    
     parts = [
         f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg">',
-        f'<rect x="0" y="0" width="{W}" height="{H}" fill="#fff"/>'
+        f'<rect x="0" y="0" width="{W}" height="{H}" fill="#ffffff"/>',
+        "".join(lines_svg),
+        "".join(nodes_svg),
+        '</svg>'
     ]
-    child_x, child_w = 350, 362
-    y = 14
-    span: Dict[int, List[float]] = {}
-    
-    for bi, hint, tall in rows:
-        h = 56 if tall else 42
-        span.setdefault(bi, [y, y + h])
-        span[bi][1] = y + h
-        parts.append(f'<rect x="{child_x}" y="{y}" width="{child_w}" height="{h}" fill="#fff" stroke="#000" stroke-width="1.2" stroke-dasharray="5,3"/>')
-        parts.append(text_el(child_x + 9, y + 16, hint, size=11, fill="#555", anchor="start"))
-        y += h + 7
-        
-    branch_x = 210
-    b_mid: Dict[int, float] = {}
-    for bi, br in enumerate(branches):
-        if bi not in span:
-            continue
-        y0, y1 = span[bi]
-        my = (y0 + y1) / 2
-        b_mid[bi] = my
-        parts.append(text_el(branch_x + 46, my + 5, br.name, size=13, weight="700"))
-        parts.append(f'<path d="M {branch_x+100} {my} H {child_x-8} V {my:.0f} H {child_x-2}" stroke="#000" stroke-width="1" fill="none"/>')
-        
-    rx = 20
-    ry = H / 2
-    parts.append(text_el(rx, ry + 5, root, size=14, weight="700", anchor="start"))
-    spine_x = branch_x - 14
-    if b_mid:
-        ys = sorted(b_mid.values())
-        parts.append(f'<path d="M {rx+8*len(root)+8} {ry} H {spine_x}" stroke="#000" stroke-width="1.2" fill="none"/>')
-        parts.append(f'<path d="M {spine_x} {ys[0]:.0f} V {ys[-1]:.0f}" stroke="#000" stroke-width="1.2" fill="none"/>')
-        for bi, my in b_mid.items():
-            parts.append(f'<path d="M {spine_x} {my:.0f} H {branch_x-2}" stroke="#000" stroke-width="1.2" fill="none"/>')
-            
-    parts.append(text_el(W - 6, H - 3, "虚线框＝待补写（要点见「复述参考」导图参照）", size=9.5, fill="#555", anchor="end"))
-    parts.append("</svg>")
     return "".join(parts)
+
+def resolve_illustration_html(unit: Any, issue_dir: Optional[str] = None) -> Optional[str]:
+    """解析插画本地资产并转为内嵌 Base64 Data URI，保证无头 PDF 打印与单页离线完全呈现"""
+    img_rel = getattr(unit, "illustration_path", None)
+    if not img_rel or not str(img_rel).strip():
+        return None
+        
+    img_rel = str(img_rel).strip()
+    candidates = []
+    if issue_dir:
+        candidates.append(os.path.join(issue_dir, img_rel))
+    candidates.append(os.path.join(ROOT_DIR, img_rel))
+    candidates.append(os.path.join(ROOT_DIR, "issues/issue-2026-w38", img_rel))
+    candidates.append(os.path.join(PACKAGE_DIR, "assets", img_rel))
+    candidates.append(os.path.join(ROOT_DIR, "content", img_rel))
+    
+    found_path = None
+    for cp in candidates:
+        if os.path.exists(cp) and os.path.isfile(cp):
+            found_path = os.path.abspath(cp)
+            break
+            
+    if not found_path:
+        return None
+        
+    try:
+        import base64
+        ext = os.path.splitext(found_path)[1].lower().replace(".", "")
+        mime = f"image/{ext}" if ext in ["png", "jpg", "jpeg", "webp", "gif"] else "image/png"
+        with open(found_path, "rb") as f:
+            b64_data = base64.b64encode(f.read()).decode("utf-8")
+        data_uri = f"data:{mime};base64,{b64_data}"
+        title = getattr(unit, "title", "单元插画")
+        return f'<div class="ill-img-container"><img src="{data_uri}" alt="{esc(title)} 插画" class="ill-img"/></div>'
+    except Exception as e:
+        print(f"⚠️ 加载插画资产异常 {found_path}: {e}", file=sys.stderr)
+        return None
 
 
 # ==============================================================================
@@ -165,7 +276,9 @@ def render_unit_preview_html(unit: Any, unit_type: str, backref_page: Optional[i
             unit.mindmap_tree.center, unit.keywords
         )
         unit_data["mindmap_svg"] = generate_mindmap_svg(unit.mindmap_tree)
-        unit_data["illustration_html"] = None
+        unit_data["illustration_html"] = resolve_illustration_html(
+            unit, issue_dir=os.path.join(ROOT_DIR, "issues/issue-2026-w38")
+        )
     elif unit_type == "commentary":
         retelling_title = ""
         try:
@@ -204,13 +317,14 @@ def render_issue_html(manifest: IssueManifest,
     style_css = get_style_css()
     page_map = page_map or {}
     
+    issue_dir = os.path.join(ROOT_DIR, "issues", manifest.issue_id)
     retellings_data = []
     for r in retellings:
         retellings_data.append({
             "unit": r,
             "keywords_svg": generate_keywords_svg(r.mindmap_tree.center, r.keywords),
             "mindmap_svg": generate_mindmap_svg(r.mindmap_tree),
-            "illustration_html": None
+            "illustration_html": resolve_illustration_html(r, issue_dir=issue_dir)
         })
         
     commentaries_data = []

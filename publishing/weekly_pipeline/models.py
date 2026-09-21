@@ -88,6 +88,8 @@ class RetellingUnit(BaseModel):
     mapkey: str = Field(..., description="导图参照文字")
     illustration_id: Optional[str] = Field(None, description="插画编号，如 ILL-R01")
     illustration_brief: Optional[str] = Field(None, description="插画需求描述")
+    illustration_path: Optional[str] = Field(None, description="插画相对路径，如 illustrations/ILL-R27.png")
+    illustration_status: Optional[str] = Field("pending", description="插画状态: confirmed / pending / skipped")
 
 
 # ==============================================================================
@@ -177,13 +179,15 @@ class CommentaryUnit(BaseModel):
 
     def get_spoken_paragraphs(self) -> List[str]:
         """返回规范化拼装的口语范本各段文本（开头总论、主体段落包含分论点、结尾独立收束）"""
+        import re
         paras = []
         if self.speech.main_claim and self.speech.main_claim.strip():
-            paras.append(self.speech.main_claim.strip())
+            clean_main = re.sub(r'</?[a-zA-Z0-9]+[^>]*>', '', self.speech.main_claim.strip())
+            paras.append(clean_main)
         for b in self.speech.body:
-            claim_clean = b.claim.strip()
+            claim_clean = re.sub(r'</?[a-zA-Z0-9]+[^>]*>', '', b.claim.strip())
             for idx, p in enumerate(b.paragraphs):
-                p_clean = p.strip()
+                p_clean = re.sub(r'</?[a-zA-Z0-9]+[^>]*>', '', p.strip())
                 if idx == 0:
                     if not p_clean.startswith(claim_clean):
                         paras.append(f"{claim_clean} {p_clean}")
@@ -192,7 +196,8 @@ class CommentaryUnit(BaseModel):
                 else:
                     paras.append(p_clean)
         if self.speech.closing and self.speech.closing.strip():
-            paras.append(self.speech.closing.strip())
+            clean_closing = re.sub(r'</?[a-zA-Z0-9]+[^>]*>', '', self.speech.closing.strip())
+            paras.append(clean_closing)
         return paras
 
     def get_full_spoken_text(self) -> str:

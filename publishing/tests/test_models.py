@@ -590,5 +590,117 @@ mapkey: 答案1
             self.assertTrue((target / "old.txt").exists())
             self.assertEqual((target / "old.txt").read_text(encoding="utf-8"), "OLD_CONTENT")
 
+    def test_a1_text_format_separation_no_raw_tags(self):
+        """A1 专项：验证 C19/C20 数据中无裸 HTML 标签，HTML 模板正常首句加粗且无双重转义与首句重复"""
+        import yaml
+        from weekly_pipeline.validation import load_yaml_safely
+        from weekly_pipeline.render import render_unit_preview_html
+        from weekly_pipeline.export_markdown import export_commentary_markdown
+
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+        for cid in ["C19", "C20"]:
+            fpath = os.path.join(root_dir, "content", "commentaries", f"{cid}.yaml")
+            with open(fpath, "r", encoding="utf-8") as f:
+                raw_text = f.read()
+            self.assertNotIn("<b>", raw_text, f"{cid}.yaml 数据中不得包含裸 <b> 标签")
+            self.assertNotIn("</b>", raw_text, f"{cid}.yaml 数据中不得包含裸 </b> 标签")
+            
+            data = load_yaml_safely(raw_text)
+            cu = CommentaryUnit(**data)
+            html_out = render_unit_preview_html(cu, "commentary")
+            # 模板应渲染 <b>，但不应有被转义的 &lt;b&gt; 实体
+            self.assertNotIn("&lt;b&gt;", html_out, f"{cid} 渲染 HTML 中不得出现双重转义实体 &lt;b&gt;")
+            self.assertNotIn("&lt;/b&gt;", html_out, f"{cid} 渲染 HTML 中不得出现双重转义实体 &lt;/b&gt;")
+            self.assertNotIn("<b><b>", html_out, f"{cid} 渲染 HTML 中不得出现重复加粗标签")
+            
+            # Markdown 导出验证
+            md_out = export_commentary_markdown(cu, edition="student")
+            self.assertNotIn("<b>", md_out, f"{cid} 导出的学生 Markdown 中不得有 <b> 标签")
+            self.assertIn("**", md_out, f"{cid} 导出的学生 Markdown 应使用 ** 语法加粗")
+
+    def test_a2_mindmap_geometry_and_wrapping(self):
+        """A2 专项：验证导图布局算法对超长中心主题、多分支多分枝的自适应，以及连线底层绘制"""
+        from weekly_pipeline.models import MindmapTree, MindmapBranch, MindmapLeaf
+        from weekly_pipeline.render import generate_mindmap_svg, wrap_cjk_text
+
+        # 1. 验证长标题换行
+        long_title = "云南边境少年考上川师大：穿沾泥校服种咖啡，“离开大山是为了回到大山”"
+        wrapped = wrap_cjk_text(long_title, max_chars=9)
+        self.assertGreater(len(wrapped), 1)
+        for w in wrapped:
+            self.assertLessEqual(len(w), 12)
+
+        # 2. 合成多分枝、长文字复杂树
+        tree = MindmapTree(
+            center=long_title,
+            branches=[
+                MindmapBranch(name="起点与背景", leaves=[
+                    MindmapLeaf(id="A1", hint="极度偏远山区求学与家庭重大变故考验", answer="答案1"),
+                    MindmapLeaf(id="A2", hint="穿校服种咖啡攒学费自立自强", answer="答案2"),
+                ]),
+                MindmapBranch(name="成长与决断", leaves=[
+                    MindmapLeaf(id="B1", hint="高考成绩优异考取重点师范大学学府", answer="答案3"),
+                ]),
+                MindmapBranch(name="未来与反哺", leaves=[
+                    MindmapLeaf(id="C1", hint="学成后重返家乡支援边疆乡村教育", answer="答案4"),
+                    MindmapLeaf(id="C2", hint="带动更多大山孩子开拓宽广视野", answer="答案5"),
+                ])
+            ]
+        )
+        svg = generate_mindmap_svg(tree)
+        self.assertTrue(svg.startswith("<svg"))
+        self.assertTrue(svg.endswith("</svg>"))
+        # 核心几何断言：连线层 (path) 必须出现在实体卡片与文字层 (rect, text) 之前
+        first_path_idx = svg.find("<path")
+        last_path_idx = svg.rfind("<path")
+        # 找到首个主体节点卡片 rect (跳过首个全局画布背景 rect)
+        bg_rect_idx = svg.find("<rect")
+        first_card_rect_idx = svg.find("<rect", bg_rect_idx + 1)
+        self.assertGreater(first_path_idx, 0, "应生成连线 path")
+        self.assertGreater(first_card_rect_idx, 0, "应生成实体卡片 rect")
+        self.assertLess(first_path_idx, first_card_rect_idx, "连线层必须先于实体卡片绘制，确保连线在底层，不穿字")
+        self.assertLess(last_path_idx, first_card_rect_idx, "所有连线绘制完毕后才绘制卡片与文本")
+
+    def test_a3_illustration_loading_and_fallback(self):
+        """A3 专项：验证真实插画资产加载、Base64 内嵌以及缺图时的纯净回退（无 None）"""
+        from weekly_pipeline.validation import load_yaml_safely
+        from weekly_pipeline.models import RetellingUnit, MindmapTree
+        from weekly_pipeline.render import resolve_illustration_html, render_unit_preview_html
+
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+        # 1. 验证已确认的 R27 和 R28 插画资产加载
+        for rid in ["R27", "R28"]:
+            fpath = os.path.join(root_dir, "content", "retellings", f"{rid}.yaml")
+            with open(fpath, "r", encoding="utf-8") as f:
+                data = load_yaml_safely(f.read())
+            ru = RetellingUnit(**data)
+            self.assertEqual(ru.illustration_status, "confirmed")
+            self.assertTrue(ru.illustration_path.endswith(".png"))
+            
+            ill_html = resolve_illustration_html(ru)
+            self.assertIsNotNone(ill_html, f"{rid} 插画应成功解析为 HTML")
+            self.assertIn("data:image/png;base64,", ill_html)
+            self.assertIn("ill-img", ill_html)
+
+        # 2. 验证缺失插画时的回退绝不打印 'None'
+        dummy = RetellingUnit(
+            id="R_DUMMY",
+            title="测试缺图单元",
+            date_label="9月20日",
+            source_label="测试媒体",
+            material_paragraphs=["测试正文段落。"],
+            keywords=["测试"],
+            mindmap_tree=MindmapTree(center="中心", branches=[]),
+            ref_retelling="示范复述。",
+            mapkey="参照",
+            illustration_id=None,
+            illustration_brief=None,
+            illustration_path=None,
+            illustration_status=None
+        )
+        dummy_html = render_unit_preview_html(dummy, "retelling")
+        self.assertNotIn("None", dummy_html, "缺图时不得将 Python None 渲染到页面上")
+        self.assertIn("插画待回传", dummy_html)
+
 if __name__ == "__main__":
     unittest.main()
