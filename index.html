@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>口语素材周刊 · 静态只读审阅镜像 (issue-2026-w38)</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 4rem;
+    }
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .header-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .brand h1 { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+    .brand p { font-size: 0.82rem; color: var(--text-muted); }
+    .build-meta { font-size: 0.8rem; color: var(--text-muted); text-align: right; }
+    .build-meta code { background: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; color: #334155; }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 2rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #1e293b;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      margin-bottom: 1.5rem;
+    }
+
+    /* 成果横幅 */
+    .banner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 2rem;
+    }
+    @media (max-width: 860px) {
+      .banner-grid { grid-template-columns: 1fr; }
+    }
+    .meta-box { border-right: 1px solid var(--border); padding-right: 1.5rem; }
+    @media (max-width: 860px) { .meta-box { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; } }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    .badge-blue { background: #eff6ff; color: #1d4ed8; }
+    .badge-purple { background: #faf5ff; color: #7e22ce; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-green { background: #f0fdf4; color: #15803d; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    @media (max-width: 600px) { .download-grid { grid-template-columns: 1fr; } }
+    .dl-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text);
+      background: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .dl-btn:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+      color: var(--primary);
+    }
+    .dl-btn.primary {
+      grid-column: span 2;
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    @media (max-width: 600px) { .dl-btn.primary { grid-column: span 1; } }
+    .dl-btn.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    /* 单元明细 */
+    .units-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+    @media (max-width: 860px) { .units-grid { grid-template-columns: 1fr; } }
+    .unit-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .unit-ids { display: flex; gap: 0.4rem; align-items: center; }
+    .source-tag { font-size: 0.8rem; color: var(--text-muted); }
+    .unit-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.6rem; line-height: 1.4; }
+    .retell-summary { font-size: 0.88rem; color: #334155; margin-bottom: 0.8rem; line-height: 1.6; }
+    .pair-commentary {
+      background: #f8fafc;
+      border-left: 3px solid var(--primary);
+      padding: 0.75rem 1rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+    }
+    .demo-box {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+      padding: 0.75rem 1rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+    }
+    .sec-label { font-weight: 700; color: #1e293b; margin-bottom: 0.3rem; font-size: 0.82rem; }
+    .sample-claim { color: #475569; line-height: 1.5; }
+
+    /* 快照展架 */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 900px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .gallery-grid { grid-template-columns: 1fr; } }
+    .page-thumb {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #ffffff;
+      text-align: center;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .page-thumb:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      border-color: var(--primary);
+    }
+    .page-thumb a { text-decoration: none; color: inherit; display: block; }
+    .page-thumb img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-caption {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      background: #fafafa;
+    }
+
+    /* 表格 */
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th { background: #f8fafc; padding: 0.75rem 1rem; font-weight: 600; color: #334155; border-bottom: 1px solid var(--border); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: #0f172a; }
+    tr:last-child td { border-bottom: none; }
+    .status-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .status-ok { background: #dcfce7; color: #15803d; }
+    .status-sel { background: #dbeafe; color: #1e40af; }
+    .status-standby { background: #f1f5f9; color: #475569; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-wrap">
+      <div class="brand">
+        <h1>口语素材周刊 · 只读审阅镜像</h1>
+        <p>高质感报刊排版 · 真实插画接入 · 离线全量同源交付标准</p>
+      </div>
+      <div class="build-meta">
+        <div>版本提交：<code>958cb41</code> (antigravity-dev)</div>
+        <div>快照生成：2026-09-21 18:27:07 (UTC+8)</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- 本期成果与直接查阅 -->
+    <div class="card">
+      <div class="banner-grid">
+        <div class="meta-box">
+          <span class="badge badge-blue">正式发行版 · 现行生效</span>
+          <h2 style="font-size: 1.35rem; margin: 0.6rem 0 0.4rem;">口语素材周刊 · 2026年第38周 · 正式发行版</h2>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+            时段：2026年9月第3周（09.14-09.20）<br>
+            物理页数：<strong>严格 16 页</strong>（无截断、无白页溢出）<br>
+            门禁核验：原文连续精准匹配 100% · 纯文本无裸 HTML 标签
+          </p>
+          <div style="font-size: 0.82rem; background: #f1f5f9; padding: 0.75rem; border-radius: 6px; color: #334155;">
+            <strong>📌 镜像说明：</strong> 本站点为只读脱敏包，剔除了任何内部爬虫接口、学生练习数据与本地绝对路径，Reviewer 可在移动端或离线浏览器直接查阅。
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: #334155;">📄 同源交付文件直接打开与下载：</h3>
+          <div class="download-grid">
+            <a class="dl-btn primary" href="issues/issue-2026-w38/issue-2026-w38.pdf" target="_blank">
+              <span>📖 整刊印刷合订本 (16 页完整 PDF)</span>
+              <span>下载/打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issues/issue-2026-w38/issue-2026-w38-复述.pdf" target="_blank">
+              <span>🗣️ 复述教学分册 (5 页)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issues/issue-2026-w38/issue-2026-w38-评论.pdf" target="_blank">
+              <span>🎙️ 口语评论分册 (6 页)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issues/issue-2026-w38/issue-2026-w38-原文拆解与积累.pdf" target="_blank">
+              <span>📝 原文拆解分册 (2 页)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issues/issue-2026-w38/issue-2026-w38.md" target="_blank">
+              <span>📃 学生端 Markdown 纯文本</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issues/issue-2026-w38/issue-2026-w38.html" target="_blank">
+              <span>🌐 印刷版 HTML 渲染原件</span>
+              <span>打开 ↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 采编单元明细 -->
+    <div class="section-title">🔍 采编单元与真实证据链（本期入选）</div>
+    <div class="units-grid">
+      
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R27</span>
+              <span class="badge badge-purple">社会热点</span>
+              <span class="badge badge-green">🎨 插图: ILL-R27 (confirmed)</span>
+            </div>
+            <span class="source-tag">扬子晚报 / 新京报 2026-09-19</span>
+          </div>
+          <h3 class="unit-title">三甲医院女医生离职送外卖：重新寻找生活的节奏</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>31岁的医学女博士刘子涵，曾一路考入华西医学院、读完澳大博士，并进入三甲医院担任精神科医生。但在长期高压的工作节奏下，她感到身心俱疲，意识到外界羡慕的体面并不等于适合自己的生活。7个月前，她辞职来到珠海，当起了外卖骑手，并在街头兼职驻唱。面对外界对高学历送外卖的质疑，刘子涵表示这并非长久固定工作，而是想离开既定轨道，看看人生还有多少可能。她一边送外卖体验具体踏实的生活，一边利用专业知识为困惑的医学生提供咨询，在属于自己的节奏里重新找回了内心的从容。</p>
+          
+            <div class="pair-commentary">
+              <div class="sec-label">🎙️ 同题评论 · C19 《在既定轨道之外，探索内心的从容与可能》</div>
+              <p class="sample-claim"><strong>立论核心：</strong>读到医学女博士刘子涵辞职送外卖的故事，最触动我的是她在面对外界期待与身心重压时，敢于停下脚步、倾听内心的清醒与勇气。她没有被体面标签绑架，而是靠自己的双手，为生活找回了踏实与从容。</p>
+            </div>
+            
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R28</span>
+              <span class="badge badge-purple">暖文</span>
+              <span class="badge badge-green">🎨 插图: ILL-R28 (confirmed)</span>
+            </div>
+            <span class="source-tag">潮新闻 / 天天正能量 2026-09-03</span>
+          </div>
+          <h3 class="unit-title">萧山学生脱下校服止血：清晨街头的热忱与守护</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>9月3日早上，在杭州萧山街头，一位白发老奶奶突然意外摔倒，后脑着地血流不止。赶着去上课的17岁技校女生周子歆见状，立刻跑上前将老人扶起靠在自己怀里。为了尽快止血，她毫不犹豫脱下身上刚换的白校服外套，叠好垫在老人脑后按压，并拨打120守护至急救车赶到。路过的一位阿姨主动协助联系家属，并在事后把染血的校服带回家清洗干净，还专门联系学校表扬她。这名中专女生回校后虽然迟到了，却对救人的事只字不提，展现了纯粹可贵的善良本色。</p>
+          
+            <div class="pair-commentary">
+              <div class="sec-label">🎙️ 同题评论 · C20 《在危难时挺身而出，在善意中双向奔赴》</div>
+              <p class="sample-claim"><strong>立论核心：</strong>读到17岁中专女生周子歆脱下校服救助摔倒老人的故事，最打动我的不仅是危急关头她挺身而出的热忱，更是陌生人之间心照不宣、彼此托举的世间温情。面对眼前的伤痛，她用赤诚护住生命；面对少年的善举，路人以质朴行动呵护善良。</p>
+            </div>
+            
+        </div>
+        
+    </div>
+
+    <div class="section-title">📝 原文拆解与语言积累（本期入选）</div>
+    <div class="units-grid">
+      
+        <div class="unit-card">
+          <div class="card-header">
+            <span class="badge badge-orange">拆解积累 F19</span>
+            <span class="source-tag">浙江宣传 · 2026-09-20</span>
+          </div>
+          <h3 class="unit-title">和平年代青年血性的日常表达</h3>
+          <p class="retell-summary"><strong>情境背景：</strong>2026年9月正值全民国防教育月，多地高中生靶场实弹射击与激光体验火爆网络。浙江宣传发表深度评论，针对“和平年代是否还需要血性”的疑问，深入阐释当代青年血性的精神内核与现实土壤。</p>
+          <div class="demo-box">
+            <div class="sec-label">💡 示范｜谈青年的责任担当，可以这样说</div>
+            <p class="sample-claim">我们常常以为责任和担当非要经历惊天动地的时刻，其实它们就潜藏在日常的点滴选择之中。面对流言蜚语，能够守住常识不随波逐流；面对学业挑战，能够咬牙攻坚不轻言放弃；在他人需要帮助时，能够毫不犹豫伸出援手。这种在平凡生活里展现出的清醒、坚韧与温度，正是我们这一代青年最真实、也最动人的精神骨气。</p>
+          </div>
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <span class="badge badge-orange">拆解积累 F20</span>
+            <span class="source-tag">南方周末·自由谈 · 2026-09-19</span>
+          </div>
+          <h3 class="unit-title">读懂网络调侃背后的人才结构焦虑</h3>
+          <p class="retell-summary"><strong>情境背景：</strong>近日，网络热梗“中国博士人数超过驴的存栏量”引发广泛转发与自嘲。教育学者熊丙奇在南方周末撰文，借助翔实的统计数据纵横对比，透过戏谑表象深入剖析大众对于学历内卷与人才供需错配的深层焦虑。</p>
+          <div class="demo-box">
+            <div class="sec-label">💡 示范｜谈破除人才发展内卷，可以这样说</div>
+            <p class="sample-claim">面对当下许多年轻人对于学历内卷的焦虑，我们需要的不是相互指责，而是客观看清背后的结构性成因。很多时候，所谓的人才拥挤并不是因为优秀的人太多，而是大家的赛道和选择被狭窄的固有标签给限制了。当更多高层次人才敢于走出传统的单一学术轨道，把专业能力带到更广阔的产业一线与基层社会中去，所谓的内卷才能真正转化为多维发展的广阔天地。</p>
+          </div>
+        </div>
+        
+    </div>
+
+    <!-- 逐页快照展架 -->
+    <div class="section-title">🖼️ 全本 16 页实页高精度快照（排版与导图视觉复核）</div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+      重点复核：<strong>第 4、6 页</strong>（关键词网络、几何导图与黑白叙事插图 ILL-R27/R28）及 <strong>第 10、13 页</strong>（首句加粗、无裸露 &lt;b&gt; 标签）。
+    </p>
+    <div class="gallery-grid">
+      
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_01.png" target="_blank" title="点击查看第 1 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_01.png" alt="第 1 页" loading="lazy">
+            <div class="page-caption">第 1 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_02.png" target="_blank" title="点击查看第 2 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_02.png" alt="第 2 页" loading="lazy">
+            <div class="page-caption">第 2 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_03.png" target="_blank" title="点击查看第 3 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_03.png" alt="第 3 页" loading="lazy">
+            <div class="page-caption">第 3 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_04.png" target="_blank" title="点击查看第 4 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_04.png" alt="第 4 页" loading="lazy">
+            <div class="page-caption">第 4 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_05.png" target="_blank" title="点击查看第 5 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_05.png" alt="第 5 页" loading="lazy">
+            <div class="page-caption">第 5 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_06.png" target="_blank" title="点击查看第 6 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_06.png" alt="第 6 页" loading="lazy">
+            <div class="page-caption">第 6 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_07.png" target="_blank" title="点击查看第 7 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_07.png" alt="第 7 页" loading="lazy">
+            <div class="page-caption">第 7 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_08.png" target="_blank" title="点击查看第 8 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_08.png" alt="第 8 页" loading="lazy">
+            <div class="page-caption">第 8 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_09.png" target="_blank" title="点击查看第 9 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_09.png" alt="第 9 页" loading="lazy">
+            <div class="page-caption">第 9 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_10.png" target="_blank" title="点击查看第 10 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_10.png" alt="第 10 页" loading="lazy">
+            <div class="page-caption">第 10 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_11.png" target="_blank" title="点击查看第 11 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_11.png" alt="第 11 页" loading="lazy">
+            <div class="page-caption">第 11 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_12.png" target="_blank" title="点击查看第 12 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_12.png" alt="第 12 页" loading="lazy">
+            <div class="page-caption">第 12 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_13.png" target="_blank" title="点击查看第 13 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_13.png" alt="第 13 页" loading="lazy">
+            <div class="page-caption">第 13 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_14.png" target="_blank" title="点击查看第 14 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_14.png" alt="第 14 页" loading="lazy">
+            <div class="page-caption">第 14 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_15.png" target="_blank" title="点击查看第 15 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_15.png" alt="第 15 页" loading="lazy">
+            <div class="page-caption">第 15 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="issues/issue-2026-w38/pages/page_16.png" target="_blank" title="点击查看第 16 页高精度大图">
+            <img src="issues/issue-2026-w38/pages/page_16.png" alt="第 16 页" loading="lazy">
+            <div class="page-caption">第 16 页</div>
+          </a>
+        </div>
+        
+    </div>
+
+    <!-- 上游信源只读快照 -->
+    <div class="section-title">📊 上游信源与常态备料快照（只读状态）</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>信源名称</th>
+            <th>分类属性</th>
+            <th>接入模式</th>
+            <th>选用状态</th>
+            <th>运行健康度</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+        <tr>
+          <td><strong>浙江宣传</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-sel">本期入选</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>澎湃·马上评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>南方周末·自由谈</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>红星评论</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>新京报·快评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-sel">本期入选</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>人民锐评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>人民网·壹时评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>中青评论·热点</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>光明网评论员</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>红辣椒·马上评论</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>红辣椒·青椒融评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">active (已接通上游雷达)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>天天正能量</strong></td>
+          <td>暖文事实库</td>
+          <td><code>radar_crawler</code></td>
+          <td><span class="status-pill status-sel">本期入选</span></td>
+          <td><span class="status-pill status-ok">active (283条本地温和事实库)</span></td>
+        </tr>
+        
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+</html>
