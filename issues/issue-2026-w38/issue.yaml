@@ -1,8 +1,8 @@
 schema_version: '1.0'
 issue_id: issue-2026-w38
 title: 口语素材周刊
-kicker: 高中播音艺考口语素材周刊
-issue_no_label: 2026年第38周 · 正式发行版
+kicker: ""
+issue_no_label: 2026年第38周
 date_range: 2026年9月第3周（09.14-09.20）
 retelling_ids:
 - R27

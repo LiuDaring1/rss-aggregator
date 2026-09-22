@@ -147,19 +147,19 @@ class TestVerifierAndBuildRegression(unittest.TestCase):
         )
         page_map, ans_pages, total_pages = compute_page_map(mock_manifest)
         
-        # 动态验证其页码规划：
-        # 封面(1) + 目录(2) + 4篇复述*2(8页, 3-10) + 答案(1页, 11) + 1篇评论*3(3页, 12-14) + 3篇摘录*1(3页, 15-17) + 附录(1页, 18) = 18页
+        # 动态验证其页码规划（已按教师要求移除附录）：
+        # 封面(1) + 目录(2) + 4篇复述*2(8页, 3-10) + 答案(1页, 11) + 1篇评论*3(3页, 12-14) + 3篇摘录*1(3页, 15-17) = 17页
         # 复述分册 = 12 - 3 = 9 页 (非 trial-01 的 7 页)
         # 评论分册 = 15 - 12 = 3 页 (非 trial-01 的 6 页)
-        # 拆解分册 = 18 - 15 = 3 页 (非 trial-01 的 2 页)
+        # 拆解分册 = (total_pages + 1) - 15 = 18 - 15 = 3 页
         exp_r = page_map["C01"] - 3
         exp_c = page_map["F01"] - page_map["C01"]
-        exp_f = page_map.get("附录", total_pages) - page_map["F01"]
+        exp_f = (total_pages + 1) - page_map["F01"]
         
         self.assertEqual(exp_r, 9)
         self.assertEqual(exp_c, 3)
         self.assertEqual(exp_f, 3)
-        self.assertEqual(total_pages, 18)
+        self.assertEqual(total_pages, 17)
 
 
 if __name__ == "__main__":

@@ -1,20 +1,18 @@
 {# 模块二：评论与即兴表达单元模板 (三页制) #}
-{% set display_id = "C-单" if unit.id == "c-dan-jiao-xie" else unit.id %}
 {% set is_unverified = is_unverified | default(false) %}
 
 {# 页面 1：问题与材料回想 #}
 <section class="cq">
   <div class="page-meta">
-    <span class="meta-left">高中口语表达 · 评论单元{% if is_unverified %} <strong class="unverified-tag">【草稿·未核验】</strong>{% endif %}</span>
+    <span class="meta-left">口语素材周刊 · 评论单元{% if is_unverified %} <strong class="unverified-tag">【草稿·未核验】</strong>{% endif %}</span>
     <span class="meta-right">1 / 3</span>
   </div>
   <div class="cuhead">
-    <span class="rno">{{ display_id }}</span>
     <h3>{{ unit.title }}</h3>
     {% if backref_page %}
     <span class="backref">关联材料见第 {{ backref_page }} 页</span>
     {% elif is_unverified %}
-    <span class="backref unverified-backref">对应复述·{{ unit.retelling_ref }}（未核验）</span>
+    <span class="backref unverified-backref">对应复述材料（未核验）</span>
     {% elif retelling_title %}
     <span class="backref">关联材料：《{{ retelling_title }}》</span>
     {% else %}
@@ -50,11 +48,10 @@
 {# 页面 2：观点池与推演思考 #}
 <section class="cview">
   <div class="page-meta">
-    <span class="meta-left">高中口语表达 · 评论单元{% if is_unverified %} <strong class="unverified-tag">【草稿·未核验】</strong>{% endif %}</span>
+    <span class="meta-left">口语素材周刊 · 评论单元{% if is_unverified %} <strong class="unverified-tag">【草稿·未核验】</strong>{% endif %}</span>
     <span class="meta-right">2 / 3</span>
   </div>
   <div class="cuhead">
-    <span class="rno">{{ display_id }}</span>
     <h3>{{ unit.title }} · 观点与推演</h3>
   </div>
   <div class="cu-blk">
@@ -93,11 +90,10 @@
 {# 页面 3：口语范本与拆解 #}
 <section class="cscript">
   <div class="page-meta">
-    <span class="meta-left">高中口语表达 · 评论单元{% if is_unverified %} <strong class="unverified-tag">【草稿·未核验】</strong>{% endif %}</span>
+    <span class="meta-left">口语素材周刊 · 评论单元{% if is_unverified %} <strong class="unverified-tag">【草稿·未核验】</strong>{% endif %}</span>
     <span class="meta-right">3 / 3</span>
   </div>
   <div class="cuhead">
-    <span class="rno">{{ display_id }}</span>
     <h3>{{ unit.title }} · 口语范本与拆解</h3>
   </div>
   <div class="cu-blk">

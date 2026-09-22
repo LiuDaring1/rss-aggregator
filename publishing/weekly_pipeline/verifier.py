@@ -136,7 +136,7 @@ def verify_issue_splits(issue_id: str, target_dir: Optional[str] = None) -> bool
     page_map, ans_pages, total_pages = compute_page_map(manifest)
     c_start = page_map[manifest.commentary_ids[0]]
     f_start = page_map[manifest.excerpt_ids[0]]
-    app_start = page_map.get("附录", total_pages)
+    app_start = page_map.get("附录", total_pages + 1)
     
     exp_r_pages = c_start - 3
     exp_c_pages = f_start - c_start
@@ -150,8 +150,10 @@ def verify_issue_splits(issue_id: str, target_dir: Optional[str] = None) -> bool
         f"{issue_id}-原文拆解与积累.pdf": (exp_f_pages, "原文拆解分册"),
     }
     
+    has_app = "附录" in page_map
+    app_str = " | 附录: 1 页" if has_app else ""
     print(f"\n📑 [物理页数核验] 动态规划页数 (总计 {total_pages} 页):")
-    print(f"  - 复述分册: {exp_r_pages} 页 | 评论分册: {exp_c_pages} 页 | 拆解分册: {exp_f_pages} 页 | 附录: 1 页")
+    print(f"  - 复述分册: {exp_r_pages} 页 | 评论分册: {exp_c_pages} 页 | 拆解分册: {exp_f_pages} 页{app_str}")
     print(f"  - 校验目录: {target_dir}")
     
     passed_count = 0

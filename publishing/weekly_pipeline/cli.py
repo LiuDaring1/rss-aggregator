@@ -223,6 +223,62 @@ def cmd_build(args):
         with open(yp, "r", encoding="utf-8") as fp:
             excerpts.append(ExcerptUnit.model_validate(load_yaml_safely(fp.read())))
             
+    # 采编台账完整性与单元一致性强校验 (manifest_prep.json vs issue.yaml)
+    prep_json_path = os.path.join("issues", issue_id, "manifest_prep.json")
+    if os.path.exists(prep_json_path):
+        import json
+        with open(prep_json_path, "r", encoding="utf-8") as pf:
+            prep_data = json.load(pf)
+        
+        prep_r_ids = [r["unit_id"] for r in prep_data.get("retellings", [])]
+        prep_c_ids = [c["unit_id"] for c in prep_data.get("commentaries", [])]
+        prep_f_ids = [f["unit_id"] for f in prep_data.get("excerpts", [])]
+        
+        # 校验数量
+        stats = prep_data.get("statistics", {})
+        if stats.get("retellings_count") != len(manifest.retelling_ids):
+            print(f"❌ [台账校验] 复述统计数量 ({stats.get('retellings_count')}) 与 issue.yaml ({len(manifest.retelling_ids)}) 不一致！")
+            sys.exit(1)
+        if stats.get("commentaries_count") != len(manifest.commentary_ids):
+            print(f"❌ [台账校验] 评论统计数量 ({stats.get('commentaries_count')}) 与 issue.yaml ({len(manifest.commentary_ids)}) 不一致！")
+            sys.exit(1)
+        if stats.get("excerpts_count") != len(manifest.excerpt_ids):
+            print(f"❌ [台账校验] 摘录统计数量 ({stats.get('excerpts_count')}) 与 issue.yaml ({len(manifest.excerpt_ids)}) 不一致！")
+            sys.exit(1)
+            
+        # 校验集合等价性 (检查缺项、重复、未登记上线)
+        if set(prep_r_ids) != set(manifest.retelling_ids) or len(prep_r_ids) != len(manifest.retelling_ids):
+            diff = set(manifest.retelling_ids) ^ set(prep_r_ids)
+            print(f"❌ [台账校验] 复述单元集合不匹配，存在未登记或多余篇目: {diff}")
+            sys.exit(1)
+        if set(prep_c_ids) != set(manifest.commentary_ids) or len(prep_c_ids) != len(manifest.commentary_ids):
+            diff = set(manifest.commentary_ids) ^ set(prep_c_ids)
+            print(f"❌ [台账校验] 评论单元集合不匹配，存在未登记或多余篇目: {diff}")
+            sys.exit(1)
+        if set(prep_f_ids) != set(manifest.excerpt_ids) or len(prep_f_ids) != len(manifest.excerpt_ids):
+            diff = set(manifest.excerpt_ids) ^ set(prep_f_ids)
+            print(f"❌ [台账校验] 摘录单元集合不匹配，存在未登记或多余篇目: {diff}")
+            sys.exit(1)
+            
+        # 校验信源与关键要素完整性
+        for r_entry in prep_data.get("retellings", []):
+            rid = r_entry.get("unit_id")
+            if not r_entry.get("source_url") or not r_entry.get("source_key_facts"):
+                print(f"❌ [台账校验] 复述单元 {rid} 缺少有效 source_url 或 source_key_facts！")
+                sys.exit(1)
+        for c_entry in prep_data.get("commentaries", []):
+            cid = c_entry.get("unit_id")
+            ref = c_entry.get("retelling_ref")
+            if ref not in manifest.retelling_ids:
+                print(f"❌ [台账校验] 评论单元 {cid} 引用的复述单元 {ref} 未在当前期刊中！")
+                sys.exit(1)
+        for f_entry in prep_data.get("excerpts", []):
+            fid = f_entry.get("unit_id")
+            if not f_entry.get("source_url") or not f_entry.get("quote_snippet"):
+                print(f"❌ [台账校验] 摘录单元 {fid} 缺少有效 source_url 或 quote_snippet！")
+                sys.exit(1)
+        print(f"✅ [台账校验通过] manifest_prep 21单元完整登记，集合等价且要素齐全。")
+
     # 前置信源连续子串核验 (任何入选摘录缺少真实原件归档或引文不匹配，坚决立即终止构建与发布)
     from weekly_pipeline.verifier import verify_issue_quotes, verify_issue_splits
     sources_dir = os.path.join("issues", issue_id, "sources")

@@ -51,7 +51,7 @@ def build_review_site(issue_id: str = "issue-2026-w38"):
     os.makedirs(target_issue_dir, exist_ok=True)
 
     # 2. 拷贝合法交付产物 (白名单拷贝，杜绝软链接与私密数据)
-    allowed_extensions = [".pdf", ".md", ".html", ".png", ".jpg", ".jpeg"]
+    allowed_extensions = [".pdf", ".md", ".html", ".png", ".jpg", ".jpeg", ".json"]
     for root, dirs, files in os.walk(dist_issue_dir):
         rel_path = os.path.relpath(root, dist_issue_dir)
         target_sub = os.path.join(target_issue_dir, rel_path) if rel_path != "." else target_issue_dir
@@ -67,6 +67,13 @@ def build_review_site(issue_id: str = "issue-2026-w38"):
                     shutil.copyfile(real_src, dst_file)
                 else:
                     shutil.copyfile(src_file, dst_file)
+
+    # 同步采编台账与信源状态文件
+    for jf in ["manifest_prep.json", "sources_status.json"]:
+        src_j = os.path.join(ROOT_DIR, "issues", issue_id, jf)
+        if os.path.exists(src_j):
+            shutil.copyfile(src_j, os.path.join(target_issue_dir, jf))
+            shutil.copyfile(src_j, os.path.join(dist_issue_dir, jf))
 
     # 3. 拷贝插图资产
     src_ill_dir = os.path.join(ROOT_DIR, "issues", issue_id, "illustrations")
@@ -133,7 +140,7 @@ def build_review_site(issue_id: str = "issue-2026-w38"):
     # 6. 构造静态 index.html
     pages_dir = os.path.join(target_issue_dir, "pages")
     page_files = [f for f in os.listdir(pages_dir) if f.startswith("page_") and f.endswith(".png")] if os.path.exists(pages_dir) else []
-    total_pages_count = len(page_files) if page_files else 48
+    total_pages_count = len(page_files) if page_files else 47
 
     html_content = generate_index_html(
         manifest=manifest,
@@ -167,7 +174,7 @@ def generate_index_html(manifest: Dict[str, Any],
                         commentaries: List[Dict[str, Any]],
                         excerpts: List[Dict[str, Any]],
                         sources: List[Dict[str, Any]],
-                        total_pages: int = 48) -> str:
+                        total_pages: int = 47) -> str:
     
     num_r = len(retellings)
     num_c = len(commentaries)
@@ -510,8 +517,8 @@ def generate_index_html(manifest: Dict[str, Any],
           <h2 style="font-size: 1.35rem; margin: 0.6rem 0 0.4rem;">{html.escape(manifest.get('title', '口语素材周刊'))} · {html.escape(manifest.get('issue_no_label', ''))}</h2>
           <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
             时段：{html.escape(manifest.get('date_range', ''))}<br>
-            物理页数：<strong>严格 {total_pages} 页</strong>（9篇复述{r_pages}页 + 6篇评论{c_pages}页 + 6篇拆解{f_pages}页 + 封面/目录/附录3页）<br>
-            门禁核验：原文连续精准匹配 100% · 纯文本无裸 HTML 标签 · 48页印张精确吻合
+            物理页数：<strong>严格 {total_pages} 页</strong>（9篇复述{r_pages}页 + 6篇评论{c_pages}页 + 6篇拆解{f_pages}页 + 封面/目录 2页）<br>
+            门禁核验：原文连续精准匹配 100% · 纯文本无裸 HTML 标签 · {total_pages}页印张精确吻合
           </p>
           <div style="font-size: 0.82rem; background: #f1f5f9; padding: 0.75rem; border-radius: 6px; color: #334155;">
             <strong>📌 镜像说明：</strong> 本站点为只读脱敏包，剔除了任何内部爬虫接口、学生练习数据与本地绝对路径，Reviewer 可在移动端或离线浏览器直接查阅。
@@ -545,6 +552,14 @@ def generate_index_html(manifest: Dict[str, Any],
               <span>🌐 印刷版 HTML 渲染原件</span>
               <span>打开 ↗</span>
             </a>
+            <a class="dl-btn" href="issues/{issue_id}/manifest_prep.json" target="_blank">
+              <span>📋 采编台账清单 (manifest_prep.json)</span>
+              <span>查看 ↗</span>
+            </a>
+            <a class="dl-btn" href="issues/{issue_id}/sources_status.json" target="_blank">
+              <span>📡 上游雷达与选材状态 (sources_status.json)</span>
+              <span>查看 ↗</span>
+            </a>
           </div>
         </div>
       </div>
@@ -564,7 +579,7 @@ def generate_index_html(manifest: Dict[str, Any],
     <!-- 逐页快照展架 -->
     <div class="section-title">🖼️ 全本 {total_pages} 页实页高精度快照（排版、导图与 9 组四格连环画视觉复核）</div>
     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-      重点复核：<strong>第 4、6、8、10、12、14、16、18、20 页</strong>（9 组复述提示页：几何导图、卷末编号图例与 ILL-R27~R35 四格叙事连环画）及 <strong>评论范本页</strong>（双主体段首句粗体、0 裸露 &lt;b&gt; 标签）。
+      重点复核：<strong>第 4、6、8、10、12、14、16、18、20 页</strong>（9 组看图复述思维导图与 ILL-R27~R35 纯无字叙事连环画）及 <strong>口语评论范本页</strong>（双主体段首句粗体、0 裸露 &lt;b&gt; 标签）。
     </p>
     <div class="gallery-grid">
       {''.join(pages_html)}

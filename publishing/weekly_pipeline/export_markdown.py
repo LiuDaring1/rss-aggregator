@@ -192,8 +192,7 @@ def compute_page_map(manifest: IssueManifest) -> Tuple[Dict[str, int], int, int]
         page_map[fid] = cur_p
         cur_p += 1
         
-    page_map["附录"] = cur_p
-    total_pages = cur_p
+    total_pages = cur_p - 1
     return page_map, ans_pages, total_pages
 
 def export_full_issue_markdown(
@@ -212,7 +211,7 @@ def export_full_issue_markdown(
     title_suffix = "（学生完整正文）" if is_student else "（教师/编辑审阅版）"
     
     # 1. 刊头
-    lines.append(f"# 高中播音艺考口语素材周刊 · {manifest.title} {title_suffix}")
+    lines.append(f"# 口语素材周刊 {title_suffix}")
     lines.append(f"**期号**：{manifest.issue_id} ｜ **期号显示**：{manifest.issue_no_label} ｜ **时间范围**：{manifest.date_range}")
     lines.append("")
     lines.append("本期栏目：**复述**（每则材料页＋提示页，参考答案集中在「复述参考」）· **评论**（同一批材料，每题三页：审题破题／观点推演／范本拆解）· **原文拆解与积累**（独立精选近期深度评论完整语段）。本文件为完整学生正文；印刷版见相应 PDF 与分册。")
@@ -229,7 +228,14 @@ def export_full_issue_markdown(
     r_toc = []
     for rid in manifest.retelling_ids:
         p = page_map.get(rid, 0)
-        r_toc.append(f"{rid}（{p}–{p+1} 页）")
+        yp = os.path.join(content_dir, "retellings", f"{rid}.yaml")
+        t = ""
+        if os.path.exists(yp):
+            with open(yp, "r", encoding="utf-8") as fp:
+                u_data = load_yaml_safely(fp.read())
+                t = u_data.get("title", "")
+        item_name = t if (is_student and t) else (f"{rid} · {t}" if t else rid)
+        r_toc.append(f"{item_name}（{p}–{p+1} 页）")
     ans_p = page_map.get("复述参考", 0)
     ans_rng = f"{ans_p}–{ans_p+ans_pages-1} 页" if ans_pages > 1 else f"{ans_p} 页"
     r_toc.append(f"复述参考（{ans_rng}）")
@@ -239,17 +245,29 @@ def export_full_issue_markdown(
     c_toc = []
     for cid in manifest.commentary_ids:
         p = page_map.get(cid, 0)
-        c_toc.append(f"{cid}（{p}–{p+2} 页）")
+        yp = os.path.join(content_dir, "commentaries", f"{cid}.yaml")
+        t = ""
+        if os.path.exists(yp):
+            with open(yp, "r", encoding="utf-8") as fp:
+                c_data = load_yaml_safely(fp.read())
+                t = c_data.get("title", "")
+        item_name = t if (is_student and t) else (f"{cid} · {t}" if t else cid)
+        c_toc.append(f"{item_name}（{p}–{p+2} 页）")
     lines.append(f"**评论**：{' ｜ '.join(c_toc)}")
     lines.append("")
     
     f_toc = []
     for fid in manifest.excerpt_ids:
         p = page_map.get(fid, 0)
-        f_toc.append(f"{fid}（{p} 页）")
+        yp = os.path.join(content_dir, "excerpts", f"{fid}.yaml")
+        t = ""
+        if os.path.exists(yp):
+            with open(yp, "r", encoding="utf-8") as fp:
+                f_data = load_yaml_safely(fp.read())
+                t = f_data.get("topic", "")
+        item_name = t if (is_student and t) else (f"{fid} · {t}" if t else fid)
+        f_toc.append(f"{item_name}（{p} 页）")
     lines.append(f"**原文拆解与积累**：{' ｜ '.join(f_toc)}")
-    lines.append("")
-    lines.append(f"**附录 · 使用说明**：{page_map.get('附录', '—')} 页")
     lines.append("")
 
     # 4. AI 陪练完整指令
@@ -283,7 +301,8 @@ def export_full_issue_markdown(
             
         retellings_loaded.append(u)
         p_start = page_map.get(u.id, 0)
-        lines.append(f"## {u.id} · {u.title}（{u.category}）")
+        heading_str = u.title if is_student else f"{u.id} · {u.title}（{u.category}）"
+        lines.append(f"## {heading_str}")
         lines.append(f"**材料页（第 {p_start} 页）**　{u.date_label} ｜ {u.source_label}")
         lines.append("")
         for p in u.material_paragraphs:
@@ -311,7 +330,8 @@ def export_full_issue_markdown(
     lines.append("")
     for u in retellings_loaded:
         r_p = page_map.get(u.id, 0)
-        lines.append(f"### {u.id} · {u.title}")
+        ans_head = u.title if is_student else f"{u.id} · {u.title}"
+        lines.append(f"### {ans_head}")
         lines.append(f"*材料见第 {r_p} 页*")
         lines.append(f"**【参考复述】**：{u.ref_retelling.strip()}")
         lines.append(f"**【导图参照】**：{u.mapkey.strip()}")
@@ -347,7 +367,8 @@ def export_full_issue_markdown(
         ref_p = page_map.get(c.retelling_ref, 0)
         ref_str = f"关联材料见第 {ref_p} 页" if ref_p else f"关联材料：{c.retelling_ref}"
         
-        lines.append(f"## {c.id} · {c.title}")
+        comm_head = c.title if is_student else f"{c.id} · {c.title}"
+        lines.append(f"## {comm_head}")
         lines.append(f"*{ref_str} ｜ 全题占 3 页（第 {cp}–{cp+2} 页）*")
         lines.append("")
         
@@ -369,7 +390,8 @@ def export_full_issue_markdown(
         lines.append("**多维观点池（多角度立论）**：")
         for v in c.learning.viewpoints:
             exp_str = f"（深层理解：{v.explanation.strip()}）" if v.explanation else ""
-            lines.append(f"- **【观点 {v.id}】{v.claim.strip()}**：依据细节——{v.evidence.strip()} {exp_str}")
+            vp_tag = "" if is_student else f"【观点 {v.id}】"
+            lines.append(f"- **{vp_tag}{v.claim.strip()}**：依据细节——{v.evidence.strip()} {exp_str}")
         lines.append("")
         for lesson in c.learning.reasoning_lessons:
             lines.append(f"**推演示范（{lesson.title.strip()}）**：")
@@ -424,7 +446,8 @@ def export_full_issue_markdown(
             raise ValueError(f"原文拆解单元 {ex.id} 口语迁移示范为空，阻断整刊导出！")
             
         fp_page = page_map.get(ex.id, 0)
-        lines.append(f"## {ex.id} · {ex.topic}（第 {fp_page} 页）")
+        ex_head = f"{ex.topic}（第 {fp_page} 页）" if is_student else f"{ex.id} · {ex.topic}（第 {fp_page} 页）"
+        lines.append(f"## {ex_head}")
         lines.append(f"**出处**：{ex.source_name} ｜ 日期：{ex.source_date}")
         lines.append("")
         lines.append("**【文章语境】**：")
@@ -445,17 +468,6 @@ def export_full_issue_markdown(
         lines.append(f"> {ex.demo_text.strip()}")
         lines.append("")
 
-    # 9. 附录
-    lines.append("---")
-    lines.append("")
-    lines.append(f"# 附录 · 使用说明（第 {page_map.get('附录', '—')} 页）")
-    lines.append("")
-    lines.append("本周刊专为高中播音主持与口语传播艺考生打造，紧扣高考口语表达三大能力：快速提炼与结构化复述、观点构建与思辨评述、语言积淀与文采锤炼。")
-    lines.append("1. **口语复述**：先看材料页读懂记准核心事实，翻到提示页看关键词网与思维导图，向语音 AI 听众口头复述并听取反馈；")
-    lines.append("2. **口语评论**：按审题立意（P1）、观点池与推演（P2）、范本朗读（P3）三步训练，重点体会两段主体首句的立论抓手；")
-    lines.append("3. **原文拆解**：品味主流媒体深度评论的原汁原味，积累精妙比喻、论证技法与时空句式，并尝试在日常表达中迁移应用。")
-    lines.append("")
-    
     return "\n".join(lines)
 
 def publish_directory_atomically(staging_dir: str, target_dir: str, _fault_after_backup: bool = False) -> None:

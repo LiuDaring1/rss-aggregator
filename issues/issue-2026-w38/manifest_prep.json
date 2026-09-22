@@ -12,9 +12,9 @@
     "reuse_policy": "复用篇目必须明示，不可用新编号伪装全新采编"
   },
   "statistics": {
-    "retellings_count": 2,
-    "commentaries_count": 2,
-    "excerpts_count": 2
+    "retellings_count": 9,
+    "commentaries_count": 6,
+    "excerpts_count": 6
   },
   "retellings": [
     {
@@ -24,6 +24,7 @@
       "source_media": "新京报·快评 / 扬子晚报",
       "source_url": "https://www.bjnews.com.cn/detail/1789804150168485.html",
       "local_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-09ad34261e.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/R27_source.txt",
       "dates": {
         "event_occurred_at": "2026-09-15",
         "published_at": "2026-09-19",
@@ -49,6 +50,7 @@
       "source_media": "潮新闻·钱江晚报 / 阿里巴巴天天正能量",
       "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45353",
       "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45353.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/R28_source.txt",
       "dates": {
         "event_occurred_at": "2026-09-03",
         "published_at": "2026-09-04",
@@ -68,6 +70,188 @@
       "workflow_status": {
         "script_done": "已从本地 raw/ttzl-45353.json 提取完整正文与时间戳",
         "agent_done": "已核验潮新闻现场采访事实，重点呈现少年赤诚与路人双向奔赴，完成采编",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "R29",
+      "category": "社会热点",
+      "title": "求职面试方案遭企业抄袭：青年拿起法律武器成功维权",
+      "source_media": "红网·红辣椒评论 / 扬子晚报",
+      "source_url": "https://hlj.rednet.cn/content/646853/56/14282384.html",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-rednet-qingjiao-c47814fcf2.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/R29_source.txt",
+      "dates": {
+        "event_occurred_at": "2026-09-16",
+        "published_at": "2026-09-19",
+        "commentary_at": "2026-09-19",
+        "award_date": null
+      },
+      "source_key_facts": [
+        "青年求职者小林应聘文创策划岗，按复试要求提交数千字详细市集策划案后被告知不予录用；",
+        "两周后小林发现涉事公司公开落地的商业市集活动，原样照搬了其方案构想、动线设计与商家招募细则；",
+        "小林保全邮件草稿与聊天记录向法院提起侵权诉讼，经劳动监察介入调解，涉事企业公开道歉并足额赔偿智力成果报酬。"
+      ],
+      "workflow_status": {
+        "script_done": "已从红网快评及扬子晚报报道提取职场方案抄袭侵权案件事实与时间戳",
+        "agent_done": "提炼求职维权法治意识与尊重原创劳动成果的思辨价值，完成采编",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "R30",
+      "category": "暖性生活",
+      "title": "脑瘫女孩双脚打字开网店：用坏40个鼠标“踏”出创业路",
+      "source_media": "益阳日报 / 天天正能量",
+      "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45348",
+      "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45348.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/R30_source.txt",
+      "dates": {
+        "event_occurred_at": "2026-09-02",
+        "published_at": "2026-09-04",
+        "commentary_at": null,
+        "award_date": "2026-09-10"
+      },
+      "source_key_facts": [
+        "湖南益阳脑瘫女孩郭佳云双手重度畸形丧失抓握能力，自强不息练习用双脚脚趾操作电脑键盘与鼠标；",
+        "几年里她磨坏了40多个普通鼠标与脚踏外设，熟练掌握图形处理、电商运营与客诉沟通专业技能；",
+        "她创办电商设计工作室，吸纳带领8位残障青年共同就业，靠过硬业务质量赢得稳定市场客户。"
+      ],
+      "workflow_status": {
+        "script_done": "已核对益阳日报报道原事实，确认脚踩鼠标与双脚打字的真实操作细节",
+        "agent_done": "纠正图文事实一致性，重点呈现身残志坚与专业自立的尊严力量，完成采编",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "R31",
+      "category": "社会热点",
+      "title": "开学季高校引导善用AI：警惕“思维外包”，守住独立思考",
+      "source_media": "新京报·快评 / 清华北大开学致辞",
+      "source_url": "https://www.bjnews.com.cn/detail/1789633832168446.html",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-2d918ed3c5.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/R31_source.txt",
+      "dates": {
+        "event_occurred_at": "2026-09-14",
+        "published_at": "2026-09-17",
+        "commentary_at": "2026-09-17",
+        "award_date": null
+      },
+      "source_key_facts": [
+        "2026年秋季开学季，国内多所知名高校负责人在开学典礼上密集发声，提醒AI原生一代青年学子警惕“认知卸载与思维外包”；",
+        "高校相继出台AI分级使用指引，明确在文献检索、语法润色等辅助环节鼓励工具增效，在核心论点推导与深度论证中坚守独立深思；",
+        "举措引导学子理性看待智能浪潮，把算法作为拓宽视野的阶梯而非代替大脑思考的拐杖，守住人类求知的主体性。"
+      ],
+      "workflow_status": {
+        "script_done": "已从 raw/comm-bjnews-point-2d918ed3c5.json 提取高校AI使用指引与学者专访",
+        "agent_done": "完成校园科技题材定点替换，建立AI时代思维主体性教学范本，完成采编",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "R32",
+      "category": "暖性生活",
+      "title": "听障青年在无声店里月入过万：靠专业手艺赢得职业尊严",
+      "source_media": "河北新闻网 / 天天正能量",
+      "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45342",
+      "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45342.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/R32_source.txt",
+      "dates": {
+        "event_occurred_at": "2026-08-30",
+        "published_at": "2026-09-02",
+        "commentary_at": null,
+        "award_date": "2026-09-08"
+      },
+      "source_key_facts": [
+        "石家庄无声咖啡馆听障咖啡师陈鹏通过观察震动与视觉刻度，刻苦打磨意式浓缩萃取与精美拉花手艺；",
+        "他与伙伴通过手写便签与点单屏和顾客顺畅交流，出品稳定醇香，小店日均客流超百人，月收入稳定突破万元；",
+        "他拒绝外界以“同情施舍”心态光顾，用无可挑剔的专业品质赢得顾客长期复购与行业职业尊严。"
+      ],
+      "workflow_status": {
+        "script_done": "已提取河北新闻网现场报道与手艺人奋斗细节",
+        "agent_done": "突出职业尊严与专业匠心，完成暖性生活材料采编",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "R33",
+      "category": "社会热点",
+      "title": "校运会让家长签免责承诺书：校园体育不该“因噎废食”",
+      "source_media": "红网·红辣椒评论 / 中国青年报",
+      "source_url": "https://hlj.rednet.cn/content/646853/61/14283921.html",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-rednet-qingjiao-d24e118deb.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/R33_source.txt",
+      "dates": {
+        "event_occurred_at": "2026-09-16",
+        "published_at": "2026-09-19",
+        "commentary_at": "2026-09-19",
+        "award_date": null
+      },
+      "source_key_facts": [
+        "某地初中举办秋季田径运动会前夕，要求参赛学生家长签署“意外伤害自担责任、学校概不负责”的书面协议方可报名；",
+        "家长与社会舆论质疑校方转嫁安全管理法定职责，部分学校为规避磕碰风险甚至取消长跑跳高对抗项目；",
+        "当地教育行政部门迅速责令撤回整改，强调学校应通过完善防雨防滑预案、常态化安全演练与校方责任险守护学生体魄，不可因噎废食。"
+      ],
+      "workflow_status": {
+        "script_done": "已提取红网评论与中国青年报关于校园体育安全责任机制讨论",
+        "agent_done": "聚焦校园治理与体育育人本质，完成采编与三层导图构建",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "R34",
+      "category": "暖性生活",
+      "title": "00后大学生送外卖打工攒钱：吃泡面奔赴偏远大山支教",
+      "source_media": "云南网 / 天天正能量",
+      "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45346",
+      "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45346.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/R34_source.txt",
+      "dates": {
+        "event_occurred_at": "2026-08-28",
+        "published_at": "2026-09-04",
+        "commentary_at": null,
+        "award_date": "2026-09-10"
+      },
+      "source_key_facts": [
+        "昆明00后在校大学生李伟利用暑假下工地当小工、风雨无阻送外卖打工攒下5000元路费与教具款；",
+        "他吃泡面节省开支，独自背着吉他与科学实验教具，辗转跋涉两千公里奔赴云南大理偏远高寒山村小学开展公益支教；",
+        "他为留守儿童开设音乐启蒙与趣味物理科普课，用具体行动诠释当代青年的社会责任感与自立自强的精神底色。"
+      ],
+      "workflow_status": {
+        "script_done": "已提取云南网采访实录与支教纪实数据",
+        "agent_done": "展现当代青年自强利他的青春风貌，完成采编",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "R35",
+      "category": "社会热点",
+      "title": "“吃作业”纸片糖走红校园周边：网红噱头背后的安全与引导",
+      "source_media": "中青评论 / 红网",
+      "source_url": "https://pinglun.youth.cn/wztt/202609/t20260915_15523912.htm",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-youth-pinglun-aeba1ffe30.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/R35_source.txt",
+      "dates": {
+        "event_occurred_at": "2026-09-12",
+        "published_at": "2026-09-15",
+        "commentary_at": "2026-09-15",
+        "award_date": null
+      },
+      "source_key_facts": [
+        "校园周边小卖部近期流行包装印有“试卷”“作业”“补习班”字样的淀粉压片“纸片糖”，吸引低年级中小学生争相购买食用；",
+        "媒体调查发现此类网红零食多为无生产日期、无质检合格证的“三无”劣质食品，人工色素超标且助长消极厌学情绪；",
+        "市场监管部门迅速开展校园周边食品安全专项整治，依法没收查封问题零食，家校协同织密未成年人健康消费守护网。"
+      ],
+      "workflow_status": {
+        "script_done": "已提取中青评论对校园周边问题零食查处报道",
+        "agent_done": "结合食品安全与未成年人心理健康双重视角，完成采编",
         "pending_signoff": "系统贯通生产定版"
       },
       "action_decision": "approved_production"
@@ -93,13 +277,73 @@
       "unit_id": "C20",
       "retelling_ref": "R28",
       "title": "在危难时挺身而出，在善意中双向奔赴",
-      "source_media": "潮新闻 / 天天正能量",
+      "source_media": "潮新闻·钱江晚报 / 阿里巴巴天天正能量",
       "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45353",
       "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45353.json",
       "speech_main_claim": "读到17岁中专女生周子歆脱下校服救助摔倒老人的故事，最打动我的不仅是危急关头她毫不迟疑的挺身而出，更是陌生人之间那种心照不宣、彼此托举的世间温情。面对眼前的伤痛，她用一腔热忱护住生命；面对少年的善举，路人以质朴行动呵护善良。",
       "workflow_status": {
         "script_done": "已关联 R28 事实材料与救助细节",
         "agent_done": "按现行定标规范生成4组观点池，完成恰好两个主体段的口语范本与拆解指导",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "C21",
+      "retelling_ref": "R29",
+      "title": "尊重智力成果，职场考核不该以“试题”之名侵害劳动权益",
+      "source_media": "红网·红辣椒评论",
+      "source_url": "https://hlj.rednet.cn/content/646853/56/14282384.html",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-rednet-qingjiao-c47814fcf2.json",
+      "speech_main_claim": "读到求职者面试方案遭抄袭成功维权的故事，最发人深省的是招聘考核不能沦为企业白嫖无偿劳动的灰色地带。面试是双向考察而非智力掠夺，维护原创版权与劳动尊严，需要每一个职场青年敢于拿起法律武器，更需要全社会筑牢保护创新与契约精神的法治屏障。",
+      "workflow_status": {
+        "script_done": "已关联 R29 面试抄袭维权事实材料与对应评论文章",
+        "agent_done": "完成4组观点池、思维诊断、口语表达示范与教学重点解析",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "C22",
+      "retelling_ref": "R30",
+      "title": "拒绝廉价同情，普通人的尊严源自真实的奋斗与自强",
+      "source_media": "益阳日报 / 天天正能量",
+      "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45348",
+      "local_raw_path": "aggr-site/data/wenwen/raw/ttzl-45348.json",
+      "speech_main_claim": "读到脑瘫女孩郭佳云用脚打字开创网店的故事，真正触动人心的不是身体残障带来的悲情感，而是她靠着日复一日的死磕打磨出的专业实力。尊严从来不是靠同情施舍得来的，而是用无可替代的奋斗成果赢得的。当她带领更多残障伙伴自食其力时，展现的是平凡生命最硬核的光芒。",
+      "workflow_status": {
+        "script_done": "已关联 R30 脑瘫女孩用脚打字创业材料与媒体报道",
+        "agent_done": "完成4组观点池、思维诊断、口语表达示范与教学重点解析",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "C23",
+      "retelling_ref": "R31",
+      "title": "警惕“思维外包”，在算法时代守住思考的主体性",
+      "source_media": "新京报·快评 / 清华北大开学致辞",
+      "source_url": "https://www.bjnews.com.cn/detail/1789633832168446.html",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-2d918ed3c5.json",
+      "speech_main_claim": "读到开学季高校集体引导青年学子善用AI的举措，最引发我共鸣的是面对技术狂潮时对人类思维主体性的清醒坚守。工具的每一次跃升都是为了解放人的潜能，而非代替大脑的深度生长。学会与算法共处，最高境界不是把思考全盘外包给机器，而是在善用技术的同时守住独立钻研与批判深思的定力。",
+      "workflow_status": {
+        "script_done": "已关联 R31 高校善用AI材料与新京报深度专访",
+        "agent_done": "完成定点替换，按最新教学标准输出4组观点池与双段口语示范",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "C24",
+      "retelling_ref": "R33",
+      "title": "纸面免责难消育人担当，校园体育需要多一点开阔底气",
+      "source_media": "红网·红辣椒评论 / 中国青年报",
+      "source_url": "https://hlj.rednet.cn/content/646853/61/14283921.html",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-rednet-qingjiao-d24e118deb.json",
+      "speech_main_claim": "读到校运会要求家长签署免责承诺书的新闻，最值得反思的是不能为了机械避责而动摇学校立德树人的根本使命。一张纸面协议免不掉法定的安全监管义务，却可能关上孩子们奔向操场、磨砺意志的大门。筑牢安全防线靠的是周密严谨的应急预案和制度支撑，而不是因噎废食的自缚手脚。",
+      "workflow_status": {
+        "script_done": "已关联 R33 校运会免责书材料与红网深度评述",
+        "agent_done": "完成4组观点池、思维诊断、口语表达示范与教学重点解析",
         "pending_signoff": "系统贯通生产定版"
       },
       "action_decision": "approved_production"
@@ -136,6 +380,74 @@
       "workflow_status": {
         "script_done": "已验证引文与 sources/F20_source.txt 100% 连续子串匹配",
         "agent_done": "完成语境还原、数据逻辑拆解、词句积累与迁移口语示范",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "F21",
+      "topic": "农村治污不能照搬城市经验的一刀切",
+      "source_name": "人民网·人民锐评",
+      "source_date": "2026-09-19",
+      "source_url": "http://opinion.people.com.cn/n1/2026/0919/c223228-40323912.html",
+      "feed_url": "http://127.0.0.1:1200/people/opinion/ruiping",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-people-ruiping-954fcfc76c.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/F21_source.txt",
+      "quote_snippet": "治污原本是件利民的好事，可一旦背离了实际、脱离了群众，往往就会好事办砸，甚至造成新的污染和矛盾。农村环境整治绝非简单复制城市的管网工程，乡村有其特殊的生产生活习惯与生态承载规律，如果不顾成本与管护能力盲目推进，只能落得劳民伤财的尴尬下场。",
+      "workflow_status": {
+        "script_done": "已验证引文与 sources/F21_source.txt 100% 连续子串匹配",
+        "agent_done": "完成语境还原、逻辑拆解、词句积累与迁移口语示范",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "F22",
+      "topic": "平台经济创新不能以模糊用工责任为代价",
+      "source_name": "澎湃新闻·马上评",
+      "source_date": "2026-09-20",
+      "source_url": "https://m.thepaper.cn/detail/34108398",
+      "feed_url": "http://127.0.0.1:1200/thepaper/channel/27224",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-dd2a0156b9.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/F22_source.txt",
+      "quote_snippet": "各类模式创新，都应当把劳动者权益纳入考量，而不能以牺牲劳动者权益为目的。一个规模上千万的就业群体在维护自身权益，容易被困在“老板是谁”里，无论如何都说不过去。外卖行业发展到今天，需要彻底正视这一现实了。它关系到这部分劳动者的切身权益，也事关行业的长远健康发展。",
+      "workflow_status": {
+        "script_done": "已验证引文与 sources/F22_source.txt 100% 连续子串匹配",
+        "agent_done": "完成语境还原、法治边界辨析、词句积累与迁移口语示范",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "F23",
+      "topic": "破除学术功利化内卷与回归科研本质",
+      "source_name": "新京报·快评",
+      "source_date": "2026-09-20",
+      "source_url": "https://www.bjnews.com.cn/detail/1789885581169113.html",
+      "feed_url": "http://127.0.0.1:1200/bjnews/opinion",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-4ebfc5e0a6.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/F23_source.txt",
+      "quote_snippet": "拉长考核周期、取消量化指标，绝非取消考核、纵容躺平，而是淘汰短平快、功利化的数量考核，建立起以教学质量、育人贡献、原创学术价值为本的长效考核体系。这就给学者留足了科研沉淀周期，能够专注于长线研究、冷门研究、基础研究。",
+      "workflow_status": {
+        "script_done": "已验证引文与 sources/F23_source.txt 100% 连续子串匹配",
+        "agent_done": "完成语境还原、评价逻辑重构剖析、词句积累与迁移口语示范",
+        "pending_signoff": "系统贯通生产定版"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "F24",
+      "topic": "从热梗“玩”出来到底气“干”出来的青年自豪",
+      "source_name": "浙江宣传",
+      "source_date": "2026-09-20",
+      "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260920_31920423.shtml",
+      "feed_url": "http://127.0.0.1:1200/zjol/zjxc",
+      "local_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-bd1cf57e7b.json",
+      "source_txt_path": "issues/issue-2026-w38/sources/F24_source.txt",
+      "quote_snippet": "简单的是歌词，不简单的是实力。“中国人能飞”之所以让人上头，靠的不只是旋律多洗脑，而是这些年一件件兑现的事。因为“飞”足够具象、足够浪漫，让每一个普通人都感到心潮澎湃。当“中国人能飞”变成实景时，我们更应清醒：热搜上的“能飞”，终究是现实里的“能成”托举起来的。",
+      "workflow_status": {
+        "script_done": "已验证引文与 sources/F24_source.txt 100% 连续子串匹配",
+        "agent_done": "完成语境还原、时代语态与实干底气拆解、词句积累与迁移口语示范",
         "pending_signoff": "系统贯通生产定版"
       },
       "action_decision": "approved_production"

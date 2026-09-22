@@ -5,7 +5,6 @@
 {% for it in retellings %}
 <div class="ans">
   <div class="anshead">
-    <span class="rno">{{ it.id }}</span>
     <span class="ans-t">{{ it.title }}</span>
     {% if page_map and page_map[it.id] %}
     <span class="backref">材料见第 {{ page_map[it.id] }} 页</span>
