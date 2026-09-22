@@ -230,19 +230,21 @@ h1, h2, h3, .sans, .lbl, .rno, .tag, .hint-cap, .cuhead, .toc-sec, .kicker, .ans
 }
 .ill-img-container {
   border: 1.2pt solid #000;
-  max-height: 48mm;
+  width: 100%;
+  max-height: 65mm;
   min-height: 40mm;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   background: #fff;
-  padding: 1mm;
+  padding: 1.5mm;
+  margin-top: 1mm;
 }
 .ill-img {
+  width: 100%;
   max-width: 100%;
-  max-height: 45mm;
-  width: auto;
+  max-height: 62mm;
   height: auto;
   object-fit: contain;
   display: block;

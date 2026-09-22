@@ -289,9 +289,9 @@ def export_full_issue_markdown(
         for p in u.material_paragraphs:
             lines.append(f"> {p.strip()}")
             lines.append("")
-        lines.append(f"**提示页（第 {p_start+1} 页）**")
+        lines.append(f"**第 {p_start+1} 页**")
         lines.append(f"- **关键词**：{' · '.join(u.keywords)}")
-        lines.append(f"- **思维导图（虚线待补写）**：")
+        lines.append(f"- **思维导图**：")
         lines.append("```")
         lines.append(f"中心：{u.mindmap_tree.center}")
         for branch in u.mindmap_tree.branches:
@@ -299,7 +299,7 @@ def export_full_issue_markdown(
             for leaf in branch.leaves:
                 lines.append(f"│   └─ [提示] {leaf.hint}")
         lines.append("```")
-        lines.append(f"- **插画需求**：{u.illustration_brief or '黑白报刊式插画'}")
+        lines.append(f"- **看图复述**：{u.illustration_brief or '黑白报刊式叙事漫画'}")
         lines.append("")
 
     # 6. 集中复述参考

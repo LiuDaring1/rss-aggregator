@@ -702,5 +702,38 @@ mapkey: 答案1
         self.assertNotIn("None", dummy_html, "缺图时不得将 Python None 渲染到页面上")
         self.assertIn("插画待回传", dummy_html)
 
+    def test_node2_layout_rules_no_ids_no_hint_page_label(self):
+        """验证教师确认版式：1.去导图内部编号与图例；2.去提示页标签；3.栏目标题无冗余说明括号"""
+        from weekly_pipeline.models import MindmapTree, MindmapBranch, MindmapLeaf
+        from weekly_pipeline.render import generate_mindmap_svg, render_unit_preview_html
+        from weekly_pipeline.validation import load_yaml_safely
+        from weekly_pipeline.models import RetellingUnit
+
+        tree = MindmapTree(
+            center="测试主题",
+            branches=[
+                MindmapBranch(name="分支一", leaves=[
+                    MindmapLeaf(id="A1", hint="要点一提示", answer="答案一"),
+                    MindmapLeaf(id="A2", hint="要点二提示", answer="答案二"),
+                ])
+            ]
+        )
+        svg = generate_mindmap_svg(tree)
+        self.assertNotIn("[A1]", svg, "导图不得渲染 [A1] 等内部编号")
+        self.assertNotIn("图例：", svg, "导图不得渲染图例说明")
+        self.assertNotIn("编号对应", svg, "导图不得渲染编号对应说明")
+        self.assertIn("要点一提示", svg, "导图应保留文字提示")
+
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+        r27_path = os.path.join(root_dir, "content", "retellings", "R27.yaml")
+        with open(r27_path, "r", encoding="utf-8") as f:
+            u27 = RetellingUnit.model_validate(load_yaml_safely(f.read()))
+        html = render_unit_preview_html(u27, "retelling")
+        self.assertNotIn("· 提示页", html, "页面标题中严禁出现 · 提示页")
+        self.assertNotIn("（虚线待补写 · 编号对应卷末复述参考）", html, "思维导图栏目严禁冗余说明括号")
+        self.assertNotIn("（3-4格连环画）", html, "看图复述栏目严禁冗余说明括号")
+        self.assertIn("思维导图", html)
+        self.assertIn("看图复述", html)
+
 if __name__ == "__main__":
     unittest.main()

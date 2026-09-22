@@ -133,7 +133,7 @@ def generate_mindmap_svg(tree: MindmapTree) -> str:
         leaf_boxes.append((bi, hint, lid, curr_y, h))
         curr_y += h + gap_leaf
         
-    H = curr_y + 12
+    H = curr_y + 4
     
     branch_spans: Dict[int, List[float]] = {}
     for bi, hint, lid, ly, lh in leaf_boxes:
@@ -203,12 +203,10 @@ def generate_mindmap_svg(tree: MindmapTree) -> str:
     # 5. 顶层节点绘制：子叶虚线框与书写横线
     for bi, hint, lid, ly, lh in leaf_boxes:
         nodes_svg.append(f'<rect x="{lx}" y="{ly}" width="{lw}" height="{lh}" fill="#ffffff" stroke="#475569" stroke-width="1.2" stroke-dasharray="5,3" rx="3"/>')
-        hint_label = f"[{lid}] {hint}" if lid else hint
+        hint_label = hint
         nodes_svg.append(text_el(lx + 10, ly + 16, hint_label, size=11, weight="600", fill="#475569", anchor="start"))
         nodes_svg.append(f'<line x1="{lx + 10}" y1="{ly + lh - 12}" x2="{lx + lw - 10}" y2="{ly + lh - 12}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2,2"/>')
         
-    nodes_svg.append(text_el(W - 8, H - 4, "图例：[A1][B1]等编号对应卷末「复述参考」各空 · 虚线框＝待补写", size=9.5, fill="#64748b", anchor="end"))
-    
     parts = [
         f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg">',
         f'<rect x="0" y="0" width="{W}" height="{H}" fill="#ffffff"/>',

@@ -22,18 +22,18 @@
 <section class="rp rhint">
   <div class="rhead">
     <span class="rno">{{ unit.id }}</span>
-    <h3>{{ unit.title }} · 提示页</h3>
+    <h3>{{ unit.title }}</h3>
   </div>
   <div class="hint-blk">
     <div class="hint-cap">关键词网络</div>
     {{ keywords_svg | safe }}
   </div>
   <div class="hint-blk">
-    <div class="hint-cap">思维导图（虚线待补写 · 编号对应卷末复述参考）</div>
+    <div class="hint-cap">思维导图</div>
     {{ mindmap_svg | safe }}
   </div>
   <div class="hint-blk">
-    <div class="hint-cap">看图复述（3-4格连环画）</div>
+    <div class="hint-cap">看图复述</div>
     {% if illustration_html %}
       {{ illustration_html | safe }}
     {% else %}
