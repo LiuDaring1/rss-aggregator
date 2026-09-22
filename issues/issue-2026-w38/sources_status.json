@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "issue-2026-w38",
+  "generated_at": "2026-09-22T20:33:07.462365",
+  "upstream_fetch": {
+    "last_success_time": "2026-09-20T17:15:00+08:00",
+    "raw_commentary_files_count": 579,
+    "raw_wenwen_files_count": 283,
+    "program_marked_full_text": 376,
+    "editorial_verified_full_text": 21,
+    "verification_distinction_note": "程序基于文本长度与段落数标记的 hasFullText (97篇) 仅作为候选初筛；正式入选刊本的21篇全部经过人工采编逐字核实比对真实原件，在 sources/ 下存档原始文本。"
+  },
+  "active_sources": [
+    {
+      "name": "新京报·快评",
+      "channel": "opinion",
+      "status": "active",
+      "last_fetch": "2026-09-20T17:15:00+08:00",
+      "selected_units": [
+        "R27",
+        "C19",
+        "R31",
+        "C23",
+        "F23"
+      ]
+    },
+    {
+      "name": "潮新闻·钱江晚报",
+      "channel": "news/society",
+      "status": "active",
+      "last_fetch": "2026-09-20T16:34:00+08:00",
+      "selected_units": [
+        "R28",
+        "C20"
+      ]
+    },
+    {
+      "name": "阿里巴巴天天正能量",
+      "channel": "storyDetails",
+      "status": "active",
+      "last_fetch": "2026-09-20T16:34:00+08:00",
+      "selected_units": [
+        "R28",
+        "R30",
+        "C22",
+        "R32",
+        "R34"
+      ]
+    },
+    {
+      "name": "红网·红辣椒评论",
+      "channel": "hlj/qingjiao",
+      "status": "active",
+      "last_fetch": "2026-09-20T17:15:00+08:00",
+      "selected_units": [
+        "R29",
+        "C21",
+        "R33",
+        "C24"
+      ]
+    },
+    {
+      "name": "益阳日报",
+      "channel": "local_news",
+      "status": "active",
+      "last_fetch": "2026-09-20T16:34:00+08:00",
+      "selected_units": [
+        "R30",
+        "C22"
+      ]
+    },
+    {
+      "name": "河北新闻网",
+      "channel": "local_news",
+      "status": "active",
+      "last_fetch": "2026-09-20T16:34:00+08:00",
+      "selected_units": [
+        "R32"
+      ]
+    },
+    {
+      "name": "云南网",
+      "channel": "local_news",
+      "status": "active",
+      "last_fetch": "2026-09-20T16:34:00+08:00",
+      "selected_units": [
+        "R34"
+      ]
+    },
+    {
+      "name": "中国青年报·中青评论",
+      "channel": "youth_pinglun",
+      "status": "active",
+      "last_fetch": "2026-09-20T17:15:00+08:00",
+      "selected_units": [
+        "R35"
+      ]
+    },
+    {
+      "name": "浙江宣传",
+      "channel": "zjxc",
+      "status": "active",
+      "last_fetch": "2026-09-20T17:15:00+08:00",
+      "selected_units": [
+        "F19",
+        "F24"
+      ]
+    },
+    {
+      "name": "南方周末·自由谈",
+      "channel": "infzm_ziyoutan",
+      "status": "active",
+      "last_fetch": "2026-09-20T17:15:00+08:00",
+      "selected_units": [
+        "F20"
+      ]
+    },
+    {
+      "name": "人民网·人民锐评",
+      "channel": "people_ruiping",
+      "status": "active",
+      "last_fetch": "2026-09-20T17:15:00+08:00",
+      "selected_units": [
+        "F21"
+      ]
+    },
+    {
+      "name": "澎湃新闻·马上评",
+      "channel": "thepaper_mashangping",
+      "status": "active",
+      "last_fetch": "2026-09-20T17:15:00+08:00",
+      "selected_units": [
+        "F22"
+      ]
+    }
+  ],
+  "selection_ledger": {
+    "total_selected_units": 21,
+    "retellings_count": 9,
+    "commentaries_count": 6,
+    "excerpts_count": 6,
+    "retellings_ids": [
+      "R27",
+      "R28",
+      "R29",
+      "R30",
+      "R31",
+      "R32",
+      "R33",
+      "R34",
+      "R35"
+    ],
+    "commentaries_ids": [
+      "C19",
+      "C20",
+      "C21",
+      "C22",
+      "C23",
+      "C24"
+    ],
+    "excerpts_ids": [
+      "F19",
+      "F20",
+      "F21",
+      "F22",
+      "F23",
+      "F24"
+    ],
+    "reused_units": [
+      {
+        "unit_id": "R28",
+        "reused_from": "issue-trial-02",
+        "reason": "经典脱校服救人事实，用于正式期口语复述标杆示例，已明示发生时间为2026-09-03"
+      }
+    ],
+    "replaced_units": [
+      {
+        "old_topic": "闲置公车转岗乡镇 (原R31/C23)",
+        "new_topic": "开学季高校引导善用AI：警惕“思维外包”，守住独立思考 (新R31/C23)",
+        "reason": "按教师审阅意见，排除机关治理/公车调配选题，替换为更贴近高中大学学子生活的科技与独立思考题材"
+      }
+    ]
+  },
+  "pending_and_failures": {
+    "failures_count": 0,
+    "pending_checks_count": 0,
+    "audit_summary": "全部21个单元均完成上游信源URL核对、时间要素拆分、原件归档与连续子串匹配，无悬挂或未登记篇目。"
+  }
+}
