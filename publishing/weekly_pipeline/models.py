@@ -76,7 +76,7 @@ class RetellingUnit(BaseModel):
 
     schema_version: str = "1.0"
     id: str = Field(..., description="单元ID，如 R01, R02")
-    category: Literal["社会热点", "暖文", "正向社会生活"] = "社会热点"
+    category: Literal["社会热点", "暖文", "正向社会生活", "暖性社会生活", "暖性生活"] = "社会热点"
     packet_ref: Optional[str] = Field(None, description="引用的事件资料包ID")
     title: str = Field(..., description="材料标题")
     date_label: str = Field(..., description="时间标签，如 8月21日")

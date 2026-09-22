@@ -207,7 +207,7 @@ def generate_mindmap_svg(tree: MindmapTree) -> str:
         nodes_svg.append(text_el(lx + 10, ly + 16, hint_label, size=11, weight="600", fill="#475569", anchor="start"))
         nodes_svg.append(f'<line x1="{lx + 10}" y1="{ly + lh - 12}" x2="{lx + lw - 10}" y2="{ly + lh - 12}" stroke="#cbd5e1" stroke-width="0.8" stroke-dasharray="2,2"/>')
         
-    nodes_svg.append(text_el(W - 8, H - 4, "虚线框＝待补写（要点见「复述参考」导图参照）", size=9.5, fill="#64748b", anchor="end"))
+    nodes_svg.append(text_el(W - 8, H - 4, "图例：[A1][B1]等编号对应卷末「复述参考」各空 · 虚线框＝待补写", size=9.5, fill="#64748b", anchor="end"))
     
     parts = [
         f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg">',

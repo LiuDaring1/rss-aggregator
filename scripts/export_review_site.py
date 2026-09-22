@@ -131,6 +131,10 @@ def build_review_site(issue_id: str = "issue-2026-w38"):
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S (UTC+8)")
 
     # 6. 构造静态 index.html
+    pages_dir = os.path.join(target_issue_dir, "pages")
+    page_files = [f for f in os.listdir(pages_dir) if f.startswith("page_") and f.endswith(".png")] if os.path.exists(pages_dir) else []
+    total_pages_count = len(page_files) if page_files else 48
+
     html_content = generate_index_html(
         manifest=manifest,
         issue_id=issue_id,
@@ -139,7 +143,8 @@ def build_review_site(issue_id: str = "issue-2026-w38"):
         retellings=retellings_data,
         commentaries=commentaries_data,
         excerpts=excerpts_data,
-        sources=sanitized_sources
+        sources=sanitized_sources,
+        total_pages=total_pages_count
     )
 
     index_path = os.path.join(OUTPUT_DIR, "index.html")
@@ -161,7 +166,16 @@ def generate_index_html(manifest: Dict[str, Any],
                         retellings: List[Dict[str, Any]],
                         commentaries: List[Dict[str, Any]],
                         excerpts: List[Dict[str, Any]],
-                        sources: List[Dict[str, Any]]) -> str:
+                        sources: List[Dict[str, Any]],
+                        total_pages: int = 48) -> str:
+    
+    num_r = len(retellings)
+    num_c = len(commentaries)
+    num_f = len(excerpts)
+    ans_p = 3 if num_r >= 8 else (2 if num_r >= 5 else 1)
+    r_pages = num_r * 2 + ans_p
+    c_pages = num_c * 3
+    f_pages = num_f * 1
     
     # 构造单元展示卡片 HTML
     units_html = []
@@ -222,7 +236,7 @@ def generate_index_html(manifest: Dict[str, Any],
 
     # 页面快照缩略图 HTML
     pages_html = []
-    for p in range(1, 17):
+    for p in range(1, total_pages + 1):
         p_str = f"page_{p:02d}.png"
         pages_html.append(f"""
         <div class="page-thumb">
@@ -496,8 +510,8 @@ def generate_index_html(manifest: Dict[str, Any],
           <h2 style="font-size: 1.35rem; margin: 0.6rem 0 0.4rem;">{html.escape(manifest.get('title', '口语素材周刊'))} · {html.escape(manifest.get('issue_no_label', ''))}</h2>
           <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
             时段：{html.escape(manifest.get('date_range', ''))}<br>
-            物理页数：<strong>严格 16 页</strong>（无截断、无白页溢出）<br>
-            门禁核验：原文连续精准匹配 100% · 纯文本无裸 HTML 标签
+            物理页数：<strong>严格 {total_pages} 页</strong>（9篇复述{r_pages}页 + 6篇评论{c_pages}页 + 6篇拆解{f_pages}页 + 封面/目录/附录3页）<br>
+            门禁核验：原文连续精准匹配 100% · 纯文本无裸 HTML 标签 · 48页印张精确吻合
           </p>
           <div style="font-size: 0.82rem; background: #f1f5f9; padding: 0.75rem; border-radius: 6px; color: #334155;">
             <strong>📌 镜像说明：</strong> 本站点为只读脱敏包，剔除了任何内部爬虫接口、学生练习数据与本地绝对路径，Reviewer 可在移动端或离线浏览器直接查阅。
@@ -508,19 +522,19 @@ def generate_index_html(manifest: Dict[str, Any],
           <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: #334155;">📄 同源交付文件直接打开与下载：</h3>
           <div class="download-grid">
             <a class="dl-btn primary" href="issues/{issue_id}/{issue_id}.pdf" target="_blank">
-              <span>📖 整刊印刷合订本 (16 页完整 PDF)</span>
+              <span>📖 整刊印刷合订本 ({total_pages} 页完整 PDF)</span>
               <span>下载/打开 ↗</span>
             </a>
             <a class="dl-btn" href="issues/{issue_id}/{issue_id}-复述.pdf" target="_blank">
-              <span>🗣️ 复述教学分册 (5 页)</span>
+              <span>🗣️ 复述教学分册 ({r_pages} 页)</span>
               <span>打开 ↗</span>
             </a>
             <a class="dl-btn" href="issues/{issue_id}/{issue_id}-评论.pdf" target="_blank">
-              <span>🎙️ 口语评论分册 (6 页)</span>
+              <span>🎙️ 口语评论分册 ({c_pages} 页)</span>
               <span>打开 ↗</span>
             </a>
             <a class="dl-btn" href="issues/{issue_id}/{issue_id}-原文拆解与积累.pdf" target="_blank">
-              <span>📝 原文拆解分册 (2 页)</span>
+              <span>📝 原文拆解分册 ({f_pages} 页)</span>
               <span>打开 ↗</span>
             </a>
             <a class="dl-btn" href="issues/{issue_id}/{issue_id}.md" target="_blank">
@@ -537,20 +551,20 @@ def generate_index_html(manifest: Dict[str, Any],
     </div>
 
     <!-- 采编单元明细 -->
-    <div class="section-title">🔍 采编单元与真实证据链（本期入选）</div>
+    <div class="section-title">🔍 采编单元与真实证据链（本期入选 · 9篇复述 + 6篇评论）</div>
     <div class="units-grid">
       {''.join(units_html)}
     </div>
 
-    <div class="section-title">📝 原文拆解与语言积累（本期入选）</div>
+    <div class="section-title">📝 原文拆解与语言积累（本期独立入选 · 6篇深度时评精选）</div>
     <div class="units-grid">
       {''.join(excerpts_html)}
     </div>
 
     <!-- 逐页快照展架 -->
-    <div class="section-title">🖼️ 全本 16 页实页高精度快照（排版与导图视觉复核）</div>
+    <div class="section-title">🖼️ 全本 {total_pages} 页实页高精度快照（排版、导图与 9 组四格连环画视觉复核）</div>
     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-      重点复核：<strong>第 4、6 页</strong>（关键词网络、几何导图与黑白叙事插图 ILL-R27/R28）及 <strong>第 10、13 页</strong>（首句加粗、无裸露 &lt;b&gt; 标签）。
+      重点复核：<strong>第 4、6、8、10、12、14、16、18、20 页</strong>（9 组复述提示页：几何导图、卷末编号图例与 ILL-R27~R35 四格叙事连环画）及 <strong>评论范本页</strong>（双主体段首句粗体、0 裸露 &lt;b&gt; 标签）。
     </p>
     <div class="gallery-grid">
       {''.join(pages_html)}

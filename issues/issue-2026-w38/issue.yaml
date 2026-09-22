@@ -7,12 +7,27 @@ date_range: 2026年9月第3周（09.14-09.20）
 retelling_ids:
 - R27
 - R28
+- R29
+- R30
+- R31
+- R32
+- R33
+- R34
+- R35
 commentary_ids:
 - C19
 - C20
+- C21
+- C22
+- C23
+- C24
 excerpt_ids:
 - F19
 - F20
+- F21
+- F22
+- F23
+- F24
 ai_prompt_path: ai-retelling-prompt.txt
 build_config:
   pdf_render_timeout_ms: 15000

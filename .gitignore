@@ -22,6 +22,7 @@ dist/
 *.tmp
 issues/*/*_pages/
 issues/*/*.html
+review-public/
 aggr-site/public/data
 aggr-site/public/dist
 aggr-site/public/issues
