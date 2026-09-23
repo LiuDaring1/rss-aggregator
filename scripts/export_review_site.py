@@ -58,7 +58,11 @@ def build_review_site(issue_id: Optional[str] = None):
 
     dist_issue_dir = os.path.join(ROOT_DIR, "dist", issue_id)
     if not os.path.exists(dist_issue_dir):
-        raise RuntimeError(f"未找到构建产物目录: {dist_issue_dir}，请先执行 cli.py build {issue_id}")
+        fallback_issue_dir = os.path.join(ROOT_DIR, "issues", issue_id)
+        if os.path.exists(os.path.join(fallback_issue_dir, f"{issue_id}.pdf")):
+            dist_issue_dir = fallback_issue_dir
+        else:
+            raise RuntimeError(f"未找到构建产物目录: {dist_issue_dir} 或 {fallback_issue_dir}，请先执行 cli.py build {issue_id}")
 
     target_issue_dir = os.path.join(OUTPUT_DIR, "issues", issue_id)
     os.makedirs(target_issue_dir, exist_ok=True)
@@ -86,7 +90,9 @@ def build_review_site(issue_id: Optional[str] = None):
         src_j = os.path.join(ROOT_DIR, "issues", issue_id, jf)
         if os.path.exists(src_j):
             shutil.copyfile(src_j, os.path.join(target_issue_dir, jf))
-            shutil.copyfile(src_j, os.path.join(dist_issue_dir, jf))
+            dst_dist = os.path.join(dist_issue_dir, jf)
+            if os.path.abspath(src_j) != os.path.abspath(dst_dist):
+                shutil.copyfile(src_j, dst_dist)
 
     # 3. 拷贝插图资产
     src_ill_dir = os.path.join(ROOT_DIR, "issues", issue_id, "illustrations")
