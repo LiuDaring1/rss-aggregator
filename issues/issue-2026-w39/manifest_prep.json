@@ -29,10 +29,9 @@
         "status": "verified",
         "verified_entities": [
           "王福民",
-          "颅内血肿",
-          "送餐摔倒",
-          "众包协议",
-          "多层转包"
+          "送餐途中",
+          "摔倒",
+          "颅内血肿"
         ],
         "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
       }
@@ -56,11 +55,11 @@
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "龚宝冬",
           "西南政法大学",
-          "网格员",
+          "林维",
+          "龚宝冬",
           "彭水县汉葭街道",
-          "林维"
+          "网格员"
         ],
         "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
       }
@@ -70,7 +69,7 @@
       "title": "高校倡导“过紧日子”：严控行政排场，把经费用在教学科研刀刃上",
       "source_media": "新京报·快评 2026-09-19",
       "source_url": "https://www.bjnews.com.cn/detail/1789806307169100.html",
-      "source_key_facts": "多所高校严控公务接待与办会排场，压缩行政开支，把经费用在教学科研与师生保障刀刃上",
+      "source_key_facts": "北大、北林大、安建大等出台严规严控办会接待，快评澄清紧的是排场虚耗并倡导资金优先倾斜助学与设备更新",
       "local_raw_path": "issues/issue-2026-w39/sources/R38_source.txt",
       "dates": {
         "published_at": "2026-09-19",
@@ -84,11 +83,13 @@
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "高校过紧日子",
+          "北京大学",
+          "北京林业大学",
+          "安徽建筑大学",
           "严控行政排场",
-          "教学科研刀刃上"
+          "高校过紧日子"
         ],
-        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+        "notes": "已严格回读新京报原报道核验，区分已核实办会禁令与倡导性资金倾斜建议，无虚构既成事实"
       }
     },
     {
@@ -111,9 +112,10 @@
         "status": "verified",
         "verified_entities": [
           "邮件礼仪",
-          "大学生求职",
-          "浙江宣传",
-          "结构化表达"
+          "大学生",
+          "秋招",
+          "结构化表达",
+          "即时通讯"
         ],
         "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
       }
@@ -137,9 +139,11 @@
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "派出所晒粮",
-          "开放大院",
-          "为民办实事"
+          "派出所",
+          "大院",
+          "晒粮",
+          "停车坪",
+          "水稻"
         ],
         "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
       }
@@ -164,8 +168,7 @@
         "status": "verified",
         "verified_entities": [
           "汪洋",
-          "四川师范大学地理与资源科学学院",
-          "王桂勤",
+          "四川师范大学",
           "进行性肌营养不良症",
           "534分"
         ],
@@ -174,10 +177,10 @@
     },
     {
       "unit_id": "R42",
-      "title": "景区滥用“真人NPC”打造网红打卡点：莫让互动噱头取代文化内涵",
+      "title": "景区“3000万招NPC”引发热议：莫让高薪画饼透支文旅诚信",
       "source_media": "红辣椒·青椒融评 2026-09-22",
-      "source_url": "https://hlj.rednet.cn/nograb/646043/66/16305660.html",
-      "source_key_facts": "景区高薪千万招揽NPC制造低俗炒作噱头，文化内涵被轻佻互动遮蔽引反思",
+      "source_url": "https://hlj.rednet.cn/content/646853/56/14298712.html",
+      "source_key_facts": "山西晋城司徒小镇3000万招聘100名NPC引发画饼质疑，前期500万悬赏尚未兑现，评论呼吁让承诺有契约兜底",
       "local_raw_path": "issues/issue-2026-w39/sources/R42_source.txt",
       "dates": {
         "published_at": "2026-09-21",
@@ -187,16 +190,17 @@
       "is_reused": false,
       "raw_id": "comm-rednet-qingjiao-dcfc085f54",
       "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-rednet-qingjiao-dcfc085f54.json",
-      "upstream_content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "upstream_content_hash": "def7d8285e15d0e1ccfb9f12d788e9613fb27ee22f14134a89e4cb16dfa3b764",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "真人NPC",
-          "景区沉浸式",
-          "文化内涵",
-          "流量泡沫"
+          "司徒小镇",
+          "3000万招NPC",
+          "100名NPC",
+          "500万悬赏尚未兑现",
+          "契约兜底"
         ],
-        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+        "notes": "已通过红网报道快照全文核验，案情、时间、主体与评论观点完全吻合真实报道"
       }
     },
     {
@@ -218,10 +222,10 @@
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "溆浦县中都乡学校",
-          "少年摄影班",
-          "刘垒",
-          "真实乡土叙事"
+          "溆浦",
+          "中都乡",
+          "少年摄影",
+          "真实乡土"
         ],
         "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
       }
@@ -245,10 +249,10 @@
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "好心补路",
-          "拉绳警示",
-          "驻马店驿城区",
-          "情理法边界"
+          "驻马店",
+          "谢某",
+          "混凝土",
+          "细绳"
         ],
         "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
       }
