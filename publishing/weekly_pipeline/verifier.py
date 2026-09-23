@@ -264,11 +264,15 @@ def verify_fact_and_source_ledger(issue_id: str, content_dir: str = "content") -
             errors.append(f"[{uid}] {unit_type}核验状态未通过 (当前: {status})")
             return
 
-        # 2. 原件存在性
+        # 2. 原件存在性 (优先查找指定路径，若不存在则回退至本期留存镜像快照)
         full_raw = os.path.join(project_root, raw_path)
         if not os.path.exists(full_raw):
-            errors.append(f"[{uid}] 声明的上游原件不存在: {raw_path}")
-            return
+            fallback_raw = os.path.join(project_root, "issues", issue_id, "sources", f"{uid}_raw_snapshot.json")
+            if os.path.exists(fallback_raw):
+                full_raw = fallback_raw
+            else:
+                errors.append(f"[{uid}] 声明的上游原件不存在: {raw_path}")
+                return
 
         try:
             with open(full_raw, "r", encoding="utf-8") as rf:
@@ -324,11 +328,25 @@ def verify_fact_and_source_ledger(issue_id: str, content_dir: str = "content") -
             continue
 
         # 提取面向读者的学生正文字段（杜绝用 editor_notes 等内部注释混充核查结果）
-        title_text = str(ydata.get("title", ""))
-        paras_text = "\n".join(str(p) for p in ydata.get("material_paragraphs", []))
-        ref_text = str(ydata.get("ref_retelling", ""))
-        kw_text = " ".join(str(k) for k in ydata.get("keywords", []))
-        student_text = f"{title_text}\n{paras_text}\n{ref_text}\n{kw_text}"
+        r_parts = []
+        r_parts.append(str(ydata.get("title", "")))
+        r_parts.extend(str(p) for p in ydata.get("material_paragraphs", []))
+        r_parts.append(str(ydata.get("ref_retelling", "")))
+        r_parts.extend(str(k) for k in ydata.get("keywords", []))
+        if ydata.get("mapkey"):
+            r_parts.append(str(ydata["mapkey"]))
+        mm = ydata.get("mindmap_tree", {})
+        if isinstance(mm, dict):
+            r_parts.append(str(mm.get("center", "")))
+            for br in mm.get("branches", []):
+                if isinstance(br, dict):
+                    r_parts.append(str(br.get("name", "")))
+                    for lf in br.get("leaves", []):
+                        if isinstance(lf, dict):
+                            r_parts.append(str(lf.get("hint", "")))
+                            r_parts.append(str(lf.get("answer", "")))
+                            r_parts.extend(str(fr) for fr in lf.get("fact_refs", []))
+        student_text = "\n".join(r_parts)
 
         # 核心真实实体在学生正文中的存在性核验
         ventities = r.get("fact_verification", {}).get("verified_entities", [])
@@ -358,10 +376,23 @@ def verify_fact_and_source_ledger(issue_id: str, content_dir: str = "content") -
     for ex in manifest.get("excerpts", []):
         _verify_source_contract(ex, "摘录")
 
+    # 建立复述单元字典映射以供评论单元追溯来源依据与事件类型
+    retelling_map = {r.get("unit_id"): r for r in manifest.get("retellings", [])}
+
     # 3. 检查评论单元事实与关联（严格以本期入选评论集合为边界，未入选草稿不阻塞本期发布）
     for c in manifest.get("commentaries", []):
         cid = c.get("unit_id")
         r_ref = c.get("retelling_ref")
+
+        # 评论审核状态核查（若显式标记待复核等非 verified 状态，明确拦截）
+        c_status = c.get("fact_verification", {}).get("status")
+        if c_status and c_status != "verified":
+            errors.append(f"[{cid}] 评论核验状态未通过 (当前: {c_status})")
+
+        # 关联复述合法性核查
+        if r_ref and r_ref not in retelling_map:
+            errors.append(f"[{cid}] 评论关联的复述单元不存在: {r_ref}")
+
         cp = os.path.join(project_root, content_dir, "commentaries", f"{cid}.yaml")
         if not os.path.exists(cp):
             errors.append(f"[{cid}] 缺少入选评论单元文件: {cp}")
@@ -374,21 +405,60 @@ def verify_fact_and_source_ledger(issue_id: str, content_dir: str = "content") -
             errors.append(f"[{cid}] 解析入选评论 YAML 失败: {ce}")
             continue
 
-        c_title = str(cdata.get("title", ""))
-        c_recap = "\n".join(str(p) for p in cdata.get("learning", {}).get("recap_facts", []))
-        c_body = ""
-        speech_body = cdata.get("speech", {}).get("body", [])
-        if isinstance(speech_body, list):
-            for b in speech_body:
-                if isinstance(b, dict):
-                    c_body += "\n" + "\n".join(str(p) for p in b.get("paragraphs", []))
-        c_text = f"{c_title}\n{c_recap}\n{c_body}"
+        # 提取面向读者的学生可见全量字段（覆盖开头、结尾、论点、观点依据、推演解析，严格排除 editor_notes）
+        c_parts = []
+        c_parts.append(str(cdata.get("title", "")))
 
-        # 评论单元事件绑定防伪检查
-        if r_ref == "R36" or "王福民" in c_text:
+        learning_blk = cdata.get("learning", {})
+        if isinstance(learning_blk, dict):
+            c_parts.extend(str(p) for p in learning_blk.get("recap_facts", []))
+            c_parts.extend(str(q) for q in learning_blk.get("questions", []))
+            if learning_blk.get("baseline_diagnostic"):
+                c_parts.append(str(learning_blk["baseline_diagnostic"]))
+            for vp in learning_blk.get("viewpoints", []):
+                if isinstance(vp, dict):
+                    c_parts.append(str(vp.get("claim", "")))
+                    c_parts.append(str(vp.get("evidence", "")))
+                    if vp.get("explanation"):
+                        c_parts.append(str(vp["explanation"]))
+            for rl in learning_blk.get("reasoning_lessons", []):
+                if isinstance(rl, dict):
+                    c_parts.append(str(rl.get("title", "")))
+                    c_parts.append(str(rl.get("deduction_text", "")))
+
+        speech_blk = cdata.get("speech", {})
+        if isinstance(speech_blk, dict):
+            c_parts.append(str(speech_blk.get("main_claim", "")))
+            c_parts.append(str(speech_blk.get("closing", "")))
+            for b in speech_blk.get("body", []):
+                if isinstance(b, dict):
+                    c_parts.append(str(b.get("claim", "")))
+                    c_parts.extend(str(p) for p in b.get("paragraphs", []))
+
+        teaching_blk = cdata.get("teaching", {})
+        if isinstance(teaching_blk, dict):
+            if teaching_blk.get("spine"):
+                c_parts.append(str(teaching_blk["spine"]))
+            for dc in teaching_blk.get("deconstruction", []):
+                if isinstance(dc, dict):
+                    c_parts.append(str(dc.get("target", "")))
+                    c_parts.append(str(dc.get("instruction", "")))
+
+        c_text = "\n".join(c_parts)
+
+        # 评论单元基于关联来源的事件绑定防伪检查
+        r_item = retelling_map.get(r_ref, {})
+        r_raw_id = r_item.get("raw_id", "")
+        r_entities = r_item.get("fact_verification", {}).get("verified_entities", [])
+        r_facts = r_item.get("source_key_facts", "")
+
+        is_wang_fumin_comm = (r_ref == "R36") or (r_raw_id == "comm-bjnews-point-83270da3e9") or ("王福民" in r_entities) or ("王福民" in r_facts)
+        if is_wang_fumin_comm:
             if "车祸骨折" in c_text or "交通事故骨折" in c_text:
                 errors.append(f"[{cid}] 评论单元存在事实误传：包含'交通事故骨折/车祸骨折'（真实报道为摔倒受重伤、颅内血肿）")
-        if r_ref == "R41" or "汪洋" in c_text:
+
+        is_wang_yang_comm = (r_ref == "R41") or (r_raw_id == "ttzl-45357") or ("汪洋" in r_entities) or ("汪洋" in r_facts)
+        if is_wang_yang_comm:
             if "程东" in c_text:
                 errors.append(f"[{cid}] 评论单元存在严重事实错配：包含虚构实体'程东'")
             if ("安徽大学" in c_text or "安大" in c_text) and "安徽建筑大学" not in c_text:

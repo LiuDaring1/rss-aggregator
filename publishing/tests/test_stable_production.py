@@ -26,6 +26,7 @@ import tempfile
 import unittest
 import subprocess
 import hashlib
+import yaml
 from datetime import datetime
 from unittest.mock import patch
 
@@ -769,7 +770,80 @@ class TestStableProductionScenarios(unittest.TestCase):
             c25_tampered = c25_orig.replace("摔倒受重伤", "车祸骨折")
             with open(c25_path, "w", encoding="utf-8") as yf:
                 yf.write(c25_tampered)
-            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "骑手评论注入车祸骨折必须拦截！")
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "骑手评论主体段注入车祸骨折必须拦截！")
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yf.write(c25_orig)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+
+            # 2.9.1 评论开头 main_claim 注入错误词 -> 必须拦截
+            with open(c25_path, "r", encoding="utf-8") as yf:
+                c_data = yaml.safe_load(yf)
+            c_data["speech"]["main_claim"] = "外卖骑手遭遇车祸骨折后，需要得到应有的劳动安全兜底保障。"
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yaml.safe_dump(c_data, yf, allow_unicode=True, sort_keys=False)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "评论main_claim注入错误词必须拦截！")
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yf.write(c25_orig)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+
+            # 2.9.2 评论结尾 closing 注入错误词 -> 必须拦截
+            with open(c25_path, "r", encoding="utf-8") as yf:
+                c_data = yaml.safe_load(yf)
+            c_data["speech"]["closing"] = "希望每一位因车祸骨折的骑手都能得到公正合理的赔偿。"
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yaml.safe_dump(c_data, yf, allow_unicode=True, sort_keys=False)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "评论closing注入错误词必须拦截！")
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yf.write(c25_orig)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+
+            # 2.9.3 评论主体段 claim 注入错误词 -> 必须拦截
+            with open(c25_path, "r", encoding="utf-8") as yf:
+                c_data = yaml.safe_load(yf)
+            c_data["speech"]["body"][0]["claim"] = "骑手发生车祸骨折后，平台不能以算法为由推诿责任。"
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yaml.safe_dump(c_data, yf, allow_unicode=True, sort_keys=False)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "评论body.claim注入错误词必须拦截！")
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yf.write(c25_orig)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+
+            # 2.9.4 评论观点依据 viewpoints[].evidence 注入错误词 -> 必须拦截
+            with open(c25_path, "r", encoding="utf-8") as yf:
+                c_data = yaml.safe_load(yf)
+            c_data["learning"]["viewpoints"][0]["evidence"] = "骑手在送餐途中遭遇车祸骨折，维权困难。"
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yaml.safe_dump(c_data, yf, allow_unicode=True, sort_keys=False)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "评论viewpoints.evidence注入错误词必须拦截！")
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yf.write(c25_orig)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+
+            # 2.9.5 评论关联不存在的复述单元 -> 必须拦截
+            m = copy.deepcopy(base_manifest)
+            m["commentaries"][0]["retelling_ref"] = "R_DOES_NOT_EXIST"
+            _write_manifest(m)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "评论关联不存在复述单元必须拦截！")
+            _write_manifest(base_manifest)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+
+            # 2.9.6 评论台账显式声明待复核状态 -> 必须拦截
+            m = copy.deepcopy(base_manifest)
+            m["commentaries"][0]["fact_verification"] = {"status": "pending_review"}
+            _write_manifest(m)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "评论待复核状态必须拦截！")
+            _write_manifest(base_manifest)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+
+            # 2.9.7 内部 editor_notes 出现纠错词 -> 绝不误报拦截（放行通过）
+            with open(c25_path, "r", encoding="utf-8") as yf:
+                c_data = yaml.safe_load(yf)
+            if "teaching" not in c_data:
+                c_data["teaching"] = {}
+            c_data["teaching"]["editor_notes"] = "内部纠错备注：曾有编辑误写为车祸骨折，现已严格核对修正为摔倒与颅内血肿。"
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yaml.safe_dump(c_data, yf, allow_unicode=True, sort_keys=False)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "内部editor_notes不属于学生文本，不得误拦截！")
             with open(c25_path, "w", encoding="utf-8") as yf:
                 yf.write(c25_orig)
             self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))

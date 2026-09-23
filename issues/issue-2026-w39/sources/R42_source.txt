@@ -9,6 +9,7 @@
 首次采集：2026-09-23T12:28:05.577745+08:00 (接口重定向未解析出正文，记录为 metadata_only)
 补录核验：2026-09-23T18:05:00+08:00 (通过主流报道快照镜像回读完成长文补全)
 本地原件：aggr-site/data/commentaries/raw/comm-rednet-qingjiao-dcfc085f54.json
+版本库镜像快照：issues/issue-2026-w39/sources/R42_raw_snapshot.json (已纳入Git跟踪供外部独立核查)
 正文范围：评论正文共 7 自然段，1280 汉字 (不含栏目导航与作者介绍)
 内容哈希：def7d8285e15d0e1ccfb9f12d788e9613fb27ee22f14134a89e4cb16dfa3b764
 
