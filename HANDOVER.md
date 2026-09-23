@@ -50,67 +50,69 @@
 
 ---
 
-## 3. 下一次怎样出刊（极简标准生产指令）
+## 3. 每周稳定生产极简操作指南 (Unified Runner)
 
-出刊无需手工搬运文件，遵循以下 4 步即可：
+日常采编与出刊推荐直接使用统一生产调度台 `scripts/weekly_runner.py`，无需手动搬运文件或记住复杂的参数：
 
-### 第一步：同步最新上游资料（评论全文与暖文）
+### 核心命令一览：
 ```bash
-# 单次全量抓取并持久化 11 家权威评论栏目最新全文到本地资料库
-python3 scripts/fetch_commentaries.py
+# 1. 查看生产进度看板与上游健康度 (推荐教师每周一首先运行)
+python3 scripts/weekly_runner.py status --issue issue-2026-w39
 
-# （可选）在后台常驻周期运行：
-python3 scripts/fetch_commentaries.py --daemon --interval 3600 &
+# 2. 执行信源采集并初始化本周备料 (自动推导自然周时间窗并扫描候选池)
+python3 scripts/weekly_runner.py prep --issue issue-2026-w39
+
+# 3. 执行带原子防护与全门禁核验的正式构建 (Staging 隔离，失败绝不伤历史)
+python3 scripts/weekly_runner.py build --issue issue-2026-w39
+
+# 4. 导出多期审阅静态站并正式发布 (保留 W38 等历史期归档)
+python3 scripts/weekly_runner.py publish --issue issue-2026-w39
 ```
 
-### 第二步：扫描最新候选池（自动推导自然周时间窗与回看范围）
+### 任务断点续做机制 (Resumable Production)：
+- 生产状态实时持久化于 `issues/<期号>/production_state.json`，串联：
+  `prep` $\to$ `candidates_selected` $\to$ `drafting` $\to$ `comics` $\to$ `review` $\to$ `build` $\to$ `published`。
+- 会话中断、关闭终端或切换 Agent 对话后，重新运行 `status` 或 `prep` 会自动读取当前断点并提示下一步待办。已完成定稿并冻结的单元（`frozen_units`）绝不重复重写或重新生图。
+
+### 私有数据本地备份与灾备恢复：
 ```bash
-# 自动推导自然周起止（如 2026-w39 自动计算为 09.21~09.27，回看14天），并标记往期复用
-python3 publishing/weekly_pipeline/prep.py --issue issue-2026-w39
-```
+# 执行本地数据备份归档 (生成 backups/commentaries_backup_YYYYMMDD_HHMMSS.tar.gz)
+python3 scripts/backup_data.py --backup
 
-### 第三步：Agent 依据现行标准采编与审核
-- Agent 或编辑读取 `issues/<期号>/candidates_scan.json` 中的热点评论与暖性素材；
-- 对照 `CURRENT_REQUIREMENTS.md`（以岩新融合定稿版为语体标准）：
-  - 编写复述单元：`content/retellings/Rxx.yaml`
-  - 编写评论单元：`content/commentaries/Cxx.yaml`（多向观点池，双主体段范本，首句加粗亮明分论点）
-  - 编写原文拆解单元：`content/excerpts/Fxx.yaml`（并将原文保存在 `issues/<期号>/sources/Fxx_source.txt`，标注官网原链接）
-  - 组装期号配置：`issues/<期号>/issue.yaml`
+# 校验备份完整性 (校验 SHA256 与 db.json / raw 文件)
+python3 scripts/backup_data.py --verify backups/commentaries_backup_XXXXXXXX_XXXXXX.tar.gz
 
-### 第四步：离线排版构建与交付
-```bash
-# 确定性离线构建整刊与分册（支持直接传入 issues/<期号>）
-python3 publishing/weekly_pipeline/cli.py build issues/issue-2026-w39
-
-# （或使用标准完整参数指定输出路径）
-python3 publishing/weekly_pipeline/cli.py build --issue issue-2026-w39 --outdir dist/issue-2026-w39 --formats html,pdf
-
-# 镜像同步到桌面供教师直取
-mkdir -p ~/Desktop/口语素材周刊_正式生产发布_issue-2026-w39
-cp -rf dist/issue-2026-w39/* ~/Desktop/口语素材周刊_正式生产发布_issue-2026-w39/
+# 容灾还原演练
+python3 scripts/backup_data.py --restore backups/commentaries_backup_XXXXXXXX_XXXXXX.tar.gz --data-dir aggr-site/data/commentaries
 ```
 
 ---
 
-## 4. 教师查看与在线资料库使用
+## 4. 教师查看与在线审阅站点
 
-教师打开本地运行的聚合站：  
-🔗 **`http://127.0.0.1:3001/weekly.html`**（或从聚合站首页顶部导航“📖 周刊出刊台”进入）
-
-可在浏览器中：
-1. **直接阅读长文全文**：无需打开 JSON，在线浏览与检索 188 篇权威时评完整长文与字数；
-2. **查验当期采编明细**：查看本期复述、评论、拆解单元的事实出处与 100% 精确匹配引文；
-3. **一键打开与下载成品**：一键预览或下载 16 页整刊合订本、三本独立教学分册 PDF 及 Markdown 全文。
+1. **多期静态审阅站 (永久归档)**：
+   - 门户首页：`review-public/index.html` (自动展示最新已发布期次，顶部提供往期周刊归档下拉菜单)；
+   - W38 永久归档：`review-public/issues/issue-2026-w38/index.html`；
+   - W39 及后续归档：`review-public/issues/issue-2026-w39/index.html`；
+   - 线上部署：GitHub Pages `gh-pages` 分支。
+2. **聚合站后台直通 (开发测试)**：
+   - 🔗 **`http://127.0.0.1:3001/weekly.html`**；
+   - 可在线浏览 360+ 篇权威时评与暖文全文，并查看当期采编明细。
 
 ---
 
 ## 5. 故障恢复与常见排查
 
-1. **RSSHub 连接失败 (`Failed to connect to 127.0.0.1:1200`)**：
+1. **全源抓取失败或网络中断**：
+   - `fetch_commentaries.py` 内置全部失败系统级拦截（`exit code 2`），并在 `sources_status.json` 记录连续失败次数与真实错误堆栈，绝不清空存量数据，亦不将抓取异常伪装为正常成功。
+2. **进程文件锁冲突**：
+   - `fetch_commentaries.py` 采用 `fcntl.flock` 单实例文件锁（`db.json.lock`）。若同一时刻有另一个采集实例运行，将安全跳过并保护数据库不被并发写坏。
+3. **RSSHub 连接失败 (`Failed to connect to 127.0.0.1:1200`)**：
    - 检查 RSSHub 进程：`ps aux | grep 1200`
    - 重启命令：`cd ~/Desktop/RSS订阅-zcode/rsshub && pnpm dev &`
-2. **聚合站 Web 服务检查 (`http://localhost:3001`)**：
-   - 检查服务状态：`lsof -i :3001`
-   - 若未启动：`cd ~/Desktop/RSS订阅-zcode/aggr-site && node server.js &`
-3. **引文校验拦截 (`verify_issue_quotes failed`)**：
-   - 系统内置强门禁机制：所有入选 `Fxx.yaml` 的 `quote_paragraphs` 必须 100% 是 `issues/<期号>/sources/Fxx_source.txt` 的真实连续子串。若有改动，必须确保引文与原件字字一致。
+4. **macOS 自动化调度 (launchd)**：
+   - 调度配置文件位于 `scripts/launchd/com.weekly.fetch_commentaries.plist`。
+   - 载入调度：`launchctl load ~/Library/LaunchAgents/com.weekly.fetch_commentaries.plist`。
+5. **构建门禁拦截与原子回滚**：
+   - 严苛门禁：正式构建必须存在 `manifest_prep.json` 且 21 单元集合严格匹配；信源原段 100% 连续子串精准比对；物理页数精确守恒。
+   - 原子安全：构建产物首先在 `dist/<期号>.staging` 生成与检验，全部通过后才提升为正式发布目录；若有任何报错，staging 目录立即清理，原有正式发布文件毫发无损。

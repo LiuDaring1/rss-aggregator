@@ -1,0 +1,165 @@
+{
+  "schema_version": "2.1",
+  "issue_id": "issue-trial-01",
+  "time_window": "2026-09-01 ~ 2026-09-18",
+  "issue_window": "2026-09-01 ~ 2026-09-18",
+  "search_window": "2026-08-20 ~ 2026-09-18",
+  "generated_at": "2026-09-18T19:11:00.000000",
+  "editorial_policy": {
+    "standards_doc": "CURRENT_REQUIREMENTS.md",
+    "layout_baseline": "trial-01",
+    "dates_policy": "严禁将获奖或抓取时间冒充新闻发生时间",
+    "reuse_policy": "复用篇目必须明示"
+  },
+  "statistics": {
+    "retellings_count": 3,
+    "commentaries_count": 2,
+    "excerpts_count": 2
+  },
+  "retellings": [
+    {
+      "unit_id": "R18",
+      "category": "正向社会生活",
+      "title": "长春爱心小两口医院门口免费发餐：每天上百人排队，家属主动当义工",
+      "source_media": "城市晚报 / 天天正能量",
+      "source_url": "https://www.gongyi.alipay.com/item/ttzl-45350",
+      "local_raw_path": "issues/issue-trial-01/sources/R18_C13_ttzl-45350.txt",
+      "source_txt_path": "issues/issue-trial-01/sources/R18_C13_ttzl-45350.txt",
+      "dates": {
+        "event_occurred_at": "2026-08-15",
+        "published_at": "2026-09-02",
+        "commentary_at": "2026-09-03",
+        "award_date": "2026-09-03"
+      },
+      "source_key_facts": [
+        "吉林省肿瘤医院西门摆起爱心餐摊，每天中午免费为肿瘤患者及家属发放上百份热乎午餐；",
+        "13万元积蓄做公益，不设团队不搞直播带货；",
+        "家属主动化身义工，自发协助搬运菜桶维持秩序。"
+      ],
+      "workflow_status": {
+        "script_done": "已提取完整正文与元数据",
+        "agent_done": "已核对事实完成采编",
+        "pending_signoff": "试产通过"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "R19",
+      "category": "正向社会生活",
+      "title": "山东大二女生赵敏连续两年进山：给乡村女童开设专属生理科普课",
+      "source_media": "三湘都市报 / 天天正能量",
+      "source_url": "https://www.gongyi.alipay.com/item/ttzl-45340",
+      "local_raw_path": "issues/issue-trial-01/sources/R19_C14_ttzl-45340.txt",
+      "source_txt_path": "issues/issue-trial-01/sources/R19_C14_ttzl-45340.txt",
+      "dates": {
+        "event_occurred_at": "2026-07-20",
+        "published_at": "2026-09-06",
+        "commentary_at": "2026-09-06",
+        "award_date": "2026-09-06"
+      },
+      "source_key_facts": [
+        "连续第二年进山支教，为乡村女童开设专属青春期生理科普课；",
+        "课堂覆盖生理常识、自我保护和女性力量；",
+        "获得小微公益专项奖。"
+      ],
+      "workflow_status": {
+        "script_done": "已提取完整正文与元数据",
+        "agent_done": "已核对事实完成采编",
+        "pending_signoff": "试产通过"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "R20",
+      "category": "正向社会生活",
+      "title": "张家界志愿者张安林与何元华5年走访500次：成50名困境儿童“爱心爸妈”",
+      "source_media": "三湘都市报 / 天天正能量",
+      "source_url": "https://www.gongyi.alipay.com/item/ttzl-45338",
+      "local_raw_path": "issues/issue-trial-01/sources/R20_ttzl-45338.txt",
+      "source_txt_path": "issues/issue-trial-01/sources/R20_ttzl-45338.txt",
+      "dates": {
+        "event_occurred_at": "2021-01-01",
+        "published_at": "2026-09-02",
+        "commentary_at": "2026-09-03",
+        "award_date": "2026-09-02"
+      },
+      "source_key_facts": [
+        "5年崎岖山路徒步走访500余次，筹集助学金60万元；",
+        "结对帮扶50名留守与困境儿童；",
+        "随身携带冷暖台账，长期陪伴打开自闭心扉。"
+      ],
+      "workflow_status": {
+        "script_done": "已提取完整正文与元数据",
+        "agent_done": "已核对事实完成采编",
+        "pending_signoff": "试产通过"
+      },
+      "action_decision": "approved_production"
+    }
+  ],
+  "commentaries": [
+    {
+      "unit_id": "C13",
+      "retelling_ref": "R18",
+      "title": "从“淋过雨就撑把伞”看微小善意如何激活良性互助",
+      "source_media": "城市晚报 / 天天正能量",
+      "source_url": "https://www.gongyi.alipay.com/item/ttzl-45350",
+      "local_raw_path": "issues/issue-trial-01/sources/R18_C13_ttzl-45350.txt",
+      "source_txt_path": "issues/issue-trial-01/sources/R18_C13_ttzl-45350.txt",
+      "commentary_focus": "探讨肿瘤医院门前爱心发餐的朴素互助力量",
+      "workflow_status": {
+        "script_done": "已关联",
+        "agent_done": "已完成评述逻辑与诊断分析",
+        "pending_signoff": "试产通过"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "C14",
+      "retelling_ref": "R19",
+      "title": "从“变胖也没关系”看乡村女童生理科普的自尊播种",
+      "source_media": "三湘都市报 / 天天正能量",
+      "source_url": "https://www.gongyi.alipay.com/item/ttzl-45340",
+      "local_raw_path": "issues/issue-trial-01/sources/R19_C14_ttzl-45340.txt",
+      "source_txt_path": "issues/issue-trial-01/sources/R19_C14_ttzl-45340.txt",
+      "commentary_focus": "探讨乡村青春期科普的常识补齐与自主意识",
+      "workflow_status": {
+        "script_done": "已关联",
+        "agent_done": "已完成评述逻辑与诊断分析",
+        "pending_signoff": "试产通过"
+      },
+      "action_decision": "approved_production"
+    }
+  ],
+  "excerpts": [
+    {
+      "unit_id": "F13",
+      "topic": "科技与人文 · 适老化与公共底线",
+      "source_media": "浙江宣传",
+      "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260917_31914399.shtml",
+      "local_raw_path": "issues/issue-trial-01/sources/F13_shilaohua.txt",
+      "source_txt_path": "issues/issue-trial-01/sources/F13_shilaohua.txt",
+      "quote_snippet": "数字技术的进步，终究要落到对人的关怀上。数字产品的研发，也要向老人主动靠拢。适老化改造，不能做表面功夫，而要慢下来，真正去感受老人真实的需求，让数字产品去“适配”老人，而不是让老人反过来“适配”产品。",
+      "workflow_status": {
+        "script_done": "已归档",
+        "agent_done": "已拆解论证与仿写示范",
+        "pending_signoff": "试产通过"
+      },
+      "action_decision": "approved_production"
+    },
+    {
+      "unit_id": "F14",
+      "topic": "成长与自洽 · 破除外部套路建构内心大人感",
+      "source_media": "浙江宣传",
+      "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260912_31905283.shtml",
+      "local_raw_path": "issues/issue-trial-01/sources/F14_darenan.txt",
+      "source_txt_path": "issues/issue-trial-01/sources/F14_darenan.txt",
+      "quote_snippet": "过去很长一段时间，“长大”有一条相对清晰的路径：找份稳定的工作，在合适的年纪结婚生子，拥有一套自己的房子。什么年纪做什么事，像一张排得严丝合缝的课表，按部就班走完，就能领到一张名为“大人”的结业证。",
+      "workflow_status": {
+        "script_done": "已归档",
+        "agent_done": "已拆解论证与仿写示范",
+        "pending_signoff": "试产通过"
+      },
+      "action_decision": "approved_production"
+    }
+  ]
+}

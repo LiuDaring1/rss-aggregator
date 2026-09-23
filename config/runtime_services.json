@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "updated_at": "2026-09-23T08:38:00+08:00",
+  "services": {
+    "rsshub": {
+      "name": "RSSHub 路由服务",
+      "host": "127.0.0.1",
+      "port": 1200,
+      "health_url": "http://127.0.0.1:1200/",
+      "working_dir": "~/Desktop/RSS订阅-zcode/rsshub",
+      "command": "pnpm dev",
+      "description": "提供 11 家主流权威媒体评论栏目 RSS 转换路由"
+    },
+    "aggr_site": {
+      "name": "聚合站与出刊控制台",
+      "host": "127.0.0.1",
+      "port": 3001,
+      "health_url": "http://127.0.0.1:3001/weekly.html",
+      "working_dir": "~/Desktop/RSS订阅-zcode/aggr-site",
+      "command": "node server.js",
+      "description": "供教师在浏览器端查阅长文、当期采编明细与成品下载"
+    },
+    "review_server": {
+      "name": "静态审阅站本地服务",
+      "host": "127.0.0.1",
+      "port": 8040,
+      "health_url": "http://127.0.0.1:8040/",
+      "working_dir": ".",
+      "command": "python3 -m http.server 8040 --bind 127.0.0.1 --directory review-public",
+      "description": "本地脱敏静态审阅站预览"
+    }
+  },
+  "data_authorities": {
+    "commentaries": {
+      "name": "时事评论资料库",
+      "owner": "Antigravity Pipeline",
+      "authoritative_path": "aggr-site/data/commentaries",
+      "description": "由 scripts/fetch_commentaries.py 唯一权威写入并维护索引 db.json"
+    },
+    "wenwen": {
+      "name": "天天正能量暖文库",
+      "owner": "ZCode Crawler",
+      "authoritative_path": "~/Desktop/RSS订阅-zcode/aggr-site/data/wenwen",
+      "symlink_in_project": "aggr-site/data/wenwen",
+      "description": "由 ZCode 调度器抓取，本项目通过只读/双向符号链接实时直通"
+    }
+  },
+  "schedules": {
+    "launchd_plist": "scripts/launchd/com.weekly.fetch_commentaries.plist",
+    "interval_seconds": 3600
+  }
+}

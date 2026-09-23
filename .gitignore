@@ -23,6 +23,7 @@ dist/
 issues/*/*_pages/
 issues/*/*.html
 review-public/
+backups/
 aggr-site/public/data
 aggr-site/public/dist
 aggr-site/public/issues

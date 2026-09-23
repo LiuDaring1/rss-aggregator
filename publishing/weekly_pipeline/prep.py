@@ -71,17 +71,29 @@ def parse_iso_date(pub_date_str: str) -> Tuple[str, str]:
 
     return ("", s)
 
+def normalize_url(u: str) -> str:
+    """归一化 URL 用于跨期比对 (忽略协议、查询参数及末尾斜杠)"""
+    if not u or not str(u).strip():
+        return ""
+    clean = re.sub(r"^https?://", "", str(u).strip()).split("?")[0].rstrip("/")
+    return clean.lower()
+
+def normalize_title(t: str) -> str:
+    """归一化标题 (去除标点符号与空白)"""
+    if not t:
+        return ""
+    return re.sub(r"[\s\W_]+", "", str(t))
+
 def derive_week_dates(issue_id: str) -> Tuple[str, str]:
-    """依据期号格式 (如 issue-2026-w38) 计算对应自然周的周一与周日日期"""
-    m = re.search(r"(\d{4})[-_]w(\d{1,2})", issue_id.lower())
+    """依据期号格式 (如 issue-2026-w38) 计算对应自然周的周一与周日日期；格式非法坚决抛错"""
+    m = re.search(r"(\d{4})[-_]w(\d{1,2})", (issue_id or "").lower())
     if m:
         year = int(m.group(1))
         week = int(m.group(2))
         mon = datetime.date.fromisocalendar(year, week, 1)
         sun = datetime.date.fromisocalendar(year, week, 7)
         return (mon.isoformat(), sun.isoformat())
-    # 默认兜底
-    return ("2026-09-14", "2026-09-20")
+    raise ValueError(f"无法从期号 '{issue_id}' 识别有效年份与周数 (格式须为 issue-YYYY-wWW)，且未提供显式 --start-date/--end-date！")
 
 def load_raw_json(filepath: str) -> Optional[Dict[str, Any]]:
     """安全读取本地单个 raw json 文件"""
@@ -126,9 +138,15 @@ def extract_dates_from_raw(data: Dict[str, Any]) -> Dict[str, Optional[str]]:
         "fetched_at": fetched_date or None
     }
 
-def collect_historical_usage(exclude_issue_id: str = "") -> Dict[str, List[str]]:
-    """扫描所有历史期刊，建立已使用材料的引用图谱 {raw_id: [issue_id, ...]}"""
-    usage = {}
+def collect_historical_usage(exclude_issue_id: str = "") -> Dict[str, Any]:
+    """
+    全维度扫描所有历史期刊，建立已使用材料的多维引用图谱：
+    包含：by_raw_id, by_url, by_title
+    """
+    by_raw_id: Dict[str, Set[str]] = {}
+    by_url: Dict[str, Set[str]] = {}
+    by_title: Dict[str, Set[str]] = {}
+
     issue_dirs = glob.glob(os.path.join(ROOT_DIR, "issues", "*"))
     for d in issue_dirs:
         iid = os.path.basename(d)
@@ -140,8 +158,8 @@ def collect_historical_usage(exclude_issue_id: str = "") -> Dict[str, List[str]]
         for s in sources:
             fname = os.path.basename(s)
             m = re.findall(r"(ttzl-\d+|comm-[a-zA-Z0-9\-]+)", fname)
-            for raw_id in m:
-                usage.setdefault(raw_id, set()).add(iid)
+            for rid in m:
+                by_raw_id.setdefault(rid, set()).add(iid)
 
         # 2. 扫描 manifest_prep.json
         mf = os.path.join(d, "manifest_prep.json")
@@ -151,26 +169,60 @@ def collect_historical_usage(exclude_issue_id: str = "") -> Dict[str, List[str]]
                     data = json.load(f)
                     for sec in ["retellings", "commentaries", "excerpts"]:
                         for it in data.get(sec, []):
+                            # raw_id 字段或从 local_raw_path 提取
                             rid = it.get("raw_id")
+                            if not rid and it.get("local_raw_path"):
+                                base = os.path.basename(it["local_raw_path"])
+                                rid = os.path.splitext(base)[0]
                             if rid:
-                                usage.setdefault(rid, set()).add(iid)
+                                by_raw_id.setdefault(rid, set()).add(iid)
+
+                            # URL 索引
+                            u = it.get("source_url") or it.get("url")
+                            norm_u = normalize_url(u)
+                            if norm_u:
+                                by_url.setdefault(norm_u, set()).add(iid)
+
+                            # 标题索引
+                            t = it.get("title")
+                            norm_t = normalize_title(t)
+                            if norm_t and len(norm_t) >= 4:
+                                by_title.setdefault(norm_t, set()).add(iid)
             except Exception:
                 pass
-                
-        # 3. 扫描 issue.yaml 对应 units
+
+        # 3. 扫描 issue.yaml 关联的 content 单元
         iy = os.path.join(d, "issue.yaml")
         if os.path.exists(iy):
             try:
                 with open(iy, "r", encoding="utf-8") as f:
                     import yaml
                     idata = yaml.safe_load(f)
-                    for u in (idata.get("retelling_ids", []) + idata.get("commentary_ids", [])):
-                        # 尝试读取 content/ 对应单元找 source 字段
-                        pass
+                    all_uids = (
+                        (idata.get("retelling_ids") or []) +
+                        (idata.get("commentary_ids") or []) +
+                        (idata.get("excerpt_ids") or [])
+                    )
+                    for uid in all_uids:
+                        for sub in ["retellings", "commentaries", "excerpts"]:
+                            ufile = os.path.join(ROOT_DIR, "content", sub, f"{uid}.yaml")
+                            if os.path.exists(ufile):
+                                with open(ufile, "r", encoding="utf-8") as ufp:
+                                    udata = yaml.safe_load(ufp)
+                                    u_url = normalize_url(udata.get("source_url") or udata.get("url"))
+                                    if u_url:
+                                        by_url.setdefault(u_url, set()).add(iid)
+                                    u_title = normalize_title(udata.get("title"))
+                                    if u_title and len(u_title) >= 4:
+                                        by_title.setdefault(u_title, set()).add(iid)
             except Exception:
                 pass
 
-    return {k: sorted(list(v)) for k, v in usage.items()}
+    return {
+        "by_raw_id": {k: sorted(list(v)) for k, v in by_raw_id.items()},
+        "by_url": {k: sorted(list(v)) for k, v in by_url.items()},
+        "by_title": {k: sorted(list(v)) for k, v in by_title.items()}
+    }
 
 def scan_raw_candidates(
     raw_dirs: Any,
@@ -180,7 +232,7 @@ def scan_raw_candidates(
 ) -> List[Dict[str, Any]]:
     """
     扫描本地 raw 资料库，提取元数据并按检索时间窗过滤。
-    同时注入往期复用检测标记 (is_reused, reused_in, reuse_note)。
+    同时注入多维历史复用检测标记 (is_reused, reused_in, reuse_note)。
     """
     if isinstance(raw_dirs, str):
         dirs = [d.strip() for d in raw_dirs.split(",") if d.strip()]
@@ -191,7 +243,11 @@ def scan_raw_candidates(
     if not valid_dirs:
         raise FileNotFoundError(f"原始资料库目录均不存在: {raw_dirs}")
 
-    historical_usage = collect_historical_usage(exclude_issue_id=issue_id)
+    hist_usage = collect_historical_usage(exclude_issue_id=issue_id)
+    by_raw_id = hist_usage.get("by_raw_id", {})
+    by_url = hist_usage.get("by_url", {})
+    by_title = hist_usage.get("by_title", {})
+
     candidates = []
     seen_ids = set()
 
@@ -199,35 +255,47 @@ def scan_raw_candidates(
         r_real = os.path.realpath(r_dir)
         files = glob.glob(os.path.join(r_dir, "*.json"))
         for f in sorted(files):
-            if os.path.basename(f) in ["db.json", "index.json"]:
+            if os.path.basename(f) in ["db.json", "index.json", "sources_status.json"]:
                 continue
             data = load_raw_json(f)
             if not data:
                 continue
-            
+
             raw_id = str(data.get("id") or "")
             if raw_id in seen_ids:
                 continue
             seen_ids.add(raw_id)
 
             dates = extract_dates_from_raw(data)
-            
+
             # 主参照日期优先看原报道时间或事件时间，次看获奖时间，再次看抓取时间
             primary_date = dates["published_at"] or dates["event_occurred_at"] or dates["award_date"] or dates["fetched_at"] or ""
-            
+
             if search_start_date <= primary_date <= search_end_date:
                 content = data.get("content") or ""
                 paras = [p.strip() for p in content.split("\n") if p.strip()]
                 origin = data.get("origin") or data.get("sourceType") or ""
                 is_comm = (origin == "commentary") or raw_id.startswith("comm-")
                 content_type = "commentary" if is_comm else "warm_story"
-                
+
                 # 正文状态
                 has_full = data.get("hasFullText", len(content) >= 300)
                 text_type = data.get("textType", "full_text" if has_full else "summary_only")
 
-                # 历史复用检测
-                used_in = historical_usage.get(raw_id, [])
+                # 多维历史复用检测 (raw_id + URL + 标题)
+                matched_issues = set()
+                if raw_id in by_raw_id:
+                    matched_issues.update(by_raw_id[raw_id])
+
+                raw_url = normalize_url(data.get("sourceUrl") or data.get("url"))
+                if raw_url and raw_url in by_url:
+                    matched_issues.update(by_url[raw_url])
+
+                raw_title = normalize_title(data.get("title"))
+                if raw_title and raw_title in by_title:
+                    matched_issues.update(by_title[raw_title])
+
+                used_in = sorted(list(matched_issues))
                 is_reused = len(used_in) > 0
                 reuse_note = f"往期已使用 ({', '.join(used_in)})；若入选本期应在清单与导言中明示复用理由与角度差异" if is_reused else None
 

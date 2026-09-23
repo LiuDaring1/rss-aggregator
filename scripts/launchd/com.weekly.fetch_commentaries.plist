@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.weekly.fetch_commentaries</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/scripts/fetch_commentaries.py</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project</string>
+    <key>StartInterval</key>
+    <integer>3600</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/data/logs/launchd_fetch.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/data/logs/launchd_fetch.err</string>
+</dict>
+</plist>

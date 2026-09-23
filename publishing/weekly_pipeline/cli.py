@@ -161,15 +161,23 @@ def cmd_preview(args):
             print(f"  - {k.upper()}: {v}")
 
 def cmd_build(args):
+    import shutil
     raw_issue = getattr(args, "issue_pos", None) or getattr(args, "issue", None) or "sample-01-rev5"
     issue_id = raw_issue.strip("/").split("/")[-1]
-    out_dir = args.outdir or os.path.join("dist", issue_id)
+    final_out_dir = args.outdir or os.path.join("dist", issue_id)
     formats = [f.strip() for f in args.formats.split(",") if f.strip()]
-    os.makedirs(out_dir, exist_ok=True)
+
+    # 原子发布机制：先在隔离 staging 目录中完成全套构建与严格断言，全部通过后再提升
+    staging_dir = os.path.abspath(final_out_dir + ".staging")
+    if os.path.exists(staging_dir):
+        shutil.rmtree(staging_dir, ignore_errors=True)
+    os.makedirs(staging_dir, exist_ok=True)
+    out_dir = staging_dir
     
     issue_yaml = os.path.join("issues", issue_id, "issue.yaml")
     if not os.path.exists(issue_yaml):
         print(f"❌ 期刊清单不存在: {issue_yaml}")
+        shutil.rmtree(staging_dir, ignore_errors=True)
         sys.exit(1)
         
     print(f"正在构建期刊: {issue_id} (配置文件: {issue_yaml})...")
@@ -183,12 +191,14 @@ def cmd_build(args):
         yp = os.path.join("content", "retellings", f"{rid}.yaml")
         if not os.path.exists(yp):
             print(f"❌ 缺少复述单元文件: {yp}")
+            shutil.rmtree(staging_dir, ignore_errors=True)
             sys.exit(1)
         val_res = validate_file(yp)
         if not val_res.is_valid:
             print(f"❌ 单元前置校验失败，终止构建: {yp}")
             for err in val_res.errors:
                 print(f"   - {err}")
+            shutil.rmtree(staging_dir, ignore_errors=True)
             sys.exit(1)
         with open(yp, "r", encoding="utf-8") as fp:
             retellings.append(RetellingUnit.model_validate(load_yaml_safely(fp.read())))
@@ -198,12 +208,14 @@ def cmd_build(args):
         yp = os.path.join("content", "commentaries", f"{cid}.yaml")
         if not os.path.exists(yp):
             print(f"❌ 缺少评论单元文件: {yp}")
+            shutil.rmtree(staging_dir, ignore_errors=True)
             sys.exit(1)
         val_res = validate_file(yp, available_retellings=available_retellings)
         if not val_res.is_valid:
             print(f"❌ 单元前置校验失败，终止构建: {yp}")
             for err in val_res.errors:
                 print(f"   - {err}")
+            shutil.rmtree(staging_dir, ignore_errors=True)
             sys.exit(1)
         with open(yp, "r", encoding="utf-8") as fp:
             commentaries.append(CommentaryUnit.model_validate(load_yaml_safely(fp.read())))
@@ -213,19 +225,30 @@ def cmd_build(args):
         yp = os.path.join("content", "excerpts", f"{fid}.yaml")
         if not os.path.exists(yp):
             print(f"❌ 缺少原文拆解单元文件: {yp}")
+            shutil.rmtree(staging_dir, ignore_errors=True)
             sys.exit(1)
         val_res = validate_file(yp)
         if not val_res.is_valid:
             print(f"❌ 单元前置校验失败，终止构建: {yp}")
             for err in val_res.errors:
                 print(f"   - {err}")
+            shutil.rmtree(staging_dir, ignore_errors=True)
             sys.exit(1)
         with open(yp, "r", encoding="utf-8") as fp:
             excerpts.append(ExcerptUnit.model_validate(load_yaml_safely(fp.read())))
             
     # 采编台账完整性与单元一致性强校验 (manifest_prep.json vs issue.yaml)
     prep_json_path = os.path.join("issues", issue_id, "manifest_prep.json")
-    if os.path.exists(prep_json_path):
+    is_draft = getattr(args, "draft", False)
+    if not os.path.exists(prep_json_path):
+        if not is_draft:
+            print(f"❌ [台账拦截] 正式构建必须包含采编台账清单: {prep_json_path}")
+            print(f"   - 若需调试排版请使用 --draft 草稿模式；正式发布必须提供 manifest_prep.json 并通过 21 单元强校验！", file=sys.stderr)
+            shutil.rmtree(staging_dir, ignore_errors=True)
+            sys.exit(1)
+        else:
+            print(f"⚠️ [草稿构建] 未找到采编台账清单 ({prep_json_path})，因处于 --draft 模式跳过台账强校验。")
+    else:
         import json
         with open(prep_json_path, "r", encoding="utf-8") as pf:
             prep_data = json.load(pf)
@@ -238,6 +261,8 @@ def cmd_build(args):
         stats = prep_data.get("statistics", {})
         if stats.get("retellings_count") != len(manifest.retelling_ids):
             print(f"❌ [台账校验] 复述统计数量 ({stats.get('retellings_count')}) 与 issue.yaml ({len(manifest.retelling_ids)}) 不一致！")
+            shutil.rmtree(staging_dir, ignore_errors=True)
+            sys.exit(1)
             sys.exit(1)
         if stats.get("commentaries_count") != len(manifest.commentary_ids):
             print(f"❌ [台账校验] 评论统计数量 ({stats.get('commentaries_count')}) 与 issue.yaml ({len(manifest.commentary_ids)}) 不一致！")
@@ -409,14 +434,30 @@ def cmd_build(args):
 
     # 产物全量物理页数二次核验（整刊与分册完整性拦截）
     if "pdf" in formats:
-        if not verify_issue_splits(issue_id, target_dir=out_dir):
+        if not verify_issue_splits(issue_id, target_dir=staging_dir):
             print(f"❌ [发布拦截] 模块分册或整刊物理页数核验未通过，坚决拦截正式归档交付！")
+            shutil.rmtree(staging_dir, ignore_errors=True)
             sys.exit(1)
+
+    # 原子提升 (Promote staging to final_out_dir)
+    final_out_dir = os.path.abspath(final_out_dir)
+    staging_dir = os.path.abspath(staging_dir)
+
+    if os.path.exists(final_out_dir):
+        prev_dir = final_out_dir + ".prev"
+        if os.path.exists(prev_dir):
+            shutil.rmtree(prev_dir, ignore_errors=True)
+        os.rename(final_out_dir, prev_dir)
+        os.rename(staging_dir, final_out_dir)
+        shutil.rmtree(prev_dir, ignore_errors=True)
+    else:
+        os.rename(staging_dir, final_out_dir)
+
+    out_dir = final_out_dir
 
     # 自动同步归档至 issues/{issue_id}/ (确保版本库始终跟踪最新同源成品)
     issue_repo_dir = os.path.join("issues", issue_id)
     if os.path.exists(issue_repo_dir) and os.path.abspath(out_dir) != os.path.abspath(issue_repo_dir):
-        import shutil
         deliverables = [
             f"{issue_id}.md", f"{issue_id}.pdf",
             f"{issue_id}-复述.pdf", f"{issue_id}-评论.pdf", f"{issue_id}-原文拆解与积累.pdf"
@@ -429,6 +470,17 @@ def cmd_build(args):
             else:
                 print(f"  ⚠️ 警告: 预期产物不存在或为空，未同步: {src_f}")
         print(f"  ✅ 发布全量核验（信源原段与物理页数）100% 通过，已正式同步归档至仓库目录: {issue_repo_dir}")
+
+    # 更新任务状态机记录
+    try:
+        from weekly_pipeline.task_tracker import update_stage
+        update_stage(issue_id, "build", "done", notes="整刊构建、分册切分与门禁核验 100% 通过", artifacts={
+            "pdf": os.path.join(out_dir, f"{issue_id}.pdf"),
+            "html": os.path.join(out_dir, f"{issue_id}.html"),
+            "md": os.path.join(out_dir, f"{issue_id}.md")
+        })
+    except Exception:
+        pass
 
 def cmd_export_md(args):
     from weekly_pipeline.export_markdown import export_all_markdown
@@ -488,6 +540,7 @@ def main():
     p_bld.add_argument("--issue", default=None, help="期刊ID (如 issue-2026-w38)")
     p_bld.add_argument("--outdir", default=None, help="输出目录 (默认: dist/<issue_id>)")
     p_bld.add_argument("--formats", default="html,pdf", help="输出格式: html,pdf,png")
+    p_bld.add_argument("--draft", action="store_true", help="草稿模式（未提供台账清单时允许构建预览）")
     p_bld.add_argument("--offline", action="store_true", default=True, help="离线构建模式")
     p_bld.set_defaults(func=cmd_build)
     

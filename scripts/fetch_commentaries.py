@@ -302,12 +302,47 @@ def process_source(source: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Dict[s
     }
     return articles, stat
 
+import fcntl
+
+class ProcessLock:
+    """单实例进程文件锁，防止多个抓取进程并发执行导致数据损坏"""
+    def __init__(self, lockfile: str):
+        self.lockfile = lockfile
+        self.fp = None
+
+    def __enter__(self):
+        os.makedirs(os.path.dirname(os.path.abspath(self.lockfile)), exist_ok=True)
+        self.fp = open(self.lockfile, "w")
+        try:
+            fcntl.flock(self.fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except (IOError, OSError):
+            self.fp.close()
+            raise RuntimeError(f"另一个采集进程正在运行中 (lockfile: {self.lockfile})，本次运行跳过或终止。")
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.fp:
+            try:
+                fcntl.flock(self.fp, fcntl.LOCK_UN)
+                self.fp.close()
+            except Exception:
+                pass
+
 def run_fetch_cycle(
     sources_file: str = SOURCES_FILE,
     output_dir: str = DEFAULT_OUTPUT_DIR,
     index_file: str = DEFAULT_INDEX_FILE
 ) -> Dict[str, Any]:
-    """执行一次完整的信源抓取与原子更新周期"""
+    """执行一次完整的信源抓取与原子更新周期 (带单实例锁与正文防退化保护)"""
+    lock_path = index_file + ".lock"
+    with ProcessLock(lock_path):
+        return _run_fetch_cycle_core(sources_file, output_dir, index_file)
+
+def _run_fetch_cycle_core(
+    sources_file: str = SOURCES_FILE,
+    output_dir: str = DEFAULT_OUTPUT_DIR,
+    index_file: str = DEFAULT_INDEX_FILE
+) -> Dict[str, Any]:
     os.makedirs(output_dir, exist_ok=True)
     alt_dir = os.path.join(ROOT_DIR, "data", "raw", "commentaries")
     os.makedirs(alt_dir, exist_ok=True)
@@ -327,7 +362,8 @@ def run_fetch_cycle(
         "fullTextArticles": 0,
         "summaryArticles": 0,
         "articles": {},
-        "sourceStats": []
+        "sourceStats": [],
+        "sourceHealth": {}
     }
     if os.path.exists(index_file):
         try:
@@ -339,16 +375,43 @@ def run_fetch_cycle(
             pass
 
     existing_articles = db_data.get("articles", {})
+    existing_health = db_data.get("sourceHealth", {})
     new_count = 0
     updated_count = 0
     unchanged_count = 0
+    degraded_preserved_count = 0
     total_fetched = 0
     all_source_stats = []
 
     for s in enabled_sources:
+        sid = s.get("id")
         arts, stat = process_source(s)
         all_source_stats.append(stat)
         total_fetched += len(arts)
+
+        # 维护连续失败次数与最近成功时间
+        s_health = existing_health.get(sid, {
+            "id": sid,
+            "name": s.get("name"),
+            "consecutive_failures": 0,
+            "last_attempt_at": "",
+            "last_success_at": "",
+            "last_new_articles_at": "",
+            "last_error": None
+        })
+        now_ts = datetime.datetime.now(BEIJING_TZ).isoformat()
+        s_health["last_attempt_at"] = now_ts
+
+        if stat["status"] == "FAILED":
+            s_health["consecutive_failures"] = s_health.get("consecutive_failures", 0) + 1
+            s_health["last_error"] = stat.get("error")
+        else:
+            s_health["consecutive_failures"] = 0
+            s_health["last_success_at"] = now_ts
+            s_health["last_error"] = None
+            if len(arts) > 0:
+                s_health["latest_article_date"] = stat.get("latest_published_at", "")
+        existing_health[sid] = s_health
 
         for a in arts:
             aid = a["id"]
@@ -359,6 +422,34 @@ def run_fetch_cycle(
                 old_info = existing_articles[aid]
                 old_hash = old_info.get("contentHash", "")
                 old_has_full = old_info.get("hasFullText", False)
+                new_has_full = a.get("hasFullText", False)
+
+                # 正文防退化保护：已有优质全文时，新抓取变为摘要绝不覆盖全文
+                if old_has_full and not new_has_full:
+                    old_filepath = os.path.join(output_dir, f"{aid}.json")
+                    old_data = None
+                    if os.path.exists(old_filepath):
+                        try:
+                            with open(old_filepath, "r", encoding="utf-8") as opf:
+                                old_data = json.load(opf)
+                        except Exception:
+                            pass
+                    if old_data and old_data.get("content"):
+                        a["content"] = old_data["content"]
+                        a["contentLength"] = old_data["contentLength"]
+                        a["contentHash"] = old_data["contentHash"]
+                        a["textType"] = old_data.get("textType", "full_text")
+                        a["hasFullText"] = True
+                        old_flags = old_data.get("flags", [])
+                        a["flags"] = list(set(old_flags + ["degraded_fallback_preserved"]))
+                        a["degraded_warning"] = (
+                            f"源站本次抓取退化为摘要 ({len(a.get('summary', ''))} 字)，"
+                            f"已自动保留历史优质全文 ({len(old_data['content'])} 字)"
+                        )
+                        degraded_preserved_count += 1
+                        unchanged_count += 1
+                        continue
+
                 # 若内容哈希一致且正文状态未变，跳过写盘
                 if old_hash == a["contentHash"] and old_has_full == a["hasFullText"]:
                     unchanged_count += 1
@@ -396,6 +487,7 @@ def run_fetch_cycle(
     db_data["fullTextArticles"] = sum(1 for a in existing_articles.values() if a.get("hasFullText"))
     db_data["summaryArticles"] = sum(1 for a in existing_articles.values() if a.get("textType") == "summary_only")
     db_data["sourceStats"] = all_source_stats
+    db_data["sourceHealth"] = existing_health
     db_data["articles"] = existing_articles
 
     atomic_save_json(index_file, db_data)
@@ -405,6 +497,19 @@ def run_fetch_cycle(
     except Exception:
         pass
 
+    # 同时导出独立的真实运行健康度快照 (给审阅站和控制台使用)
+    status_snapshot_path = os.path.join(os.path.dirname(index_file), "sources_status.json")
+    atomic_save_json(status_snapshot_path, {
+        "updatedAt": now_iso,
+        "totalSources": len(enabled_sources),
+        "sourceStats": all_source_stats,
+        "sourceHealth": existing_health
+    })
+
+    # 判断是否全部启用的核心信源都失败
+    failed_sources = [s for s in all_source_stats if s["status"] == "FAILED"]
+    all_failed = (len(failed_sources) == len(enabled_sources)) and (len(enabled_sources) > 0)
+
     summary = {
         "timestamp": now_iso,
         "sources_count": len(enabled_sources),
@@ -412,9 +517,12 @@ def run_fetch_cycle(
         "new_articles": new_count,
         "updated_articles": updated_count,
         "unchanged_articles": unchanged_count,
+        "degraded_preserved": degraded_preserved_count,
         "total_inventory": db_data["totalArticles"],
         "full_text_inventory": db_data["fullTextArticles"],
-        "source_stats": all_source_stats
+        "source_stats": all_source_stats,
+        "source_health": existing_health,
+        "all_failed": all_failed
     }
     return summary
 
@@ -429,8 +537,10 @@ def print_source_status_table(summary: Dict[str, Any]):
         err_hint = f" ({s['error'][:25]}...)" if s.get("error") else ""
         print(f"{s['id']:22} | {s['name']:14} | {s['status']:6} | {s['total_items']:4} | {s['full_text_items']:4} | {s['summary_items']:4} | {s['latest_published_at']:10} | {s['duration']:4}s | {s['url']}{err_hint}")
     print("=" * 115)
-    print(f"🎯 运行结算: 本轮提取 {summary['total_fetched']} 篇 | 新增 {summary['new_articles']} 篇 | 更新 {summary['updated_articles']} 篇 | 未变 {summary['unchanged_articles']} 篇")
+    print(f"🎯 运行结算: 本轮提取 {summary['total_fetched']} 篇 | 新增 {summary['new_articles']} 篇 | 更新 {summary['updated_articles']} 篇 | 未变 {summary['unchanged_articles']} 篇 | 防退化保护 {summary.get('degraded_preserved', 0)} 篇")
     print(f"📦 累积资料库库存: {summary['total_inventory']} 篇 (其中具备完整长文: {summary['full_text_inventory']} 篇)")
+    if summary.get("all_failed"):
+        print("⚠️ [系统告警] 所有启用的信源抓取全部失败！请检查 RSSHub 进程与网络！")
     print("=" * 115 + "\n")
 
 def main():
@@ -448,12 +558,22 @@ def main():
             try:
                 res = run_fetch_cycle(args.sources, args.output_dir, args.index_file)
                 print_source_status_table(res)
+                if res.get("all_failed"):
+                    print("⚠️ 警告: 本轮采集所有核心源均失败，等待下次重试...", file=sys.stderr)
             except Exception as e:
                 print(f"❌ 调度周期异常: {e}", file=sys.stderr)
             time.sleep(args.interval)
     else:
-        res = run_fetch_cycle(args.sources, args.output_dir, args.index_file)
-        print_source_status_table(res)
+        try:
+            res = run_fetch_cycle(args.sources, args.output_dir, args.index_file)
+            print_source_status_table(res)
+            if res.get("all_failed"):
+                print("❌ [严重错误] 所有启用信源全部抓取失败，终止运行！", file=sys.stderr)
+                sys.exit(2)
+        except RuntimeError as re_err:
+            print(f"❌ 运行锁定拦截: {re_err}", file=sys.stderr)
+            sys.exit(3)
 
 if __name__ == "__main__":
     main()
+
