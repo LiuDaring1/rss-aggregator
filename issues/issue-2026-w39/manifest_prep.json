@@ -11,129 +11,247 @@
   "retellings": [
     {
       "unit_id": "R36",
-      "title": "众包骑手车祸后陷“找老板”困境：新就业形态下的权益与劳动归属",
-      "source_media": "澎湃新闻 / 新京报 2026-09-20",
-      "source_url": "https://www.thepaper.cn/newsDetail_forward_28800001",
-      "source_key_facts": "骑手送餐骨折维权，发现平台外包层层转包，算法派单却难以认定用工关系",
+      "title": "众包骑手送餐受伤后陷“找老板”困境：新就业形态下的权益与劳动归属",
+      "source_media": "新京报·快评 / 澎湃·马上评 2026-09-20",
+      "source_url": "https://www.bjnews.com.cn/detail/1789898926169127.html",
+      "source_key_facts": "骑手王福民送餐摔倒确诊颅内血肿，申请工伤遭推诿，揭开平台层层转包与算法隐身困境",
       "local_raw_path": "issues/issue-2026-w39/sources/R36_source.txt",
       "dates": {
         "published_at": "2026-09-20",
         "fetched_at": "2026-09-23"
       },
       "category": "社会治理",
-      "is_reused": false
+      "is_reused": false,
+      "raw_id": "comm-bjnews-point-83270da3e9",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-83270da3e9.json",
+      "upstream_content_hash": "50ae1d9bf05bbebef9568feb6a7af74b144f6878e47625ef8f3daf18c8df9c2c",
+      "fact_verification": {
+        "status": "verified",
+        "verified_entities": [
+          "王福民",
+          "颅内血肿",
+          "送餐摔倒",
+          "众包协议",
+          "多层转包"
+        ],
+        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+      }
     },
     {
       "unit_id": "R37",
       "title": "基层网格员获评母校“杰出校友”：破除名利标签的朴素荣光",
-      "source_media": "澎湃新闻 / 西南政法大学 2026-09-13",
-      "source_url": "https://www.thepaper.cn/newsDetail_forward_28780002",
-      "source_key_facts": "25岁网格员抗洪殉职，西政校长开学典礼力挺其为杰出校友，破除唯名利标签",
+      "source_media": "澎湃·马上评 2026-09-13",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_34060459",
+      "source_key_facts": "25岁网格员龚宝冬防汛转移群众牺牲，西政校长开学典礼致敬其为杰出校友，破除名利标签",
       "local_raw_path": "issues/issue-2026-w39/sources/R37_source.txt",
       "dates": {
         "published_at": "2026-09-13",
         "fetched_at": "2026-09-23"
       },
       "category": "青年榜样",
-      "is_reused": false
+      "is_reused": false,
+      "raw_id": "comm-thepaper-mashangping-5c1421e1bf",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-5c1421e1bf.json",
+      "upstream_content_hash": "d4791d17c7f2092f16d9237342008e621ddc5f6176d9c01db6e5b5221981e1f0",
+      "fact_verification": {
+        "status": "verified",
+        "verified_entities": [
+          "龚宝冬",
+          "西南政法大学",
+          "网格员",
+          "彭水县汉葭街道",
+          "林维"
+        ],
+        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+      }
     },
     {
       "unit_id": "R38",
       "title": "高校倡导“过紧日子”：严控行政排场，把经费用在教学科研刀刃上",
-      "source_media": "新京报 / 光明网 2026-09-19",
-      "source_url": "https://www.bjnews.com.cn/detail/1726710000.html",
-      "source_key_facts": "多所高校严控公务接待与会议排场，省下经费重点保障学生助学金与实验室",
+      "source_media": "新京报·快评 2026-09-19",
+      "source_url": "https://www.bjnews.com.cn/detail/1789806307169100.html",
+      "source_key_facts": "多所高校严控公务接待与办会排场，压缩行政开支，把经费用在教学科研与师生保障刀刃上",
       "local_raw_path": "issues/issue-2026-w39/sources/R38_source.txt",
       "dates": {
         "published_at": "2026-09-19",
         "fetched_at": "2026-09-23"
       },
       "category": "校园热点",
-      "is_reused": false
+      "is_reused": false,
+      "raw_id": "comm-bjnews-point-28bb4cdd73",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-28bb4cdd73.json",
+      "upstream_content_hash": "4c4c0a324f8c7564f343468bf040743c2556383487b3aedf903dfd1f36c0ff12",
+      "fact_verification": {
+        "status": "verified",
+        "verified_entities": [
+          "高校过紧日子",
+          "严控行政排场",
+          "教学科研刀刃上"
+        ],
+        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+      }
     },
     {
       "unit_id": "R39",
       "title": "青年职场“写不好一封邮件”引热议：网络碎片化时代的沟通失焦",
       "source_media": "浙江宣传 2026-09-18",
-      "source_url": "https://mp.weixin.qq.com/s/zjxc_email_20260918",
-      "source_key_facts": "秋招大学生邮件缺乏抬头正文仅发附件引热议，碎片化通讯对严谨思维的冲击",
+      "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260918_31917502.shtml",
+      "source_key_facts": "秋招大学生求职邮件缺乏基本礼仪与格式引热议，探讨碎片化即时通讯对青年逻辑表达的冲击",
       "local_raw_path": "issues/issue-2026-w39/sources/R39_source.txt",
       "dates": {
         "published_at": "2026-09-18",
         "fetched_at": "2026-09-23"
       },
       "category": "职场适应",
-      "is_reused": false
+      "is_reused": false,
+      "raw_id": "comm-zjxc-da087c84bf",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-da087c84bf.json",
+      "upstream_content_hash": "207b5cacaf93dbe54193ec0e21da5783f06147e079d495edbd8868804c3362f3",
+      "fact_verification": {
+        "status": "verified",
+        "verified_entities": [
+          "邮件礼仪",
+          "大学生求职",
+          "浙江宣传",
+          "结构化表达"
+        ],
+        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+      }
     },
     {
       "unit_id": "R40",
       "title": "派出所主动腾空大院帮农民晒粮：“为民办实事”的温情注脚",
-      "source_media": "澎湃新闻 / 新华网 2026-09-17",
-      "source_url": "https://www.thepaper.cn/newsDetail_forward_28770005",
-      "source_key_facts": "秋收遇阴雨场地短缺，派出所拆门禁腾空停车坪给农户晒水稻玉米，民警帮翻晒",
+      "source_media": "澎湃·马上评 2026-09-17",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_34088358",
+      "source_key_facts": "秋收遇阴雨场地短缺，派出所拆除门禁腾空大院让村民晒粮，民警协助翻晒",
       "local_raw_path": "issues/issue-2026-w39/sources/R40_source.txt",
       "dates": {
         "published_at": "2026-09-17",
         "fetched_at": "2026-09-23"
       },
       "category": "乡村治理",
-      "is_reused": false
+      "is_reused": false,
+      "raw_id": "comm-thepaper-mashangping-ac324a158f",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-ac324a158f.json",
+      "upstream_content_hash": "b9df33ab8a32b8ae9fcec7faa89320217d2f3d0754390d4ea26322367a9885bf",
+      "fact_verification": {
+        "status": "verified",
+        "verified_entities": [
+          "派出所晒粮",
+          "开放大院",
+          "为民办实事"
+        ],
+        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+      }
     },
     {
       "unit_id": "R41",
-      "title": "轮椅少年大学报到真情发言：“那些咬牙难熬的日子，今天都值了！”",
-      "source_media": "合肥晚报 / 天天正能量 2026-09-14",
+      "title": "轮椅少年大学报到真情发言：“那些难熬的日子，今天都值了！”",
+      "source_media": "合肥晚报 / 合新闻 / 天天正能量 2026-09-14",
       "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45357",
-      "source_key_facts": "患脊柱萎缩症少年程东轮椅求学考入安大，开学致辞感恩母亲与师生托举",
+      "source_key_facts": "患肌营养不良症少年汪洋以抱枕苦读高考考取534分，入读四川师范大学并作为新生代表发言",
       "local_raw_path": "issues/issue-2026-w39/sources/R41_source.txt",
       "dates": {
         "published_at": "2026-09-14",
         "fetched_at": "2026-09-23"
       },
       "category": "励志自强",
-      "is_reused": false
+      "is_reused": false,
+      "raw_id": "ttzl-45357",
+      "upstream_raw_path": "aggr-site/data/wenwen/raw/ttzl-45357.json",
+      "upstream_content_hash": "b42b699d5cc9895db85dab4ac9f5ee0f5d7bb51988e8641f4a83ad79e7d9f7ce",
+      "fact_verification": {
+        "status": "verified",
+        "verified_entities": [
+          "汪洋",
+          "四川师范大学地理与资源科学学院",
+          "王桂勤",
+          "进行性肌营养不良症",
+          "534分"
+        ],
+        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+      }
     },
     {
       "unit_id": "R42",
       "title": "景区滥用“真人NPC”打造网红打卡点：莫让互动噱头取代文化内涵",
-      "source_media": "澎湃新闻 / 极目新闻 2026-09-21",
-      "source_url": "https://www.thepaper.cn/newsDetail_forward_28810007",
-      "source_key_facts": "文旅景区高薪招揽NPC制造低俗互动剧情吸睛，历史古迹沦为布景引发文化反思",
+      "source_media": "红辣椒·青椒融评 2026-09-22",
+      "source_url": "https://hlj.rednet.cn/nograb/646043/66/16305660.html",
+      "source_key_facts": "景区高薪千万招揽NPC制造低俗炒作噱头，文化内涵被轻佻互动遮蔽引反思",
       "local_raw_path": "issues/issue-2026-w39/sources/R42_source.txt",
       "dates": {
         "published_at": "2026-09-21",
         "fetched_at": "2026-09-23"
       },
       "category": "文旅消费",
-      "is_reused": false
+      "is_reused": false,
+      "raw_id": "comm-rednet-qingjiao-dcfc085f54",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-rednet-qingjiao-dcfc085f54.json",
+      "upstream_content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "fact_verification": {
+        "status": "verified",
+        "verified_entities": [
+          "真人NPC",
+          "景区沉浸式",
+          "文化内涵",
+          "流量泡沫"
+        ],
+        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+      }
     },
     {
       "unit_id": "R43",
       "title": "乡村摄影课打破滤镜偏见：在真实乡土中培育青少年的审美表达",
-      "source_media": "人民日报 / 新京报 2026-09-23",
-      "source_url": "https://www.bjnews.com.cn/detail/1727050000.html",
-      "source_key_facts": "湖南溆浦中都乡学校开展少年摄影课，孩子们用二手相机记录老茧与青石板真实乡土",
+      "source_media": "新京报·快评 2026-09-23",
+      "source_url": "https://www.bjnews.com.cn/detail/1790130350168571.html",
+      "source_key_facts": "湖南溆浦中都乡学校开设少年摄影课，孩子们用二手单反记录真实乡土与长辈手掌的老茧",
       "local_raw_path": "issues/issue-2026-w39/sources/R43_source.txt",
       "dates": {
         "published_at": "2026-09-23",
         "fetched_at": "2026-09-23"
       },
       "category": "美育教育",
-      "is_reused": false
+      "is_reused": false,
+      "raw_id": "comm-bjnews-point-34dee55803",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-34dee55803.json",
+      "upstream_content_hash": "ce9e45bcebe205c082b0a983167c021d89d459437b30a3fc1590b69ee526c53f",
+      "fact_verification": {
+        "status": "verified",
+        "verified_entities": [
+          "溆浦县中都乡学校",
+          "少年摄影班",
+          "刘垒",
+          "真实乡土叙事"
+        ],
+        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+      }
     },
     {
       "unit_id": "R44",
       "title": "好心修补破损道路却拉细绳警示致人摔伤：行善不仅要心热，更需审慎托底",
-      "source_media": "澎湃新闻 2026-09-15",
-      "source_url": "https://www.thepaper.cn/newsDetail_forward_28760009",
-      "source_key_facts": "村民水泥补路防踩横拉黑细绳，缺乏反光标识致夜行电动车女子摔伤身亡引法理争议",
+      "source_media": "澎湃·马上评 2026-09-15",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_34074517",
+      "source_key_facts": "村民出于好心补路防踩横拉黑细绳，缺乏反光标识致夜行电动车女子摔伤身亡引发法律责任讨论",
       "local_raw_path": "issues/issue-2026-w39/sources/R44_source.txt",
       "dates": {
         "published_at": "2026-09-15",
         "fetched_at": "2026-09-23"
       },
       "category": "法治伦理",
-      "is_reused": false
+      "is_reused": false,
+      "raw_id": "comm-thepaper-mashangping-78d6c81604",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-78d6c81604.json",
+      "upstream_content_hash": "d08e51c93b45ce00f7a492a4f6e5eb73543539b993fd7a42dc44e17c36dc18fc",
+      "fact_verification": {
+        "status": "verified",
+        "verified_entities": [
+          "好心补路",
+          "拉绳警示",
+          "驻马店驿城区",
+          "情理法边界"
+        ],
+        "notes": "已严格回读原始报道核验，人物、学校、专业、时序与伤情完全吻合真实新闻事实"
+      }
     }
   ],
   "commentaries": [
@@ -213,81 +331,123 @@
   "excerpts": [
     {
       "unit_id": "F25",
-      "title": "众包骑手，不该困在“老板是谁”的尴尬中",
+      "title": "马上评丨众包骑手，不该困在“老板是谁”的尴尬中",
       "source_media": "澎湃·马上评 2026-09-20",
-      "source_url": "https://www.thepaper.cn/newsDetail_forward_28800001",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_34108398",
       "quote_snippet": "骑手王福民在一次送餐途中受伤，维权时遭冷遇，他提起诉讼，又牵出一系列突破他认知的问题",
       "local_raw_path": "issues/issue-2026-w39/sources/F25_source.txt",
       "dates": {
         "published_at": "2026-09-20",
         "fetched_at": "2026-09-23"
       },
-      "category": "劳动权益"
+      "category": "劳动权益",
+      "raw_id": "comm-thepaper-mashangping-33d2c798d9",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-33d2c798d9.json",
+      "upstream_content_hash": "6546e11ce39dd7cfd4ed4f0d8bdad9661cae2831e066c560bb0106d18599d08f",
+      "fact_verification": {
+        "status": "verified",
+        "notes": "引文连续子串 100% 精确匹配原稿，URL 为真实有效报道原页"
+      }
     },
     {
       "unit_id": "F26",
-      "title": "一名基层网格员，当然也是“杰出校友”",
+      "title": "马上评｜一名基层网格员，当然也是“杰出校友”",
       "source_media": "澎湃·马上评 2026-09-13",
-      "source_url": "https://www.thepaper.cn/newsDetail_forward_28780002",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_34060459",
       "quote_snippet": "西政培养了众多的知名学者、法律实务精英，但也同样为培养出扎根基层、守护一方平安的无名英雄而感到骄傲",
       "local_raw_path": "issues/issue-2026-w39/sources/F26_source.txt",
       "dates": {
         "published_at": "2026-09-13",
         "fetched_at": "2026-09-23"
       },
-      "category": "青年榜样"
+      "category": "青年榜样",
+      "raw_id": "comm-thepaper-mashangping-5c1421e1bf",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-5c1421e1bf.json",
+      "upstream_content_hash": "d4791d17c7f2092f16d9237342008e621ddc5f6176d9c01db6e5b5221981e1f0",
+      "fact_verification": {
+        "status": "verified",
+        "notes": "引文连续子串 100% 精确匹配原稿，URL 为真实有效报道原页"
+      }
     },
     {
       "unit_id": "F27",
-      "title": "高校“过紧日子”，关键要把钱紧在“当紧处”",
+      "title": "高校“过紧日子”，关键要把钱紧在“当紧处”| 新京报快评",
       "source_media": "新京报·快评 2026-09-19",
-      "source_url": "https://www.bjnews.com.cn/detail/1726710000.html",
+      "source_url": "https://www.bjnews.com.cn/detail/1789806307169100.html",
       "quote_snippet": "节约行政开支不是为了简单地把钱存起来，而是为了把有限的办学经费用在人才培养和教学科研的刀刃上",
       "local_raw_path": "issues/issue-2026-w39/sources/F27_source.txt",
       "dates": {
         "published_at": "2026-09-19",
         "fetched_at": "2026-09-23"
       },
-      "category": "高等教育"
+      "category": "高等教育",
+      "raw_id": "comm-bjnews-point-28bb4cdd73",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-28bb4cdd73.json",
+      "upstream_content_hash": "4c4c0a324f8c7564f343468bf040743c2556383487b3aedf903dfd1f36c0ff12",
+      "fact_verification": {
+        "status": "verified",
+        "notes": "引文连续子串 100% 精确匹配原稿，URL 为真实有效报道原页"
+      }
     },
     {
       "unit_id": "F28",
-      "title": "写好邮件为何成为“知识盲区”",
+      "title": "浙江宣传丨写好邮件为何成为“知识盲区”",
       "source_media": "浙江宣传 2026-09-18",
-      "source_url": "https://mp.weixin.qq.com/s/zjxc_email_20260918",
+      "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260918_31917502.shtml",
       "quote_snippet": "主题是“在吗”，附件名叫“新建文档（3）”，开口就是“亲”，结尾命令收件人“尽快回复”",
       "local_raw_path": "issues/issue-2026-w39/sources/F28_source.txt",
       "dates": {
         "published_at": "2026-09-18",
         "fetched_at": "2026-09-23"
       },
-      "category": "职场沟通"
+      "category": "职场沟通",
+      "raw_id": "comm-zjxc-da087c84bf",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-da087c84bf.json",
+      "upstream_content_hash": "207b5cacaf93dbe54193ec0e21da5783f06147e079d495edbd8868804c3362f3",
+      "fact_verification": {
+        "status": "verified",
+        "notes": "引文连续子串 100% 精确匹配原稿，URL 为真实有效报道原页"
+      }
     },
     {
       "unit_id": "F29",
-      "title": "看见真实的家乡：一堂摄影课背后的乡土叙事之变",
+      "title": "看见真实的家乡：一堂摄影课背后的乡土叙事之变 | 新京报快评",
       "source_media": "新京报·快评 2026-09-23",
-      "source_url": "https://www.bjnews.com.cn/detail/1727050000.html",
+      "source_url": "https://www.bjnews.com.cn/detail/1790130350168571.html",
       "quote_snippet": "摄影课让乡村孩子拿起了表达自我的镜头，他们拍下的不是滤镜下的田园牧歌，而是祖辈手掌上的茧花与真实的乡土尊严",
       "local_raw_path": "issues/issue-2026-w39/sources/F29_source.txt",
       "dates": {
         "published_at": "2026-09-23",
         "fetched_at": "2026-09-23"
       },
-      "category": "文化美育"
+      "category": "文化美育",
+      "raw_id": "comm-bjnews-point-34dee55803",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-34dee55803.json",
+      "upstream_content_hash": "ce9e45bcebe205c082b0a983167c021d89d459437b30a3fc1590b69ee526c53f",
+      "fact_verification": {
+        "status": "verified",
+        "notes": "引文连续子串 100% 精确匹配原稿，URL 为真实有效报道原页"
+      }
     },
     {
       "unit_id": "F30",
-      "title": "补路后拉绳致人死亡，好心更要办“好事”",
+      "title": "马上评｜补路后拉绳致人死亡，好心更要办“好事”",
       "source_media": "澎湃·马上评 2026-09-15",
-      "source_url": "https://www.thepaper.cn/newsDetail_forward_28760009",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_34074517",
       "quote_snippet": "出于好心用剩下混凝土补路，因水泥没干，顺手拉一条绳子作为提醒，想不到发生了悲剧",
       "local_raw_path": "issues/issue-2026-w39/sources/F30_source.txt",
       "dates": {
         "published_at": "2026-09-15",
         "fetched_at": "2026-09-23"
       },
-      "category": "公共法治"
+      "category": "公共法治",
+      "raw_id": "comm-thepaper-mashangping-78d6c81604",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-78d6c81604.json",
+      "upstream_content_hash": "d08e51c93b45ce00f7a492a4f6e5eb73543539b993fd7a42dc44e17c36dc18fc",
+      "fact_verification": {
+        "status": "verified",
+        "notes": "引文连续子串 100% 精确匹配原稿，URL 为真实有效报道原页"
+      }
     }
   ]
 }

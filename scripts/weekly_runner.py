@@ -24,7 +24,7 @@ import json
 import argparse
 import subprocess
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 PYTHON_EXEC = sys.executable
@@ -35,6 +35,7 @@ if os.path.join(PROJECT_ROOT, "publishing") not in sys.path:
 
 from weekly_pipeline.task_tracker import (
     load_production_state,
+    save_production_state,
     init_production_state,
     update_stage,
     freeze_unit,
@@ -75,10 +76,12 @@ def find_latest_issue(issues_dir=None):
     return candidates[0]
 
 
-def get_upstream_health():
+def get_upstream_health(db_file=None, status_file=None):
     """读取上游信源健康度与统计数据"""
-    db_file = os.path.join(PROJECT_ROOT, "aggr-site", "data", "commentaries", "db.json")
-    status_file = os.path.join(PROJECT_ROOT, "aggr-site", "data", "commentaries", "sources_status.json")
+    if db_file is None:
+        db_file = os.path.join(PROJECT_ROOT, "aggr-site", "data", "commentaries", "db.json")
+    if status_file is None:
+        status_file = os.path.join(PROJECT_ROOT, "aggr-site", "data", "commentaries", "sources_status.json")
     
     data = {
         "total_articles": 0,
@@ -114,8 +117,8 @@ def get_upstream_health():
                     now_dt = datetime.now(timezone.utc)
                     if (now_dt - last_dt).total_seconds() > 48 * 3600:
                         data["is_expired"] = True
-                except Exception:
-                    pass
+                except Exception as ex:
+                    data["expiry_error"] = f"{type(ex).__name__}: {ex}"
 
             # 最新报道日期
             articles = db.get("articles", {})
@@ -338,10 +341,10 @@ def cmd_prep(args):
         state["time_window"] = time_window_str
         save_production_state(issue_id, state)
 
+    cur_stage_before = existing_state.get("current_stage", "prep") if existing_state else "prep"
     update_stage(issue_id, stage="prep", status="done", notes="信源采集与备料初始化完成")
-    cur_stage = state.get("current_stage", "prep")
-    # 只有当此前还停留在 prep 时才自动前进到 candidates_selected，避免倒退已有进度
-    if cur_stage == "prep" or not existing_state:
+    # 只有当此前还停留在 prep 或新初始化时，才自动前进到 candidates_selected
+    if cur_stage_before == "prep" or not existing_state:
         update_stage(issue_id, stage="candidates_selected", status="in_progress", notes="等待 Agent/教师核验选题")
     
     print(f"\n✅ 期刊 {issue_id} 采编与备料初始化成功！任务状态已持久化至 {issue_dir}/production_state.json")

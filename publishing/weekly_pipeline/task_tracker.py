@@ -136,13 +136,17 @@ def update_stage(
     if artifacts:
         state.setdefault("artifacts", {}).update(artifacts)
 
-    # 自动推进当前阶段指针
+    # 自动推进当前阶段指针 (单向推进保护：刷新前序阶段不得倒退已有主生产进度)
+    cur_stage = state.get("current_stage", STAGES[0])
+    cur_idx = STAGES.index(cur_stage) if cur_stage in STAGES else 0
+    idx = STAGES.index(stage)
+
     if status == "done":
-        idx = STAGES.index(stage)
-        if idx + 1 < len(STAGES):
+        if idx >= cur_idx and idx + 1 < len(STAGES):
             state["current_stage"] = STAGES[idx + 1]
     elif status in ["in_progress", "failed"]:
-        state["current_stage"] = stage
+        if idx >= cur_idx:
+            state["current_stage"] = stage
 
     save_production_state(issue_id, state)
     return state

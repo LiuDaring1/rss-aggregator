@@ -3,7 +3,7 @@
   "issue_id": "issue-2026-w39",
   "time_window": "2026-09-21 ~ 2026-09-27",
   "created_at": "2026-09-23T13:45:00.273796+08:00",
-  "last_updated_at": "2026-09-23T14:15:08.782185+08:00",
+  "last_updated_at": "2026-09-23T16:05:53.068032+08:00",
   "current_stage": "published",
   "target_quota": {
     "retellings": 9,
@@ -19,8 +19,8 @@
   "unit_freeze_status": {
     "R36": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.851308+08:00",
-      "sha256": "05dfe1e47aeec06c09661b7af556f9fdc095982a96689a97b9dade0dad4c3728",
+      "frozen_at": "2026-09-23T16:05:21.868618+08:00",
+      "sha256": "1829c0aa9a7215303b47195e4335c27726009e579d25b8cd4b607cd1c220fe2d",
       "rel_path": "content/retellings/R36.yaml"
     },
     "R37": {
@@ -49,8 +49,8 @@
     },
     "R41": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.854792+08:00",
-      "sha256": "b91598100cec62fa92ab220957194fbc868dec1d583eb37cabbd1822273c21c8",
+      "frozen_at": "2026-09-23T16:05:21.870236+08:00",
+      "sha256": "2c56628830d4e83879e4d59006957f2e91c39a143843c4bb02f07b21864c8cd9",
       "rel_path": "content/retellings/R41.yaml"
     },
     "R42": {
@@ -73,8 +73,8 @@
     },
     "C25": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.859589+08:00",
-      "sha256": "b952e530aba4d93c81f73f9c23aa4cd4ae3572ace0aedfdcbf3e3fed3ca31bd1",
+      "frozen_at": "2026-09-23T16:05:21.871368+08:00",
+      "sha256": "7400556edfd526d02ee41a57cebeb2cbcea0b4173d7d651c20a30b402a6224e7",
       "rel_path": "content/commentaries/C25.yaml"
     },
     "C26": {
@@ -109,38 +109,38 @@
     },
     "F25": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.866633+08:00",
-      "sha256": "08d32dc21af2cdc1ce1fc85f5bac8737bbb4d0dd4e3279354a22c033d96af030",
+      "frozen_at": "2026-09-23T16:05:21.872266+08:00",
+      "sha256": "c99e0ba13d338838267afad3c297456878f46933f10206aaffc2ad72d066f6a9",
       "rel_path": "content/excerpts/F25.yaml"
     },
     "F26": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.867428+08:00",
-      "sha256": "edfb5977cbbe18dd1ef4ad142276303caa680c2820b5505a23867288f0d25891",
+      "frozen_at": "2026-09-23T16:05:21.872889+08:00",
+      "sha256": "7df99dda13cc2988ec46db5394f3e45f6bc64fa6592a579f075ae7a8142bd1f4",
       "rel_path": "content/excerpts/F26.yaml"
     },
     "F27": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.868172+08:00",
-      "sha256": "42e73dcf7a7dcf4dde84f36fce8dc47d7f220d3d95665164f7244d0557005daa",
+      "frozen_at": "2026-09-23T16:05:21.873619+08:00",
+      "sha256": "c36405ee727e110a3d7bb019a21e3bae08fdaf43d4ca0b830b26c8380f38df91",
       "rel_path": "content/excerpts/F27.yaml"
     },
     "F28": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.868771+08:00",
-      "sha256": "23e3fb05259117a1418e5e7ad06039472d879f584975ec4cd248c467314fd016",
+      "frozen_at": "2026-09-23T16:05:21.874308+08:00",
+      "sha256": "be393f7acbbf598b6b056e5ff319bcb46263c2279c0da29668d1bdbf2e7d0304",
       "rel_path": "content/excerpts/F28.yaml"
     },
     "F29": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.869498+08:00",
-      "sha256": "6c27ae9487407ad39f65072a2244c71e2eff4903b525afe3a13b0913be2ef75e",
+      "frozen_at": "2026-09-23T16:05:21.875177+08:00",
+      "sha256": "7229eb072328fb3c6c3ac2b835d9d335196d464c9b53736a1a33744cae425ea6",
       "rel_path": "content/excerpts/F29.yaml"
     },
     "F30": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.870214+08:00",
-      "sha256": "2a934918a87cd1be0b3dbf534676eb729252b94d64e42e0fdd1d2191e26a7781",
+      "frozen_at": "2026-09-23T16:05:21.875969+08:00",
+      "sha256": "c83a4b8a0ca7ffdedb6001470393216afe1876e722b96964b99d3e2111a92bf9",
       "rel_path": "content/excerpts/F30.yaml"
     }
   },
@@ -187,7 +187,7 @@
     },
     "build": {
       "status": "done",
-      "updated_at": "2026-09-23T14:13:29.350100+08:00",
+      "updated_at": "2026-09-23T16:05:40.189546+08:00",
       "completed_items": "原子构建成功，47页动态核验与信源子串100%匹配通过，凭据 f89020c7e4 已签发",
       "pending_items": [],
       "failed_items": [],
@@ -195,7 +195,7 @@
     },
     "published": {
       "status": "done",
-      "updated_at": "2026-09-23T14:15:08.781840+08:00",
+      "updated_at": "2026-09-23T16:05:53.067730+08:00",
       "completed_items": "准备执行多期静态审阅站发布与归档",
       "pending_items": [],
       "failed_items": [],

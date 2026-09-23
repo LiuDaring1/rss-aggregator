@@ -429,7 +429,9 @@ class TestStableProductionScenarios(unittest.TestCase):
     # 场景 8: 构建提升原子回滚保护
     # -------------------------------------------------------------------------
     def test_scenario_08_atomic_build_failure_protection(self):
-        """场景 8: 提升暂存批次时发生可捕获异常，自动回滚恢复正式目录，原文件哈希完全无损"""
+        """场景 8: 提升暂存批次时发生可捕获异常，自动回滚恢复正式目录，原文件哈希完全无损 (直接调用生产代码)"""
+        from weekly_pipeline.cli import promote_staging_to_final
+
         final_dir = os.path.join(self.tmp_dir, "dist_final")
         staging_dir = os.path.join(self.tmp_dir, "dist_staging")
         os.makedirs(final_dir, exist_ok=True)
@@ -443,25 +445,16 @@ class TestStableProductionScenarios(unittest.TestCase):
         with open(os.path.join(staging_dir, "new_version.pdf"), "wb") as f:
             f.write(b"NEW_VERSION_BYTES")
 
-        # 执行 cli.py 中的生产提升与回滚逻辑
-        prev_dir = final_dir + ".prev"
-        if os.path.exists(prev_dir):
-            shutil.rmtree(prev_dir, ignore_errors=True)
-        os.rename(final_dir, prev_dir)
-        try:
-            # 模拟第二次 rename 抛出异常 (如写权限、磁盘已满、网络断开等)
-            raise PermissionError("模拟系统级重命名失败 (提升中断)")
-            os.rename(staging_dir, final_dir)
-            shutil.rmtree(prev_dir, ignore_errors=True)
-        except Exception:
-            # 生产代码中的原子回滚
-            if os.path.exists(prev_dir) and not os.path.exists(final_dir):
-                os.rename(prev_dir, final_dir)
+        # 直接调用生产 promote_staging_to_final 函数，注入第二次 rename 失败故障
+        with self.assertRaises(RuntimeError) as cm:
+            promote_staging_to_final(staging_dir, final_dir, _fault_on_second_rename=True)
+        self.assertIn("已自动回滚恢复上一版本", str(cm.exception))
 
         # 断言: 正式目录自动恢复存在，canary 文件完好无损，哈希逐字节一致
         self.assertTrue(os.path.exists(final_dir), "异常回滚后正式目录必须存在")
         self.assertTrue(os.path.exists(canary_file), "原有文件必须完好恢复")
         self.assertEqual(self._file_sha256(canary_file), hash_before, "文件哈希必须逐字节一致")
+        prev_dir = final_dir + ".prev"
         self.assertFalse(os.path.exists(prev_dir), ".prev 临时目录已恢复回正式目录")
 
     # -------------------------------------------------------------------------
@@ -537,6 +530,160 @@ class TestStableProductionScenarios(unittest.TestCase):
         with open(os.path.join(restore_dir, "raw", "raw_item.json"), "r") as f:
             self.assertEqual(f.read(), '{"article": "content"}')
 
+    # -------------------------------------------------------------------------
+    # 场景 11: 阶段单向推进与备料刷新防倒退保护 (真实 runner 子进程验证)
+    # -------------------------------------------------------------------------
+    def test_scenario_11_stage_non_regression(self):
+        """场景 11: 采编中断后刷新 prep，主生产阶段依然保持在 drafting，绝不倒退"""
+        from weekly_pipeline.task_tracker import init_production_state, update_stage, load_production_state
+        test_issue = "issue-2026-w50"
+        issue_dir = os.path.join(PROJECT_ROOT, "issues", test_issue)
+        os.makedirs(issue_dir, exist_ok=True)
+        try:
+            # 1. 模拟任务已推进至 drafting
+            init_production_state(test_issue, time_window="2026-09-21 ~ 2026-09-27")
+            update_stage(test_issue, stage="prep", status="done")
+            update_stage(test_issue, stage="candidates_selected", status="done")
+            update_stage(test_issue, stage="drafting", status="in_progress")
+            
+            st_before = load_production_state(test_issue)
+            self.assertEqual(st_before["current_stage"], "drafting")
+
+            # 2. 调用 update_stage 刷新 prep
+            update_stage(test_issue, stage="prep", status="done", notes="局部重新备料刷新")
+            st_mid = load_production_state(test_issue)
+            self.assertEqual(st_mid["current_stage"], "drafting", "update_stage 刷新前序阶段不得导致主进度倒退！")
+
+            # 3. 运行真实的 weekly_runner.py prep 子进程命令
+            runner_py = os.path.join(PROJECT_ROOT, "scripts", "weekly_runner.py")
+            cmd = [
+                PYTHON_EXEC, runner_py, "prep",
+                "--issue", test_issue,
+                "--start-date", "2026-09-21",
+                "--end-date", "2026-09-27",
+                "--no-fetch"
+            ]
+            res = subprocess.run(cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+            self.assertEqual(res.returncode, 0, f"runner prep 必须成功执行: {res.stderr}")
+
+            # 4. 验证子进程执行后当前阶段依然保持 drafting
+            st_after = load_production_state(test_issue)
+            self.assertEqual(st_after["current_stage"], "drafting", "真实 runner prep 后阶段必须保持 drafting，严禁倒退至 candidates_selected！")
+        finally:
+            shutil.rmtree(issue_dir, ignore_errors=True)
+
+    # -------------------------------------------------------------------------
+    # 场景 12: 上游健康度过期预警计算与异常保护
+    # -------------------------------------------------------------------------
+    def test_scenario_12_upstream_health_expiry_and_imports(self):
+        """场景 12: 验证 timezone 正确导入、48小时过期准确判定、异常信息可追溯，且 save_production_state 正确导入"""
+        import weekly_runner
+        # 确保 save_production_state 在 weekly_runner 中已正确导入
+        self.assertTrue(hasattr(weekly_runner, "save_production_state"), "weekly_runner 必须导出 save_production_state")
+
+        # 验证过期判定逻辑 (输入 2020-01-01 超期时间戳)
+        fake_db = {
+            "totalArticles": 100,
+            "fullTextArticles": 80,
+            "updatedAt": "2020-01-01T00:00:00+00:00",
+            "lastNewArticlesAt": "2020-01-01T00:00:00+00:00",
+            "articles": {},
+            "sourceStats": []
+        }
+        test_db_dir = os.path.join(self.tmp_dir, "commentaries")
+        os.makedirs(test_db_dir, exist_ok=True)
+        test_db_path = os.path.join(test_db_dir, "db.json")
+        with open(test_db_path, "w", encoding="utf-8") as f:
+            json.dump(fake_db, f)
+
+        # 直接传入隔离 db_file 测试 get_upstream_health
+        health = weekly_runner.get_upstream_health(db_file=test_db_path)
+        self.assertTrue(health["is_expired"], "超 48 小时的时间戳必须被标记为 is_expired=True")
+        self.assertNotIn("expiry_error", health, "正常超期时间戳不应产生解析错误")
+
+        # 测试无效时间戳格式能被安全记录异常
+        fake_db["updatedAt"] = "INVALID_TIMESTAMP_STRING"
+        with open(test_db_path, "w", encoding="utf-8") as f:
+            json.dump(fake_db, f)
+        health_invalid = weekly_runner.get_upstream_health(db_file=test_db_path)
+        self.assertIn("expiry_error", health_invalid, "异常时间格式必须被记录在 expiry_error 中，不予吞掉")
+
+    # -------------------------------------------------------------------------
+    # 场景 13: 采编台账信源依据与语义事实一致性核查 (含反例与负向拦截验证)
+    # -------------------------------------------------------------------------
+    def test_scenario_13_semantic_fact_and_source_ledger_verification(self):
+        """场景 13: 验证真实信源依据核验；故意注入‘程东/安大’反例与错误raw_id，证明门禁能精准拦截"""
+        from weekly_pipeline.verifier import verify_fact_and_source_ledger
+        import copy
+
+        # 1. 真实 W39 台账核验必须 100% 通过
+        ok_w39 = verify_fact_and_source_ledger("issue-2026-w39")
+        self.assertTrue(ok_w39, "已更正事实的 W39 必须 100% 通过事实与台账核验")
+
+        # 2. 隔离测试：构建一个虚拟期目录，模拟注入反例
+        fake_issue = "issue-2026-w98"
+        fake_issue_dir = os.path.join(PROJECT_ROOT, "issues", fake_issue)
+        os.makedirs(fake_issue_dir, exist_ok=True)
+        fake_content_dir = os.path.join(self.tmp_dir, "fake_content")
+        os.makedirs(os.path.join(fake_content_dir, "retellings"), exist_ok=True)
+
+        with open(os.path.join(PROJECT_ROOT, "issues", "issue-2026-w39", "manifest_prep.json"), "r", encoding="utf-8") as f:
+            base_manifest = json.load(f)
+
+        try:
+            # 2.1 负向测试 A: 故意在 R41 中注入本轮“程东、安徽大学”错误反例
+            fake_r41_content = "安徽大学开学典礼上，合肥少年程东作为新生代表发言..."
+            with open(os.path.join(fake_content_dir, "retellings", "R41.yaml"), "w", encoding="utf-8") as yf:
+                yf.write(fake_r41_content)
+            fake_manifest = copy.deepcopy(base_manifest)
+            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
+                json.dump(fake_manifest, mf)
+
+            self.assertFalse(
+                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
+                "检测到'程东/安徽大学'事实错配反例时必须坚决拦截判定失败！"
+            )
+
+            # 2.2 负向测试 B: 故意绑定不存在的 raw_id 或未核验状态
+            with open(os.path.join(fake_content_dir, "retellings", "R41.yaml"), "w", encoding="utf-8") as yf:
+                yf.write("四川师范大学开学典礼上，汪洋同学作为新生代表发言...")
+            fake_manifest_err = copy.deepcopy(base_manifest)
+            fake_manifest_err["retellings"][0]["raw_id"] = ""
+            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
+                json.dump(fake_manifest_err, mf)
+
+            self.assertFalse(
+                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
+                "缺失真实 raw_id 绑定时必须坚决拦截！"
+            )
+
+            # 2.3 负向测试 C: 故意篡改快照哈希
+            fake_manifest_hash = copy.deepcopy(base_manifest)
+            fake_manifest_hash["retellings"][0]["upstream_content_hash"] = "tampered_bad_hash_12345"
+            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
+                json.dump(fake_manifest_hash, mf)
+
+            self.assertFalse(
+                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
+                "上游快照内容哈希不匹配时必须坚决拦截！"
+            )
+
+            # 2.4 正向测试：恢复正确绑定与正确事实 -> 检验放行
+            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
+                json.dump(base_manifest, mf)
+            with open(os.path.join(fake_content_dir, "retellings", "R41.yaml"), "w", encoding="utf-8") as yf:
+                yf.write("四川师范大学开学典礼上，19岁轮椅少年汪洋作为新生代表发言...")
+            with open(os.path.join(fake_content_dir, "retellings", "R36.yaml"), "w", encoding="utf-8") as yf:
+                yf.write("外卖骑手王福民送餐途中摔倒受重伤...")
+            self.assertTrue(
+                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
+                "正确绑定与事实无误时必须顺利放行通过！"
+            )
+        finally:
+            shutil.rmtree(fake_issue_dir, ignore_errors=True)
+            shutil.rmtree(fake_content_dir, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()
+

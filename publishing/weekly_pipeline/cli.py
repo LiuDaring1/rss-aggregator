@@ -160,6 +160,37 @@ def cmd_preview(args):
         elif k in ["html", "pdf"]:
             print(f"  - {k.upper()}: {v}")
 
+def promote_staging_to_final(staging_dir: str, final_out_dir: str, _fault_on_second_rename: bool = False) -> None:
+    """
+    原子化提升暂存目录至正式目录：
+    1. 若正式目录已存在，先重命名为 .prev 备份目录；
+    2. 将 staging_dir 提升为 final_out_dir；
+    3. 若第二步发生可捕获异常（系统错误或测试故障注入），自动将 .prev 回滚恢复为正式目录；
+    4. 提升成功后安全清理 .prev。
+    """
+    import shutil
+    final_out_dir = os.path.abspath(final_out_dir)
+    staging_dir = os.path.abspath(staging_dir)
+
+    if os.path.exists(final_out_dir):
+        prev_dir = final_out_dir + ".prev"
+        if os.path.exists(prev_dir):
+            shutil.rmtree(prev_dir, ignore_errors=True)
+        os.rename(final_out_dir, prev_dir)
+        try:
+            if _fault_on_second_rename:
+                raise PermissionError("模拟系统级重命名失败 (注入故障)")
+            os.rename(staging_dir, final_out_dir)
+            shutil.rmtree(prev_dir, ignore_errors=True)
+        except Exception as e:
+            if os.path.exists(prev_dir) and not os.path.exists(final_out_dir):
+                os.rename(prev_dir, final_out_dir)
+            raise RuntimeError(f"暂存提升至正式目录失败，已自动回滚恢复上一版本: {e}")
+    else:
+        if _fault_on_second_rename:
+            raise PermissionError("模拟系统级重命名失败 (注入故障)")
+        os.rename(staging_dir, final_out_dir)
+
 def cmd_build(args):
     import shutil
     raw_issue = getattr(args, "issue_pos", None) or getattr(args, "issue", None) or "sample-01-rev5"
@@ -314,6 +345,13 @@ def cmd_build(args):
                 sys.exit(1)
         print(f"✅ [台账校验通过] manifest_prep 21单元完整登记，集合等价且要素齐全。")
 
+        # 事实与信源依据强校验 (正式构建必须 100% 通过事实一致性与来源依据核验)
+        from weekly_pipeline.verifier import verify_fact_and_source_ledger
+        if not verify_fact_and_source_ledger(issue_id, content_dir="content"):
+            print(f"❌ [事实核验拦截] 采编台账或事实一致性核查未通过，坚决拦截构建！")
+            shutil.rmtree(staging_dir, ignore_errors=True)
+            sys.exit(1)
+
     # 前置信源连续子串核验 (任何入选摘录缺少真实原件归档或引文不匹配，坚决立即终止构建与发布)
     from weekly_pipeline.verifier import verify_issue_quotes, verify_issue_splits
     sources_dir = os.path.join("issues", issue_id, "sources")
@@ -450,25 +488,8 @@ def cmd_build(args):
             sys.exit(1)
 
     # 原子提升 (Promote staging to final_out_dir)
-    final_out_dir = os.path.abspath(final_out_dir)
-    staging_dir = os.path.abspath(staging_dir)
-
-    if os.path.exists(final_out_dir):
-        prev_dir = final_out_dir + ".prev"
-        if os.path.exists(prev_dir):
-            shutil.rmtree(prev_dir, ignore_errors=True)
-        os.rename(final_out_dir, prev_dir)
-        try:
-            os.rename(staging_dir, final_out_dir)
-            shutil.rmtree(prev_dir, ignore_errors=True)
-        except Exception as e:
-            if os.path.exists(prev_dir) and not os.path.exists(final_out_dir):
-                os.rename(prev_dir, final_out_dir)
-            raise RuntimeError(f"暂存提升至正式目录失败，已自动回滚恢复上一版本: {e}")
-    else:
-        os.rename(staging_dir, final_out_dir)
-
-    out_dir = final_out_dir
+    promote_staging_to_final(staging_dir, final_out_dir)
+    out_dir = os.path.abspath(final_out_dir)
 
     # 生成不可篡改的正式构建防伪凭据 build_receipt.json
     import hashlib
