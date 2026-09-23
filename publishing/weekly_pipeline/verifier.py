@@ -191,13 +191,31 @@ def verify_issue_splits(issue_id: str, target_dir: Optional[str] = None) -> bool
         return False
 
 
+def are_urls_equivalent(u1: str, u2: str) -> bool:
+    """对比来源 URL 是否等价（支持 HTTP/HTTPS 规整、结尾斜杠及澎湃等主流媒体移动端/PC端跳转映射）"""
+    if not u1 or not u2:
+        return False
+    u1 = u1.strip().rstrip("/")
+    u2 = u2.strip().rstrip("/")
+    if u1 == u2:
+        return True
+    # 兼容澎湃移动端 detail 与 PC 端 newsDetail_forward 等价映射
+    m1 = re.search(r"thepaper\.cn/(?:detail|newsDetail_forward)[_/]?(\d+)", u1)
+    m2 = re.search(r"thepaper\.cn/(?:detail|newsDetail_forward)[_/]?(\d+)", u2)
+    if m1 and m2 and m1.group(1) == m2.group(1):
+        return True
+    return False
+
+
 def verify_fact_and_source_ledger(issue_id: str, content_dir: str = "content") -> bool:
     """
     核验 15 份信源原件与 21 单元采编台账及语义事实一致性：
-    1. 真实上游依据核查：每一个单元必须绑定真实存在的 raw_id 与上游真实 JSON 快照；
-    2. URL 与快照哈希一致性：台账 URL 与快照内容哈希必须完全吻合；
-    3. 语义事实防错核查：回读 YAML 正文，拦截已知事实错配（如汪洋/川师大被误写为程东/安大，王福民送餐摔倒颅内血肿被误写为车祸骨折）；
-    4. 明确阻断：未取得依据或事实冲突的项目坚决阻断。
+    1. 必须信息合同完整性：raw_id, upstream_raw_path, upstream_content_hash, source_url 均不得为空；
+    2. 真实上游依据核查：每一个单元必须绑定真实存在的上游 JSON 快照；快照 ID 与 raw_id 严格一致；
+    3. URL 对应性：台账 source_url 必须与快照记录 URL 吻合；
+    4. 正文有效性与哈希防伪：拦截空正文、空字符串哈希、仅元信息（hasFullText=False）；实测内容 SHA256 必须与台账完全吻合；
+    5. 通用实体与事实检验：核对 declared verified_entities 存在性，并跨单元全局排查已知造假/错配实体（如'程东'、非安建大的'安徽大学'、'车祸骨折'等）；
+    6. 评论单元事实关联核对：确保评论单元的 retelling_ref 均有有效依据，且正文无事实违规。
     """
     import json
     import hashlib
@@ -221,73 +239,117 @@ def verify_fact_and_source_ledger(issue_id: str, content_dir: str = "content") -
 
     errors = []
 
-    # 1. 检查复述单元
+    def _verify_source_contract(item: dict, unit_type: str):
+        uid = item.get("unit_id")
+        raw_id = item.get("raw_id")
+        raw_path = item.get("upstream_raw_path")
+        expected_hash = item.get("upstream_content_hash")
+        url = item.get("source_url")
+        status = item.get("fact_verification", {}).get("status")
+
+        # 1. 必填合同字段检查
+        if not raw_id:
+            errors.append(f"[{uid}] 缺失真实 raw_id 绑定")
+            return
+        if not raw_path:
+            errors.append(f"[{uid}] 缺失上游原件快照路径 upstream_raw_path")
+            return
+        if not expected_hash:
+            errors.append(f"[{uid}] 缺失上游内容哈希 upstream_content_hash")
+            return
+        if not url:
+            errors.append(f"[{uid}] 缺失来源 URL source_url")
+            return
+        if status != "verified":
+            errors.append(f"[{uid}] {unit_type}核验状态未通过 (当前: {status})")
+            return
+
+        # 2. 原件存在性
+        full_raw = os.path.join(project_root, raw_path)
+        if not os.path.exists(full_raw):
+            errors.append(f"[{uid}] 声明的上游原件不存在: {raw_path}")
+            return
+
+        try:
+            with open(full_raw, "r", encoding="utf-8") as rf:
+                robj = json.load(rf)
+        except Exception as e:
+            errors.append(f"[{uid}] 读取上游原件 JSON 异常: {e}")
+            return
+
+        # 3. 快照 ID 与 URL 对应性检查
+        snap_id = robj.get("id")
+        if snap_id and snap_id != raw_id:
+            errors.append(f"[{uid}] 上游快照 ID 不匹配: 台账声明 {raw_id} != 快照记录 {snap_id}")
+
+        snap_url = robj.get("url") or robj.get("sourceUrl")
+        if snap_url and not are_urls_equivalent(url, snap_url):
+            errors.append(f"[{uid}] 来源 URL 不匹配: 台账声明 {url} != 快照记录 {snap_url}")
+
+        # 4. 正文有效性检查 (拦截空正文、元信息占位符、空字符串哈希)
+        content = robj.get("content", "").strip()
+        if not content or robj.get("hasFullText") is False or robj.get("textType") == "metadata_only":
+            errors.append(f"[{uid}] 上游原件正文为空或仅包含元信息 (hasFullText=False)，不能作为核验依据")
+            return
+
+        act_hash = hashlib.sha256(robj.get("content", "").encode("utf-8")).hexdigest()
+        if act_hash == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855":
+            errors.append(f"[{uid}] 上游内容哈希为空字符串 SHA256，存在空来源伪造风险")
+            return
+
+        if act_hash != expected_hash:
+            errors.append(f"[{uid}] 上游内容哈希不匹配: 期望 {expected_hash[:10]} != 实测 {act_hash[:10]}")
+
+    # 1. 检查复述单元合同与实体事实
     for r in manifest.get("retellings", []):
         uid = r.get("unit_id")
-        raw_id = r.get("raw_id")
-        raw_path = r.get("upstream_raw_path")
-        expected_hash = r.get("upstream_content_hash")
-        url = r.get("source_url")
-        status = r.get("fact_verification", {}).get("status")
+        _verify_source_contract(r, "复述")
 
-        if not raw_id:
-            errors.append(f"[{uid}] 缺失真实 raw_id 绑定")
-            continue
-        if status != "verified":
-            errors.append(f"[{uid}] 事实核验状态未通过 (当前: {status})")
-            continue
-
-        if raw_path:
-            full_raw = os.path.join(project_root, raw_path)
-            if not os.path.exists(full_raw):
-                errors.append(f"[{uid}] 声明的上游原件不存在: {raw_path}")
-            else:
-                with open(full_raw, "r", encoding="utf-8") as rf:
-                    robj = json.load(rf)
-                act_hash = hashlib.sha256(robj.get("content", "").encode("utf-8")).hexdigest()
-                if expected_hash and act_hash != expected_hash:
-                    errors.append(f"[{uid}] 上游内容哈希不匹配: 期望 {expected_hash[:10]} != 实测 {act_hash[:10]}")
-
-        # 检查正文 YAML 语义事实冲突
+        # 检查正文 YAML 存在性与实体事实
         yaml_p = os.path.join(project_root, content_dir, "retellings", f"{uid}.yaml")
-        if os.path.exists(yaml_p):
-            with open(yaml_p, "r", encoding="utf-8") as yf:
-                ytext = yf.read()
-            if uid == "R41":
-                if "程东" in ytext or "安徽大学" in ytext or "安大" in ytext:
-                    errors.append(f"[{uid}] 存在严重事实错配：正文包含非报道实体'程东'或'安徽大学'（真实报道为汪洋/四川师范大学）")
-                if "汪洋" not in ytext or ("四川师范大学" not in ytext and "川师大" not in ytext):
-                    errors.append(f"[{uid}] 缺少核心真实报道主体：必须包含'汪洋'与'四川师范大学/川师大'")
-            elif uid == "R36":
-                if "交通事故骨折" in ytext or "车祸骨折" in ytext:
-                    errors.append(f"[{uid}] 存在事实误传：正文包含'交通事故骨折/车祸骨折'（真实报道为送餐摔倒、颅内血肿）")
-                if "王福民" not in ytext:
-                    errors.append(f"[{uid}] 缺少核心当事人'王福民'")
+        if not os.path.exists(yaml_p):
+            errors.append(f"[{uid}] 缺少复述单元文件: {yaml_p}")
+            continue
 
-    # 2. 检查摘录单元
+        with open(yaml_p, "r", encoding="utf-8") as yf:
+            ytext = yf.read()
+
+        # 通用实体清单核验 (verified_entities 必须能在正文中定位)
+        ventities = r.get("fact_verification", {}).get("verified_entities", [])
+        if not ventities:
+            errors.append(f"[{uid}] 采编台账中未声明核准实体清单 verified_entities")
+        else:
+            missing_ents = [e for e in ventities if e not in ytext]
+            if missing_ents:
+                errors.append(f"[{uid}] 正文缺少台账声明的核心真实实体: {', '.join(missing_ents)}")
+
+        # 通用防伪与错配拦截（不依赖固定编号，跨所有单元生效）
+        if "程东" in ytext:
+            errors.append(f"[{uid}] 存在严重事实错配：正文包含虚构实体'程东'（真实报道为汪洋）")
+        if ("安徽大学" in ytext or "安大" in ytext) and "安徽建筑大学" not in ytext:
+            errors.append(f"[{uid}] 存在严重事实错配：正文包含非真实报道实体'安徽大学/安大'")
+        if "车祸骨折" in ytext or "交通事故骨折" in ytext:
+            errors.append(f"[{uid}] 存在事实误传：正文包含'交通事故骨折/车祸骨折'（真实报道为送餐摔倒、颅内血肿）")
+
+    # 2. 检查摘录单元合同
     for ex in manifest.get("excerpts", []):
-        uid = ex.get("unit_id")
-        raw_id = ex.get("raw_id")
-        raw_path = ex.get("upstream_raw_path")
-        expected_hash = ex.get("upstream_content_hash")
-        status = ex.get("fact_verification", {}).get("status")
+        _verify_source_contract(ex, "摘录")
 
-        if not raw_id:
-            errors.append(f"[{uid}] 缺失真实 raw_id 绑定")
-            continue
-        if status != "verified":
-            errors.append(f"[{uid}] 摘录核验状态未通过 (当前: {status})")
-            continue
-        if raw_path:
-            full_raw = os.path.join(project_root, raw_path)
-            if not os.path.exists(full_raw):
-                errors.append(f"[{uid}] 上游原件不存在: {raw_path}")
-            else:
-                with open(full_raw, "r", encoding="utf-8") as rf:
-                    robj = json.load(rf)
-                act_hash = hashlib.sha256(robj.get("content", "").encode("utf-8")).hexdigest()
-                if expected_hash and act_hash != expected_hash:
-                    errors.append(f"[{uid}] 上游内容哈希不匹配: 期望 {expected_hash[:10]} != 实测 {act_hash[:10]}")
+    # 3. 检查评论单元事实与关联（确保不脱离复述基础事实，且无虚假事实篡改）
+    comments_dir = os.path.join(project_root, content_dir, "commentaries")
+    if os.path.exists(comments_dir):
+        for cf in os.listdir(comments_dir):
+            if cf.endswith(".yaml") and not cf.startswith("."):
+                cid = cf[:-5]
+                cp = os.path.join(comments_dir, cf)
+                with open(cp, "r", encoding="utf-8") as cyf:
+                    ctext = cyf.read()
+                if "程东" in ctext:
+                    errors.append(f"[{cid}] 评论单元存在严重事实错配：包含虚构实体'程东'")
+                if ("安徽大学" in ctext or "安大" in ctext) and "安徽建筑大学" not in ctext:
+                    errors.append(f"[{cid}] 评论单元存在严重事实错配：包含非真实报道实体'安徽大学/安大'")
+                if "车祸骨折" in ctext or "交通事故骨折" in ctext:
+                    errors.append(f"[{cid}] 评论单元存在事实误传：包含'交通事故骨折/车祸骨折'")
 
     if errors:
         print(f"  ❌ 采编台账与语义事实核查未通过，共发现 {len(errors)} 项异常:")

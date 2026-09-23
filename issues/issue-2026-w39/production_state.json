@@ -3,7 +3,7 @@
   "issue_id": "issue-2026-w39",
   "time_window": "2026-09-21 ~ 2026-09-27",
   "created_at": "2026-09-23T13:45:00.273796+08:00",
-  "last_updated_at": "2026-09-23T16:08:46.437274+08:00",
+  "last_updated_at": "2026-09-23T18:30:43.198188+08:00",
   "current_stage": "published",
   "target_quota": {
     "retellings": 9,
@@ -31,8 +31,8 @@
     },
     "R38": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.853182+08:00",
-      "sha256": "29739ec40f11a13418cc689c5d0c35de5374813d80f02b342ffeaea3b9bd660f",
+      "frozen_at": "2026-09-23T18:28:19.886023+08:00",
+      "sha256": "e0acbb25bce9bc6cd5cf46d83ac5a01978d7cb29cce3792cd46a7afc7715afaa",
       "rel_path": "content/retellings/R38.yaml"
     },
     "R39": {
@@ -55,8 +55,8 @@
     },
     "R42": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.855657+08:00",
-      "sha256": "c22ad53eb4668e852dc3bba88720ea922ec890b3534734421232cc5619d0bae6",
+      "frozen_at": "2026-09-23T18:28:19.887777+08:00",
+      "sha256": "8d06bdff437b474c61e64a5550b49508b864f9dd96383feb620be3df1fe5e760",
       "rel_path": "content/retellings/R42.yaml"
     },
     "R43": {
@@ -85,8 +85,8 @@
     },
     "C27": {
       "frozen": true,
-      "frozen_at": "2026-09-23T14:03:45.861076+08:00",
-      "sha256": "4deda846cf708843e48a6af79af00f865c6f7e6e73ff42f30caf4706cd576e75",
+      "frozen_at": "2026-09-23T18:28:19.888727+08:00",
+      "sha256": "e1b0c15fdb1cd2a3a9b950e4e34aee851fe445c6776b9cf5b18d24d245179d40",
       "rel_path": "content/commentaries/C27.yaml"
     },
     "C28": {
@@ -187,7 +187,7 @@
     },
     "build": {
       "status": "done",
-      "updated_at": "2026-09-23T16:05:40.189546+08:00",
+      "updated_at": "2026-09-23T18:28:57.780162+08:00",
       "completed_items": "原子构建成功，47页动态核验与信源子串100%匹配通过，凭据 f89020c7e4 已签发",
       "pending_items": [],
       "failed_items": [],
@@ -195,7 +195,7 @@
     },
     "published": {
       "status": "done",
-      "updated_at": "2026-09-23T16:08:46.436575+08:00",
+      "updated_at": "2026-09-23T18:30:43.197819+08:00",
       "completed_items": "准备执行多期静态审阅站发布与归档",
       "pending_items": [],
       "failed_items": [],
