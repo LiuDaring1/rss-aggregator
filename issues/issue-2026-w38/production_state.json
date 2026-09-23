@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "issue-2026-w38",
+  "time_window": "2026-09-14 ~ 2026-09-20",
+  "created_at": "2026-09-23T08:43:51.305405+08:00",
+  "last_updated_at": "2026-09-23T08:45:10.429834+08:00",
+  "current_stage": "published",
+  "target_quota": {
+    "retellings": 9,
+    "commentaries": 6,
+    "excerpts": 6,
+    "total_pages": 47
+  },
+  "target_units": {
+    "retellings": [],
+    "commentaries": [],
+    "excerpts": []
+  },
+  "unit_freeze_status": {
+    "R27": true,
+    "R28": true,
+    "R29": true,
+    "R30": true,
+    "R31": true,
+    "R32": true,
+    "R33": true,
+    "R34": true,
+    "R35": true,
+    "C19": true,
+    "C20": true,
+    "C21": true,
+    "C22": true,
+    "C23": true,
+    "C24": true,
+    "F25": true,
+    "F26": true,
+    "F27": true,
+    "F28": true,
+    "F29": true,
+    "F30": true
+  },
+  "stages": {
+    "prep": {
+      "status": "done",
+      "updated_at": "2026-09-23T08:43:51.306827+08:00",
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": "9+6+6候选备料与台账完成"
+    },
+    "candidates_selected": {
+      "status": "done",
+      "updated_at": "2026-09-23T08:43:51.307187+08:00",
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": "9+6+6事实核验与选材确认"
+    },
+    "drafting": {
+      "status": "done",
+      "updated_at": "2026-09-23T08:43:51.307485+08:00",
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": "21篇教学单元采编完成"
+    },
+    "comics": {
+      "status": "done",
+      "updated_at": "2026-09-23T08:43:51.307772+08:00",
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": "全篇漫画分镜与大图就绪"
+    },
+    "review": {
+      "status": "done",
+      "updated_at": "2026-09-23T08:43:51.308043+08:00",
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": "教师终审定版"
+    },
+    "build": {
+      "status": "done",
+      "updated_at": "2026-09-23T08:45:07.280801+08:00",
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": "原子构建与全门禁验证通过"
+    },
+    "published": {
+      "status": "done",
+      "updated_at": "2026-09-23T08:45:10.429486+08:00",
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": "多期静态站与归档发布完成"
+    }
+  },
+  "artifacts": {
+    "pdf": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w38/issue-2026-w38.pdf",
+    "html": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w38/issue-2026-w38.html",
+    "md": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w38/issue-2026-w38.md"
+  }
+}
