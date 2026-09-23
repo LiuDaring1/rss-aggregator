@@ -19,6 +19,7 @@ scripts/weekly_runner.py
 
 import os
 import sys
+import re
 import json
 import argparse
 import subprocess

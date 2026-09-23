@@ -227,6 +227,9 @@ def resolve_illustration_html(unit: Any, issue_dir: Optional[str] = None) -> Opt
     if issue_dir:
         candidates.append(os.path.join(issue_dir, img_rel))
     candidates.append(os.path.join(ROOT_DIR, img_rel))
+    import glob
+    for p in glob.glob(os.path.join(ROOT_DIR, "issues", "*", img_rel)):
+        candidates.append(p)
     candidates.append(os.path.join(ROOT_DIR, "issues/issue-2026-w38", img_rel))
     candidates.append(os.path.join(PACKAGE_DIR, "assets", img_rel))
     candidates.append(os.path.join(ROOT_DIR, "content", img_rel))

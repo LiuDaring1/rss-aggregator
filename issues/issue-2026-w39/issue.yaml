@@ -1,0 +1,37 @@
+schema_version: '1.0'
+issue_id: issue-2026-w39
+title: 口语素材周刊
+kicker: ""
+issue_no_label: 2026年第39周
+date_range: 2026年9月第4周（09.21-09.27）
+retelling_ids:
+- R36
+- R37
+- R38
+- R39
+- R40
+- R41
+- R42
+- R43
+- R44
+commentary_ids:
+- C25
+- C26
+- C27
+- C28
+- C29
+- C30
+excerpt_ids:
+- F25
+- F26
+- F27
+- F28
+- F29
+- F30
+ai_prompt_path: ai-retelling-prompt.txt
+build_config:
+  pdf_render_timeout_ms: 15000
+  font_family_serif: '"Songti SC", "STSong", "SimSun", serif'
+  font_family_sans: '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
+  font_family_kaiti: '"Kaiti SC", "STKaiti", serif'
+  min_font_size_pt: 9.0

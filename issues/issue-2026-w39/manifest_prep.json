@@ -1,0 +1,293 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "issue-2026-w39",
+  "issue_window": "2026-09-21 ~ 2026-09-27",
+  "generated_at": "2026-09-23T14:00:00+08:00",
+  "statistics": {
+    "retellings_count": 9,
+    "commentaries_count": 6,
+    "excerpts_count": 6
+  },
+  "retellings": [
+    {
+      "unit_id": "R36",
+      "title": "众包骑手车祸后陷“找老板”困境：新就业形态下的权益与劳动归属",
+      "source_media": "澎湃新闻 / 新京报 2026-09-20",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28800001",
+      "source_key_facts": "骑手送餐骨折维权，发现平台外包层层转包，算法派单却难以认定用工关系",
+      "local_raw_path": "issues/issue-2026-w39/sources/R36_source.txt",
+      "dates": {
+        "published_at": "2026-09-20",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "社会治理",
+      "is_reused": false
+    },
+    {
+      "unit_id": "R37",
+      "title": "基层网格员获评母校“杰出校友”：破除名利标签的朴素荣光",
+      "source_media": "澎湃新闻 / 西南政法大学 2026-09-13",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28780002",
+      "source_key_facts": "25岁网格员抗洪殉职，西政校长开学典礼力挺其为杰出校友，破除唯名利标签",
+      "local_raw_path": "issues/issue-2026-w39/sources/R37_source.txt",
+      "dates": {
+        "published_at": "2026-09-13",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "青年榜样",
+      "is_reused": false
+    },
+    {
+      "unit_id": "R38",
+      "title": "高校倡导“过紧日子”：严控行政排场，把经费用在教学科研刀刃上",
+      "source_media": "新京报 / 光明网 2026-09-19",
+      "source_url": "https://www.bjnews.com.cn/detail/1726710000.html",
+      "source_key_facts": "多所高校严控公务接待与会议排场，省下经费重点保障学生助学金与实验室",
+      "local_raw_path": "issues/issue-2026-w39/sources/R38_source.txt",
+      "dates": {
+        "published_at": "2026-09-19",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "校园热点",
+      "is_reused": false
+    },
+    {
+      "unit_id": "R39",
+      "title": "青年职场“写不好一封邮件”引热议：网络碎片化时代的沟通失焦",
+      "source_media": "浙江宣传 2026-09-18",
+      "source_url": "https://mp.weixin.qq.com/s/zjxc_email_20260918",
+      "source_key_facts": "秋招大学生邮件缺乏抬头正文仅发附件引热议，碎片化通讯对严谨思维的冲击",
+      "local_raw_path": "issues/issue-2026-w39/sources/R39_source.txt",
+      "dates": {
+        "published_at": "2026-09-18",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "职场适应",
+      "is_reused": false
+    },
+    {
+      "unit_id": "R40",
+      "title": "派出所主动腾空大院帮农民晒粮：“为民办实事”的温情注脚",
+      "source_media": "澎湃新闻 / 新华网 2026-09-17",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28770005",
+      "source_key_facts": "秋收遇阴雨场地短缺，派出所拆门禁腾空停车坪给农户晒水稻玉米，民警帮翻晒",
+      "local_raw_path": "issues/issue-2026-w39/sources/R40_source.txt",
+      "dates": {
+        "published_at": "2026-09-17",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "乡村治理",
+      "is_reused": false
+    },
+    {
+      "unit_id": "R41",
+      "title": "轮椅少年大学报到真情发言：“那些咬牙难熬的日子，今天都值了！”",
+      "source_media": "合肥晚报 / 天天正能量 2026-09-14",
+      "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45357",
+      "source_key_facts": "患脊柱萎缩症少年程东轮椅求学考入安大，开学致辞感恩母亲与师生托举",
+      "local_raw_path": "issues/issue-2026-w39/sources/R41_source.txt",
+      "dates": {
+        "published_at": "2026-09-14",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "励志自强",
+      "is_reused": false
+    },
+    {
+      "unit_id": "R42",
+      "title": "景区滥用“真人NPC”打造网红打卡点：莫让互动噱头取代文化内涵",
+      "source_media": "澎湃新闻 / 极目新闻 2026-09-21",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28810007",
+      "source_key_facts": "文旅景区高薪招揽NPC制造低俗互动剧情吸睛，历史古迹沦为布景引发文化反思",
+      "local_raw_path": "issues/issue-2026-w39/sources/R42_source.txt",
+      "dates": {
+        "published_at": "2026-09-21",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "文旅消费",
+      "is_reused": false
+    },
+    {
+      "unit_id": "R43",
+      "title": "乡村摄影课打破滤镜偏见：在真实乡土中培育青少年的审美表达",
+      "source_media": "人民日报 / 新京报 2026-09-23",
+      "source_url": "https://www.bjnews.com.cn/detail/1727050000.html",
+      "source_key_facts": "湖南溆浦中都乡学校开展少年摄影课，孩子们用二手相机记录老茧与青石板真实乡土",
+      "local_raw_path": "issues/issue-2026-w39/sources/R43_source.txt",
+      "dates": {
+        "published_at": "2026-09-23",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "美育教育",
+      "is_reused": false
+    },
+    {
+      "unit_id": "R44",
+      "title": "好心修补破损道路却拉细绳警示致人摔伤：行善不仅要心热，更需审慎托底",
+      "source_media": "澎湃新闻 2026-09-15",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28760009",
+      "source_key_facts": "村民水泥补路防踩横拉黑细绳，缺乏反光标识致夜行电动车女子摔伤身亡引法理争议",
+      "local_raw_path": "issues/issue-2026-w39/sources/R44_source.txt",
+      "dates": {
+        "published_at": "2026-09-15",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "法治伦理",
+      "is_reused": false
+    }
+  ],
+  "commentaries": [
+    {
+      "unit_id": "C25",
+      "title": "厘清“众包”边界，不能让数字时代的劳动者流汗又流泪",
+      "source_media": "澎湃·马上评 / 新京报快评",
+      "retelling_ref": "R36",
+      "dates": {
+        "published_at": "2026-09-20",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "劳动法治",
+      "is_reused": false
+    },
+    {
+      "unit_id": "C26",
+      "title": "走出名利的狭隘标尺，让平凡的坚守获得平等的敬意",
+      "source_media": "澎湃·马上评 2026-09-13",
+      "retelling_ref": "R37",
+      "dates": {
+        "published_at": "2026-09-13",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "价值观念",
+      "is_reused": false
+    },
+    {
+      "unit_id": "C27",
+      "title": "把“紧日子”过成“好日子”，教育经费的投入应回归育人本位",
+      "source_media": "新京报·快评 / 光明网",
+      "retelling_ref": "R38",
+      "dates": {
+        "published_at": "2026-09-19",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "教育视点",
+      "is_reused": false
+    },
+    {
+      "unit_id": "C28",
+      "title": "重拾结构化表达，不仅是职场技能，更是人际交往的分寸感",
+      "source_media": "浙江宣传 2026-09-18",
+      "retelling_ref": "R39",
+      "dates": {
+        "published_at": "2026-09-18",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "沟通修养",
+      "is_reused": false
+    },
+    {
+      "unit_id": "C29",
+      "title": "敞开的大院与金黄的稻谷，照见公共治理中最质朴的温度",
+      "source_media": "澎湃·马上评 2026-09-17",
+      "retelling_ref": "R40",
+      "dates": {
+        "published_at": "2026-09-17",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "公共服务",
+      "is_reused": false
+    },
+    {
+      "unit_id": "C30",
+      "title": "善心更需理性托底，让每一次善良都在安全与规则中闪光",
+      "source_media": "澎湃·马上评 2026-09-15",
+      "retelling_ref": "R44",
+      "dates": {
+        "published_at": "2026-09-15",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "法理思辨",
+      "is_reused": false
+    }
+  ],
+  "excerpts": [
+    {
+      "unit_id": "F25",
+      "title": "众包骑手，不该困在“老板是谁”的尴尬中",
+      "source_media": "澎湃·马上评 2026-09-20",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28800001",
+      "quote_snippet": "骑手王福民在一次送餐途中受伤，维权时遭冷遇，他提起诉讼，又牵出一系列突破他认知的问题",
+      "local_raw_path": "issues/issue-2026-w39/sources/F25_source.txt",
+      "dates": {
+        "published_at": "2026-09-20",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "劳动权益"
+    },
+    {
+      "unit_id": "F26",
+      "title": "一名基层网格员，当然也是“杰出校友”",
+      "source_media": "澎湃·马上评 2026-09-13",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28780002",
+      "quote_snippet": "西政培养了众多的知名学者、法律实务精英，但也同样为培养出扎根基层、守护一方平安的无名英雄而感到骄傲",
+      "local_raw_path": "issues/issue-2026-w39/sources/F26_source.txt",
+      "dates": {
+        "published_at": "2026-09-13",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "青年榜样"
+    },
+    {
+      "unit_id": "F27",
+      "title": "高校“过紧日子”，关键要把钱紧在“当紧处”",
+      "source_media": "新京报·快评 2026-09-19",
+      "source_url": "https://www.bjnews.com.cn/detail/1726710000.html",
+      "quote_snippet": "节约行政开支不是为了简单地把钱存起来，而是为了把有限的办学经费用在人才培养和教学科研的刀刃上",
+      "local_raw_path": "issues/issue-2026-w39/sources/F27_source.txt",
+      "dates": {
+        "published_at": "2026-09-19",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "高等教育"
+    },
+    {
+      "unit_id": "F28",
+      "title": "写好邮件为何成为“知识盲区”",
+      "source_media": "浙江宣传 2026-09-18",
+      "source_url": "https://mp.weixin.qq.com/s/zjxc_email_20260918",
+      "quote_snippet": "主题是“在吗”，附件名叫“新建文档（3）”，开口就是“亲”，结尾命令收件人“尽快回复”",
+      "local_raw_path": "issues/issue-2026-w39/sources/F28_source.txt",
+      "dates": {
+        "published_at": "2026-09-18",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "职场沟通"
+    },
+    {
+      "unit_id": "F29",
+      "title": "看见真实的家乡：一堂摄影课背后的乡土叙事之变",
+      "source_media": "新京报·快评 2026-09-23",
+      "source_url": "https://www.bjnews.com.cn/detail/1727050000.html",
+      "quote_snippet": "摄影课让乡村孩子拿起了表达自我的镜头，他们拍下的不是滤镜下的田园牧歌，而是祖辈手掌上的茧花与真实的乡土尊严",
+      "local_raw_path": "issues/issue-2026-w39/sources/F29_source.txt",
+      "dates": {
+        "published_at": "2026-09-23",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "文化美育"
+    },
+    {
+      "unit_id": "F30",
+      "title": "补路后拉绳致人死亡，好心更要办“好事”",
+      "source_media": "澎湃·马上评 2026-09-15",
+      "source_url": "https://www.thepaper.cn/newsDetail_forward_28760009",
+      "quote_snippet": "出于好心用剩下混凝土补路，因水泥没干，顺手拉一条绳子作为提醒，想不到发生了悲剧",
+      "local_raw_path": "issues/issue-2026-w39/sources/F30_source.txt",
+      "dates": {
+        "published_at": "2026-09-15",
+        "fetched_at": "2026-09-23"
+      },
+      "category": "公共法治"
+    }
+  ]
+}

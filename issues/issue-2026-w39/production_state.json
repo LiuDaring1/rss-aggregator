@@ -3,8 +3,8 @@
   "issue_id": "issue-2026-w39",
   "time_window": "2026-09-21 ~ 2026-09-27",
   "created_at": "2026-09-23T13:45:00.273796+08:00",
-  "last_updated_at": "2026-09-23T13:45:00.275605+08:00",
-  "current_stage": "candidates_selected",
+  "last_updated_at": "2026-09-23T14:15:08.782185+08:00",
+  "current_stage": "published",
   "target_quota": {
     "retellings": 9,
     "commentaries": 6,
@@ -16,7 +16,134 @@
     "commentaries": [],
     "excerpts": []
   },
-  "unit_freeze_status": {},
+  "unit_freeze_status": {
+    "R36": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.851308+08:00",
+      "sha256": "05dfe1e47aeec06c09661b7af556f9fdc095982a96689a97b9dade0dad4c3728",
+      "rel_path": "content/retellings/R36.yaml"
+    },
+    "R37": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.852476+08:00",
+      "sha256": "07de16e1d136cd22a33b3c4e90e8c7832fa3e0d088731e290793920407236903",
+      "rel_path": "content/retellings/R37.yaml"
+    },
+    "R38": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.853182+08:00",
+      "sha256": "29739ec40f11a13418cc689c5d0c35de5374813d80f02b342ffeaea3b9bd660f",
+      "rel_path": "content/retellings/R38.yaml"
+    },
+    "R39": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.853766+08:00",
+      "sha256": "104a9c9f718f01f127b8a36d57ac14d239dd53619883da39691b35d7c559b528",
+      "rel_path": "content/retellings/R39.yaml"
+    },
+    "R40": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.854289+08:00",
+      "sha256": "7f838017155c2a00f9cfec577d753def3660938b24a8d70c5043f668f288fc5b",
+      "rel_path": "content/retellings/R40.yaml"
+    },
+    "R41": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.854792+08:00",
+      "sha256": "b91598100cec62fa92ab220957194fbc868dec1d583eb37cabbd1822273c21c8",
+      "rel_path": "content/retellings/R41.yaml"
+    },
+    "R42": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.855657+08:00",
+      "sha256": "c22ad53eb4668e852dc3bba88720ea922ec890b3534734421232cc5619d0bae6",
+      "rel_path": "content/retellings/R42.yaml"
+    },
+    "R43": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.857049+08:00",
+      "sha256": "89027cc69c1236c90b94d747f90f3ece68a5489d62b0a02da1d4036a9c7fa22c",
+      "rel_path": "content/retellings/R43.yaml"
+    },
+    "R44": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.858661+08:00",
+      "sha256": "066d238b22f24c3a28303abaa5e6ee72663f96f423a9020e0e12fe7ca56b59f9",
+      "rel_path": "content/retellings/R44.yaml"
+    },
+    "C25": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.859589+08:00",
+      "sha256": "b952e530aba4d93c81f73f9c23aa4cd4ae3572ace0aedfdcbf3e3fed3ca31bd1",
+      "rel_path": "content/commentaries/C25.yaml"
+    },
+    "C26": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.860448+08:00",
+      "sha256": "34ceaf57d9fbf85326e3cb14e0751afd0a7b4e15a2e9558693f52c94d8748efa",
+      "rel_path": "content/commentaries/C26.yaml"
+    },
+    "C27": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.861076+08:00",
+      "sha256": "4deda846cf708843e48a6af79af00f865c6f7e6e73ff42f30caf4706cd576e75",
+      "rel_path": "content/commentaries/C27.yaml"
+    },
+    "C28": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.862110+08:00",
+      "sha256": "0136eb84881c0cfe825d47484ed4f44e67406e38084e775eead3415ee40ccf98",
+      "rel_path": "content/commentaries/C28.yaml"
+    },
+    "C29": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.863363+08:00",
+      "sha256": "7ea8ee71a5478de90b9c0105445be75d9b69f7ffc841b42ea9182bef1ce3526d",
+      "rel_path": "content/commentaries/C29.yaml"
+    },
+    "C30": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.864454+08:00",
+      "sha256": "ec337e055761716dff797e3f2b63ca03bae40d0df31795fdd786719a18bbba32",
+      "rel_path": "content/commentaries/C30.yaml"
+    },
+    "F25": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.866633+08:00",
+      "sha256": "08d32dc21af2cdc1ce1fc85f5bac8737bbb4d0dd4e3279354a22c033d96af030",
+      "rel_path": "content/excerpts/F25.yaml"
+    },
+    "F26": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.867428+08:00",
+      "sha256": "edfb5977cbbe18dd1ef4ad142276303caa680c2820b5505a23867288f0d25891",
+      "rel_path": "content/excerpts/F26.yaml"
+    },
+    "F27": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.868172+08:00",
+      "sha256": "42e73dcf7a7dcf4dde84f36fce8dc47d7f220d3d95665164f7244d0557005daa",
+      "rel_path": "content/excerpts/F27.yaml"
+    },
+    "F28": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.868771+08:00",
+      "sha256": "23e3fb05259117a1418e5e7ad06039472d879f584975ec4cd248c467314fd016",
+      "rel_path": "content/excerpts/F28.yaml"
+    },
+    "F29": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.869498+08:00",
+      "sha256": "6c27ae9487407ad39f65072a2244c71e2eff4903b525afe3a13b0913be2ef75e",
+      "rel_path": "content/excerpts/F29.yaml"
+    },
+    "F30": {
+      "frozen": true,
+      "frozen_at": "2026-09-23T14:03:45.870214+08:00",
+      "sha256": "2a934918a87cd1be0b3dbf534676eb729252b94d64e42e0fdd1d2191e26a7781",
+      "rel_path": "content/excerpts/F30.yaml"
+    }
+  },
   "stages": {
     "prep": {
       "status": "done",
@@ -27,53 +154,58 @@
       "notes": "信源采集与备料初始化完成"
     },
     "candidates_selected": {
-      "status": "in_progress",
-      "updated_at": "2026-09-23T13:45:00.275587+08:00",
-      "completed_items": [],
+      "status": "done",
+      "updated_at": "2026-09-23T13:59:34.561994+08:00",
+      "completed_items": "Agent/教师已确认 9+6+6 选题，台账 manifest_prep.json 与 issue.yaml 已落地",
       "pending_items": [],
       "failed_items": [],
       "notes": "等待 Agent/教师核验选题"
     },
     "drafting": {
-      "status": "pending",
-      "updated_at": null,
-      "completed_items": [],
+      "status": "done",
+      "updated_at": "2026-09-23T14:03:45.870809+08:00",
+      "completed_items": "R36~R44, C25~C30, F25~F30 21单元采编定稿，信源核验全部通过并冻结防篡改",
       "pending_items": [],
       "failed_items": [],
       "notes": ""
     },
     "comics": {
-      "status": "pending",
-      "updated_at": null,
-      "completed_items": [],
+      "status": "done",
+      "updated_at": "2026-09-23T14:12:22.806140+08:00",
+      "completed_items": "W39 全部9组纯无字横向单排叙事漫画(1818x532)已完成并适配就绪",
       "pending_items": [],
       "failed_items": [],
       "notes": ""
     },
     "review": {
-      "status": "pending",
-      "updated_at": null,
-      "completed_items": [],
+      "status": "done",
+      "updated_at": "2026-09-23T14:12:22.808425+08:00",
+      "completed_items": "完成采编自查与审核，准备触发原子构建",
       "pending_items": [],
       "failed_items": [],
       "notes": ""
     },
     "build": {
-      "status": "pending",
-      "updated_at": null,
-      "completed_items": [],
+      "status": "done",
+      "updated_at": "2026-09-23T14:13:29.350100+08:00",
+      "completed_items": "原子构建成功，47页动态核验与信源子串100%匹配通过，凭据 f89020c7e4 已签发",
       "pending_items": [],
       "failed_items": [],
-      "notes": ""
+      "notes": "原子构建与全门禁验证通过"
     },
     "published": {
-      "status": "pending",
-      "updated_at": null,
-      "completed_items": [],
+      "status": "done",
+      "updated_at": "2026-09-23T14:15:08.781840+08:00",
+      "completed_items": "准备执行多期静态审阅站发布与归档",
       "pending_items": [],
       "failed_items": [],
-      "notes": ""
+      "notes": "多期静态站本地导出归档完成"
     }
   },
-  "artifacts": {}
+  "artifacts": {
+    "pdf": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w39/issue-2026-w39.pdf",
+    "html": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w39/issue-2026-w39.html",
+    "md": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w39/issue-2026-w39.md",
+    "build_receipt": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w39/build_receipt.json"
+  }
 }
