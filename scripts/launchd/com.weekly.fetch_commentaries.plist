@@ -6,7 +6,7 @@
     <string>com.weekly.fetch_commentaries</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/bin/python3</string>
+        <string>/opt/miniconda3/bin/python3</string>
         <string>/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/scripts/fetch_commentaries.py</string>
     </array>
     <key>WorkingDirectory</key>

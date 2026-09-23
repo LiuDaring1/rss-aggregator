@@ -16,10 +16,39 @@ import shutil
 import datetime
 import subprocess
 import html
+import re
 from typing import Dict, Any, List, Optional
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 OUTPUT_DIR = os.path.join(ROOT_DIR, "review-public")
+
+def parse_issue_sort_key(issue_name: str):
+    """期号排序键：常规周刊数值排序优先，历史试产次之"""
+    m = re.match(r"^issue-(\d{4})-w(\d+)$", issue_name)
+    if m:
+        return (2, int(m.group(1)), int(m.group(2)), issue_name)
+    m_trial = re.match(r"^issue-trial-(\d+)$", issue_name)
+    if m_trial:
+        return (1, 0, int(m_trial.group(1)), issue_name)
+    return (0, 0, 0, issue_name)
+
+def safe_copy_file(src: str, dst: str) -> bool:
+    """安全拷贝单个文件：杜绝外部软链接（realpath 超出项目根目录直接拦截）"""
+    if os.path.islink(src):
+        real_src = os.path.realpath(src)
+        project_real = os.path.realpath(ROOT_DIR)
+        try:
+            rel = os.path.relpath(real_src, project_real)
+            if rel.startswith("..") or os.path.isabs(rel):
+                print(f"⚠️ [白名单拦截] 拦截指向项目外部的软链接: {src} -> {real_src}")
+                return False
+        except Exception:
+            return False
+        shutil.copyfile(real_src, dst)
+        return True
+    else:
+        shutil.copyfile(src, dst)
+        return True
 
 def get_git_info() -> Dict[str, str]:
     try:
@@ -35,7 +64,8 @@ def load_yaml(fpath: str) -> Dict[str, Any]:
     with open(fpath, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
-def build_review_site(issue_id: Optional[str] = None):
+def build_review_site(issue_id: Optional[str] = None, output_dir: Optional[str] = None):
+    effective_out_dir = os.path.abspath(output_dir) if output_dir else OUTPUT_DIR
     # 0. 自动探测最新期号 (若未显式指定)
     if not issue_id:
         # 扫描 dist/ 下的可用期号
@@ -46,7 +76,7 @@ def build_review_site(issue_id: Optional[str] = None):
                 if d.startswith("issue-") and os.path.exists(os.path.join(dist_dir, d, f"{d}.pdf")):
                     candidates.append(d)
         if candidates:
-            candidates.sort(reverse=True)
+            candidates.sort(key=parse_issue_sort_key, reverse=True)
             issue_id = candidates[0]
         else:
             issue_id = "issue-2026-w38"
@@ -54,7 +84,7 @@ def build_review_site(issue_id: Optional[str] = None):
     print(f"🚀 开始生成脱敏静态审阅站 (当前期号: {issue_id})...")
 
     # 1. 确保目标目录存在 (增量归档架构，绝不暴力删除整个 review-public，保护历史各期)
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(effective_out_dir, exist_ok=True)
 
     dist_issue_dir = os.path.join(ROOT_DIR, "dist", issue_id)
     if not os.path.exists(dist_issue_dir):
@@ -64,44 +94,54 @@ def build_review_site(issue_id: Optional[str] = None):
         else:
             raise RuntimeError(f"未找到构建产物目录: {dist_issue_dir} 或 {fallback_issue_dir}，请先执行 cli.py build {issue_id}")
 
-    target_issue_dir = os.path.join(OUTPUT_DIR, "issues", issue_id)
+    target_issue_dir = os.path.join(effective_out_dir, "issues", issue_id)
     os.makedirs(target_issue_dir, exist_ok=True)
 
-    # 2. 拷贝合法交付产物 (白名单拷贝，杜绝软链接与私密数据)
-    allowed_extensions = [".pdf", ".md", ".html", ".png", ".jpg", ".jpeg", ".json"]
-    for root, dirs, files in os.walk(dist_issue_dir):
-        rel_path = os.path.relpath(root, dist_issue_dir)
-        target_sub = os.path.join(target_issue_dir, rel_path) if rel_path != "." else target_issue_dir
-        os.makedirs(target_sub, exist_ok=True)
-        for f in files:
-            ext = os.path.splitext(f)[1].lower()
-            if ext in allowed_extensions:
-                src_file = os.path.join(root, f)
-                dst_file = os.path.join(target_sub, f)
-                # 使用 copyfile 避免带入 symlink
-                if os.path.islink(src_file):
-                    real_src = os.path.realpath(src_file)
-                    shutil.copyfile(real_src, dst_file)
-                else:
-                    shutil.copyfile(src_file, dst_file)
+    # 2. 严格按交付白名单枚举拷贝 (严禁通配扫描内部私密数据、内部测试 JSON、外部软链接)
+    whitelisted_files = [
+        f"{issue_id}.pdf",
+        f"{issue_id}-复述.pdf",
+        f"{issue_id}-评论.pdf",
+        f"{issue_id}-原文拆解与积累.pdf",
+        f"{issue_id}.html",
+        f"{issue_id}.md",
+        "build_receipt.json",
+        "manifest_prep.json",
+        "sources_status.json"
+    ]
+    for fname in whitelisted_files:
+        src = os.path.join(dist_issue_dir, fname)
+        if not os.path.exists(src):
+            src = os.path.join(ROOT_DIR, "issues", issue_id, fname)
+        if os.path.exists(src):
+            dst = os.path.join(target_issue_dir, fname)
+            safe_copy_file(src, dst)
 
-    # 同步采编台账与信源状态文件
-    for jf in ["manifest_prep.json", "sources_status.json"]:
-        src_j = os.path.join(ROOT_DIR, "issues", issue_id, jf)
-        if os.path.exists(src_j):
-            shutil.copyfile(src_j, os.path.join(target_issue_dir, jf))
-            dst_dist = os.path.join(dist_issue_dir, jf)
-            if os.path.abspath(src_j) != os.path.abspath(dst_dist):
-                shutil.copyfile(src_j, dst_dist)
+    # 拷贝页面快照
+    pages_dirs_to_check = [
+        os.path.join(dist_issue_dir, f"{issue_id}_pages"),
+        os.path.join(dist_issue_dir, "pages"),
+        os.path.join(ROOT_DIR, "issues", issue_id, "pages")
+    ]
+    target_pages_dir = os.path.join(target_issue_dir, "pages")
+    for pd in pages_dirs_to_check:
+        if os.path.exists(pd) and os.path.isdir(pd):
+            os.makedirs(target_pages_dir, exist_ok=True)
+            for f in os.listdir(pd):
+                if f.lower().endswith(".png"):
+                    safe_copy_file(os.path.join(pd, f), os.path.join(target_pages_dir, f))
+            break
 
     # 3. 拷贝插图资产
     src_ill_dir = os.path.join(ROOT_DIR, "issues", issue_id, "illustrations")
-    if os.path.exists(src_ill_dir):
+    if not os.path.exists(src_ill_dir):
+        src_ill_dir = os.path.join(dist_issue_dir, "illustrations")
+    if os.path.exists(src_ill_dir) and os.path.isdir(src_ill_dir):
         dst_ill_dir = os.path.join(target_issue_dir, "illustrations")
         os.makedirs(dst_ill_dir, exist_ok=True)
         for f in os.listdir(src_ill_dir):
-            if f.endswith((".png", ".jpg", ".jpeg")):
-                shutil.copyfile(os.path.join(src_ill_dir, f), os.path.join(dst_ill_dir, f))
+            if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+                safe_copy_file(os.path.join(src_ill_dir, f), os.path.join(dst_ill_dir, f))
 
     # 4. 加载单元结构化数据生成展示卡片
     issue_yaml_path = os.path.join(ROOT_DIR, "issues", issue_id, "issue.yaml")
@@ -138,13 +178,26 @@ def build_review_site(issue_id: Optional[str] = None):
 
     db_stats_map = {}
     db_health_map = {}
+    db_updated_at = None
     if os.path.exists(db_json_path):
         try:
             with open(db_json_path, "r", encoding="utf-8") as f:
                 loaded_db = json.load(f)
+                db_updated_at = loaded_db.get("updatedAt")
                 for st in loaded_db.get("sourceStats", []):
                     db_stats_map[st.get("id")] = st
                 db_health_map = loaded_db.get("sourceHealth", {})
+        except Exception:
+            pass
+
+    is_snapshot_expired = False
+    if db_updated_at:
+        try:
+            dt = datetime.datetime.fromisoformat(db_updated_at.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=datetime.timezone.utc)
+            if (datetime.datetime.now(datetime.timezone.utc) - dt).total_seconds() > 48 * 3600:
+                is_snapshot_expired = True
         except Exception:
             pass
 
@@ -176,6 +229,8 @@ def build_review_site(issue_id: Optional[str] = None):
         if consec > 0:
             err_msg = hl.get("last_error") or "连接超时"
             status_text = f"异常 (连续失败{consec}次: {err_msg[:20]})"
+        elif is_snapshot_expired:
+            status_text = f"快照已过期 (最后抓取: {db_updated_at[:10]})"
         elif tot_it > 0:
             status_text = f"正常在线 (实时抓取{tot_it}条, {full_it}篇全文)"
         elif st.get("status") == "EMPTY":
@@ -192,60 +247,72 @@ def build_review_site(issue_id: Optional[str] = None):
             "selected_this_issue": is_selected
         })
 
-    # 检查天天正能量真实库存
+    # 检查天天正能量真实库存 (动态统计，拒绝死常量)
     ttzl_db_path = os.path.join(ROOT_DIR, "aggr-site", "data", "wenwen", "db.json")
-    ttzl_count = 283
+    ttzl_count = None
     if os.path.exists(ttzl_db_path):
         try:
             with open(ttzl_db_path, "r", encoding="utf-8") as f:
                 w_data = json.load(f)
-                ttzl_count = w_data.get("totalArticles", ttzl_count)
+                ttzl_count = w_data.get("totalArticles")
         except Exception:
             pass
+
+    if ttzl_count is not None and ttzl_count > 0:
+        ttzl_status = f"正常在线 ({ttzl_count}条本地温和事实库)"
+    elif os.path.exists(ttzl_db_path):
+        ttzl_status = "已就绪 (库存为空)"
+    else:
+        ttzl_status = "未初始化 (本地数据缺失)"
 
     sanitized_sources.append({
         "name": "天天正能量",
         "category": "暖文事实库",
         "type": "radar_crawler",
-        "status": f"正常在线 ({ttzl_count}条本地温和事实库)",
+        "status": ttzl_status,
         "selected_this_issue": ("天天正能量" in selected_str or "阿里" in selected_str)
     })
 
     git_info = get_git_info()
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S (UTC+8)")
 
-    # 6. 发现所有已归档期刊
+    # 6. 发现所有已归档期刊 (精准数值排序)
     available_issues = set()
-    issues_root = os.path.join(OUTPUT_DIR, "issues")
+    issues_root = os.path.join(effective_out_dir, "issues")
     if os.path.exists(issues_root):
         for d in os.listdir(issues_root):
             if d.startswith("issue-") and os.path.isdir(os.path.join(issues_root, d)):
                 available_issues.add(d)
     available_issues.add(issue_id)
-    sorted_issues = sorted(list(available_issues), reverse=True)
+    sorted_issues = sorted(list(available_issues), key=parse_issue_sort_key, reverse=True)
+    latest_issue = sorted_issues[0]
 
     # 计算页数
     pages_dir = os.path.join(target_issue_dir, "pages")
     page_files = [f for f in os.listdir(pages_dir) if f.startswith("page_") and f.endswith(".png")] if os.path.exists(pages_dir) else []
     total_pages_count = len(page_files) if page_files else 47
 
-    # 构造根目录 index.html (指向当前/最新期)
-    root_html_content = generate_index_html(
-        manifest=manifest,
-        issue_id=issue_id,
-        git_info=git_info,
-        now_str=now_str,
-        retellings=retellings_data,
-        commentaries=commentaries_data,
-        excerpts=excerpts_data,
-        sources=sanitized_sources,
-        total_pages=total_pages_count,
-        all_issues=sorted_issues,
-        path_prefix=f"issues/{issue_id}/"
-    )
-    index_path = os.path.join(OUTPUT_DIR, "index.html")
-    with open(index_path, "w", encoding="utf-8") as f:
-        f.write(root_html_content)
+    # 构造根目录 index.html (首页防降级机制: 仅发布最新期或首次导出时刷新主站首页)
+    index_path = os.path.join(effective_out_dir, "index.html")
+    if issue_id == latest_issue or not os.path.exists(index_path):
+        root_html_content = generate_index_html(
+            manifest=manifest,
+            issue_id=issue_id,
+            git_info=git_info,
+            now_str=now_str,
+            retellings=retellings_data,
+            commentaries=commentaries_data,
+            excerpts=excerpts_data,
+            sources=sanitized_sources,
+            total_pages=total_pages_count,
+            all_issues=sorted_issues,
+            path_prefix=f"issues/{issue_id}/"
+        )
+        with open(index_path, "w", encoding="utf-8") as f:
+            f.write(root_html_content)
+        print(f"  ✅ 主站门户首页已更新为最新期: {issue_id}")
+    else:
+        print(f"  ℹ️ [首页防降级] 当前导出期号 {issue_id} 早于主站最新期 {latest_issue}，主站首页 index.html 保持指向最新期。")
 
     # 构造期刊独立归档页 issues/<issue_id>/index.html
     issue_html_content = generate_index_html(
@@ -266,10 +333,10 @@ def build_review_site(issue_id: Optional[str] = None):
         f.write(issue_html_content)
 
     # 7. 写入 .nojekyll 防止 GitHub Pages 吞下以下划线开头的文件
-    with open(os.path.join(OUTPUT_DIR, ".nojekyll"), "w", encoding="utf-8") as f:
+    with open(os.path.join(effective_out_dir, ".nojekyll"), "w", encoding="utf-8") as f:
         f.write("")
 
-    print(f"✅ 脱敏静态审阅站已成功生成至: {OUTPUT_DIR}")
+    print(f"✅ 脱敏静态审阅站已成功生成至: {effective_out_dir}")
     print(f"   - 门户首页: {index_path}")
     print(f"   - 归档分期: {issue_index_path}")
     print(f"   - 包含产物: PDF/Markdown/HTML/PNG 快照全量同源离线打包")
@@ -775,5 +842,6 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="脱敏静态审阅站生成器")
     parser.add_argument("--issue", default=None, help="目标期刊ID (若省略则自动检测最新期)")
+    parser.add_argument("--outdir", default=None, help="目标输出目录 (默认 review-public)")
     args = parser.parse_args()
-    build_review_site(args.issue)
+    build_review_site(args.issue, output_dir=args.outdir)

@@ -147,10 +147,44 @@ def update_stage(
     save_production_state(issue_id, state)
     return state
 
+import hashlib
+
+def find_unit_file(unit_id: str) -> Optional[str]:
+    """寻找单元文件路径 (相对于 ROOT_DIR)"""
+    candidates = [
+        os.path.join("content", "retellings", f"{unit_id}.yaml"),
+        os.path.join("content", "commentaries", f"{unit_id}.yaml"),
+        os.path.join("content", "excerpts", f"{unit_id}.yaml"),
+    ]
+    for c in candidates:
+        full = os.path.join(ROOT_DIR, c)
+        if os.path.exists(full):
+            return c
+    return None
+
+def compute_file_sha256(filepath: str) -> str:
+    h = hashlib.sha256()
+    with open(filepath, "rb") as f:
+        while chunk := f.read(65536):
+            h.update(chunk)
+    return h.hexdigest()
+
 def freeze_unit(issue_id: str, unit_id: str):
-    """标记单元已定稿冻结，避免后续流程被重复重写"""
+    """标记单元已定稿冻结，记录文件哈希，避免后续流程被重复重写或意外篡改"""
     state = load_production_state(issue_id) or init_production_state(issue_id)
-    state.setdefault("unit_freeze_status", {})[unit_id] = True
+    rel_path = find_unit_file(unit_id)
+    file_hash = None
+    if rel_path:
+        full_path = os.path.join(ROOT_DIR, rel_path)
+        file_hash = compute_file_sha256(full_path)
+
+    freeze_record = {
+        "frozen": True,
+        "frozen_at": datetime.datetime.now(BEIJING_TZ).isoformat(),
+        "sha256": file_hash,
+        "rel_path": rel_path
+    }
+    state.setdefault("unit_freeze_status", {})[unit_id] = freeze_record
     save_production_state(issue_id, state)
 
 def is_unit_frozen(issue_id: str, unit_id: str) -> bool:
@@ -158,7 +192,47 @@ def is_unit_frozen(issue_id: str, unit_id: str) -> bool:
     state = load_production_state(issue_id)
     if not state:
         return False
-    return state.get("unit_freeze_status", {}).get(unit_id, False)
+    entry = state.get("unit_freeze_status", {}).get(unit_id)
+    if isinstance(entry, dict):
+        return entry.get("frozen", False)
+    return bool(entry)
+
+def unfreeze_unit(issue_id: str, unit_id: str):
+    """显式解冻单元，允许重新编辑与生成"""
+    state = load_production_state(issue_id) or init_production_state(issue_id)
+    if unit_id in state.get("unit_freeze_status", {}):
+        if isinstance(state["unit_freeze_status"][unit_id], dict):
+            state["unit_freeze_status"][unit_id]["frozen"] = False
+        else:
+            state["unit_freeze_status"][unit_id] = False
+    save_production_state(issue_id, state)
+
+def verify_frozen_units(issue_id: str) -> Tuple[bool, List[str]]:
+    """核对所有已冻结单元的文件哈希，确保未经显式解冻前内容未被篡改"""
+    state = load_production_state(issue_id)
+    if not state:
+        return (True, [])
+
+    errors = []
+    frozen_map = state.get("unit_freeze_status", {})
+    for unit_id, val in frozen_map.items():
+        is_frz = val.get("frozen", False) if isinstance(val, dict) else bool(val)
+        if is_frz and isinstance(val, dict):
+            rel_path = val.get("rel_path") or find_unit_file(unit_id)
+            expected_hash = val.get("sha256")
+            if rel_path and expected_hash:
+                full_path = os.path.join(ROOT_DIR, rel_path)
+                if not os.path.exists(full_path):
+                    errors.append(f"已冻结单元 {unit_id} 的源文件不存在: {rel_path}")
+                else:
+                    curr_hash = compute_file_sha256(full_path)
+                    if curr_hash != expected_hash:
+                        errors.append(
+                            f"已冻结单元 {unit_id} 发生未授权篡改! "
+                            f"记录哈希: {expected_hash[:10]}... 当前哈希: {curr_hash[:10]}... "
+                            f"(文件: {rel_path})"
+                        )
+    return (len(errors) == 0, errors)
 
 def get_resume_info(issue_id: str) -> Dict[str, Any]:
     """获取断点续做指引信息"""
@@ -172,8 +246,20 @@ def get_resume_info(issue_id: str) -> Dict[str, Any]:
         }
 
     cur_stage = state.get("current_stage", "prep")
-    st_data = state["stages"].get(cur_stage, {})
+    pub_stage = state.get("stages", {}).get("published", {})
+    if pub_stage.get("status") == "done":
+        return {
+            "status": "completed",
+            "issue_id": issue_id,
+            "current_stage": "published",
+            "stage_status": "done",
+            "pending_items": [],
+            "failed_items": [],
+            "notes": pub_stage.get("notes", ""),
+            "next_action": "本期已完成全部生产与归档发布，可供教学使用"
+        }
 
+    st_data = state["stages"].get(cur_stage, {})
     return {
         "status": "in_progress",
         "issue_id": issue_id,

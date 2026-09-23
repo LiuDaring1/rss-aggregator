@@ -402,6 +402,7 @@ def build_manifest_from_candidates(
 
 def main():
     parser = argparse.ArgumentParser(description="周刊备料管线连接工具 v2.1")
+    parser.add_argument("command", nargs="?", default="scan", help="可选子命令 (如 init, scan)")
     parser.add_argument("--raw-dir", default="aggr-site/data/wenwen/raw,aggr-site/data/commentaries/raw", help="raw 资料库路径（支持逗号分隔多个目录）")
     parser.add_argument("--issue-id", "--issue", default="issue-2026-w38", help="期刊 ID (如 issue-2026-w38)")
     parser.add_argument("--start-date", default=None, help="本期起始日期 (YYYY-MM-DD，若省略则自动从期号推算)")

@@ -183,6 +183,16 @@ def cmd_build(args):
     print(f"正在构建期刊: {issue_id} (配置文件: {issue_yaml})...")
     with open(issue_yaml, "r", encoding="utf-8") as f:
         manifest = IssueManifest.model_validate(load_yaml_safely(f.read()))
+
+    # 冻结单元防篡改强校验
+    from weekly_pipeline.task_tracker import verify_frozen_units
+    is_valid, errors = verify_frozen_units(issue_id)
+    if not is_valid:
+        print(f"❌ [冻结单元篡改拦截] 检测到已冻结定稿单元被非法篡改或文件缺失:")
+        for err in errors:
+            print(f"   - {err}")
+        shutil.rmtree(staging_dir, ignore_errors=True)
+        sys.exit(1)
         
     # 加载 units (带严格前置校验与安全解析)
     retellings = []
@@ -448,19 +458,59 @@ def cmd_build(args):
         if os.path.exists(prev_dir):
             shutil.rmtree(prev_dir, ignore_errors=True)
         os.rename(final_out_dir, prev_dir)
-        os.rename(staging_dir, final_out_dir)
-        shutil.rmtree(prev_dir, ignore_errors=True)
+        try:
+            os.rename(staging_dir, final_out_dir)
+            shutil.rmtree(prev_dir, ignore_errors=True)
+        except Exception as e:
+            if os.path.exists(prev_dir) and not os.path.exists(final_out_dir):
+                os.rename(prev_dir, final_out_dir)
+            raise RuntimeError(f"暂存提升至正式目录失败，已自动回滚恢复上一版本: {e}")
     else:
         os.rename(staging_dir, final_out_dir)
 
     out_dir = final_out_dir
+
+    # 生成不可篡改的正式构建防伪凭据 build_receipt.json
+    import hashlib
+    import datetime
+    
+    pdf_path = os.path.join(out_dir, f"{issue_id}.pdf")
+    pdf_hash = None
+    actual_pages = total_pages
+    if os.path.exists(pdf_path):
+        h = hashlib.sha256()
+        with open(pdf_path, "rb") as pf:
+            while chunk := pf.read(65536):
+                h.update(chunk)
+        pdf_hash = h.hexdigest()
+        try:
+            import pypdf
+            reader = pypdf.PdfReader(pdf_path)
+            actual_pages = len(reader.pages)
+        except Exception:
+            pass
+
+    build_receipt = {
+        "issue_id": issue_id,
+        "timestamp": datetime.datetime.now().isoformat(),
+        "is_draft": bool(getattr(args, "draft", False)),
+        "pdf_sha256": pdf_hash,
+        "total_pages": actual_pages,
+        "citation_verified": True,
+        "formats": formats
+    }
+    receipt_file = os.path.join(out_dir, "build_receipt.json")
+    with open(receipt_file, "w", encoding="utf-8") as rf:
+        json.dump(build_receipt, rf, ensure_ascii=False, indent=2)
+    print(f"  ✅ 构建凭据已生成: {receipt_file} (PDF SHA256: {pdf_hash[:10] if pdf_hash else 'N/A'}...)")
 
     # 自动同步归档至 issues/{issue_id}/ (确保版本库始终跟踪最新同源成品)
     issue_repo_dir = os.path.join("issues", issue_id)
     if os.path.exists(issue_repo_dir) and os.path.abspath(out_dir) != os.path.abspath(issue_repo_dir):
         deliverables = [
             f"{issue_id}.md", f"{issue_id}.pdf",
-            f"{issue_id}-复述.pdf", f"{issue_id}-评论.pdf", f"{issue_id}-原文拆解与积累.pdf"
+            f"{issue_id}-复述.pdf", f"{issue_id}-评论.pdf", f"{issue_id}-原文拆解与积累.pdf",
+            "build_receipt.json"
         ]
         for fname in deliverables:
             src_f = os.path.join(out_dir, fname)
@@ -477,7 +527,8 @@ def cmd_build(args):
         update_stage(issue_id, "build", "done", notes="整刊构建、分册切分与门禁核验 100% 通过", artifacts={
             "pdf": os.path.join(out_dir, f"{issue_id}.pdf"),
             "html": os.path.join(out_dir, f"{issue_id}.html"),
-            "md": os.path.join(out_dir, f"{issue_id}.md")
+            "md": os.path.join(out_dir, f"{issue_id}.md"),
+            "build_receipt": os.path.join(out_dir, "build_receipt.json")
         })
     except Exception:
         pass

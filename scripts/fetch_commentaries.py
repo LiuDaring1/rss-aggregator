@@ -380,6 +380,7 @@ def _run_fetch_cycle_core(
     updated_count = 0
     unchanged_count = 0
     degraded_preserved_count = 0
+    degraded_events = []
     total_fetched = 0
     all_source_stats = []
 
@@ -442,11 +443,43 @@ def _run_fetch_cycle_core(
                         a["hasFullText"] = True
                         old_flags = old_data.get("flags", [])
                         a["flags"] = list(set(old_flags + ["degraded_fallback_preserved"]))
-                        a["degraded_warning"] = (
+                        warning_msg = (
                             f"源站本次抓取退化为摘要 ({len(a.get('summary', ''))} 字)，"
                             f"已自动保留历史优质全文 ({len(old_data['content'])} 字)"
                         )
+                        a["degraded_warning"] = warning_msg
                         degraded_preserved_count += 1
+                        degraded_events.append({
+                            "article_id": aid,
+                            "title": a.get("title", ""),
+                            "source_id": a.get("sourceId", ""),
+                            "source_name": a.get("sourceName", ""),
+                            "warning": warning_msg,
+                            "preserved_content_length": len(old_data["content"]),
+                            "summary_length": len(a.get("summary", "")),
+                            "timestamp": datetime.datetime.now(BEIJING_TZ).isoformat()
+                        })
+                        # 确保防退化修改原子写盘
+                        atomic_save_json(filepath, a)
+                        try:
+                            atomic_save_json(alt_path, a)
+                        except Exception:
+                            pass
+                        # 登记入索引字典
+                        existing_articles[aid] = {
+                            "id": aid,
+                            "title": a["title"],
+                            "sourceId": a["sourceId"],
+                            "sourceName": a["sourceName"],
+                            "publishedAt": a["publishedAt"],
+                            "url": a["url"],
+                            "contentLength": a["contentLength"],
+                            "contentHash": a["contentHash"],
+                            "textType": a["textType"],
+                            "hasFullText": a["hasFullText"],
+                            "flags": a.get("flags", []),
+                            "degraded_warning": a.get("degraded_warning")
+                        }
                         unchanged_count += 1
                         continue
 
@@ -483,12 +516,19 @@ def _run_fetch_cycle_core(
     # 更新并原子落盘 db.json
     now_iso = datetime.datetime.now(BEIJING_TZ).isoformat()
     db_data["updatedAt"] = now_iso
+    if new_count > 0 or not db_data.get("lastNewArticlesAt"):
+        db_data["lastNewArticlesAt"] = now_iso
     db_data["totalArticles"] = len(existing_articles)
     db_data["fullTextArticles"] = sum(1 for a in existing_articles.values() if a.get("hasFullText"))
     db_data["summaryArticles"] = sum(1 for a in existing_articles.values() if a.get("textType") == "summary_only")
     db_data["sourceStats"] = all_source_stats
     db_data["sourceHealth"] = existing_health
     db_data["articles"] = existing_articles
+
+    if degraded_events:
+        db_events = db_data.setdefault("degradedEvents", [])
+        db_events.extend(degraded_events)
+        db_data["degradedEvents"] = db_events[-50:]
 
     atomic_save_json(index_file, db_data)
     alt_index = os.path.join(alt_dir, "db.json")
@@ -501,9 +541,11 @@ def _run_fetch_cycle_core(
     status_snapshot_path = os.path.join(os.path.dirname(index_file), "sources_status.json")
     atomic_save_json(status_snapshot_path, {
         "updatedAt": now_iso,
+        "lastNewArticlesAt": db_data.get("lastNewArticlesAt"),
         "totalSources": len(enabled_sources),
         "sourceStats": all_source_stats,
-        "sourceHealth": existing_health
+        "sourceHealth": existing_health,
+        "degradedEvents": db_data.get("degradedEvents", [])
     })
 
     # 判断是否全部启用的核心信源都失败
@@ -512,6 +554,7 @@ def _run_fetch_cycle_core(
 
     summary = {
         "timestamp": now_iso,
+        "last_new_articles_at": db_data.get("lastNewArticlesAt"),
         "sources_count": len(enabled_sources),
         "total_fetched": total_fetched,
         "new_articles": new_count,
@@ -522,6 +565,7 @@ def _run_fetch_cycle_core(
         "full_text_inventory": db_data["fullTextArticles"],
         "source_stats": all_source_stats,
         "source_health": existing_health,
+        "degraded_events": db_data.get("degradedEvents", []),
         "all_failed": all_failed
     }
     return summary

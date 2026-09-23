@@ -31,6 +31,7 @@ aggr-site/public/issues
 # 运行数据与日志（本机留档）
 aggr-site/data/
 data/raw/
+data/logs/
 aggr-site/server.log
 aggr-site/pnpm-install.log
 rsshub/rsshub.log
