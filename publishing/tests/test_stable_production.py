@@ -609,18 +609,20 @@ class TestStableProductionScenarios(unittest.TestCase):
         self.assertIn("expiry_error", health_invalid, "异常时间格式必须被记录在 expiry_error 中，不予吞掉")
 
     # -------------------------------------------------------------------------
-    # 场景 13: 采编台账信源依据与语义事实一致性核查 (8 类反例与负向拦截严格验证)
+    # -------------------------------------------------------------------------
+    # 场景 13: 采编台账信源依据与单变量隔离核查 (负向精准拦截与正向对照)
     # -------------------------------------------------------------------------
     def test_scenario_13_semantic_fact_and_source_ledger_verification(self):
-        """场景 13: 验证真实信源依据核验；覆盖缺快照、缺哈希、空正文、错配ID/URL、新编号造假与评论违规等拦截"""
+        """场景 13: 验证从完整有效基准夹具出发，实施单变量改变的负向拦截与正向对照测试"""
         from weekly_pipeline.verifier import verify_fact_and_source_ledger
         import copy
+        import hashlib
 
         # 1. 真实 W39 台账核验必须 100% 通过
         ok_w39 = verify_fact_and_source_ledger("issue-2026-w39")
         self.assertTrue(ok_w39, "已更正事实的 W39 必须 100% 通过事实与台账核验")
 
-        # 2. 隔离测试：构建虚拟期目录，模拟注入各种故障反例
+        # 2. 隔离测试：构建自包含、完整的虚拟期目录与内容环境
         fake_issue = "issue-2026-w98"
         fake_issue_dir = os.path.join(PROJECT_ROOT, "issues", fake_issue)
         os.makedirs(fake_issue_dir, exist_ok=True)
@@ -631,28 +633,50 @@ class TestStableProductionScenarios(unittest.TestCase):
         with open(os.path.join(PROJECT_ROOT, "issues", "issue-2026-w39", "manifest_prep.json"), "r", encoding="utf-8") as f:
             base_manifest = json.load(f)
 
-        try:
-            # 2.1 负向用例 1: 缺少上游快照路径 upstream_raw_path -> 必须拦截
-            m_no_path = copy.deepcopy(base_manifest)
-            m_no_path["retellings"][0]["upstream_raw_path"] = ""
+        rel_content_dir = os.path.relpath(fake_content_dir, PROJECT_ROOT)
+
+        # 拷贝完整有效的复述与评论单元 YAML 到隔离目录，构筑 100% 通过的基准夹具
+        for r in base_manifest.get("retellings", []):
+            uid = r.get("unit_id")
+            src_p = os.path.join(PROJECT_ROOT, "content", "retellings", f"{uid}.yaml")
+            if os.path.exists(src_p):
+                shutil.copyfile(src_p, os.path.join(fake_content_dir, "retellings", f"{uid}.yaml"))
+
+        for c in base_manifest.get("commentaries", []):
+            cid = c.get("unit_id")
+            src_p = os.path.join(PROJECT_ROOT, "content", "commentaries", f"{cid}.yaml")
+            if os.path.exists(src_p):
+                shutil.copyfile(src_p, os.path.join(fake_content_dir, "commentaries", f"{cid}.yaml"))
+
+        def _write_manifest(m):
             with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
-                json.dump(m_no_path, mf)
-            self.assertFalse(
-                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
-                "缺少上游快照路径时必须坚决拦截！"
+                json.dump(m, mf, ensure_ascii=False)
+
+        try:
+            # 2.0 基准校验：完整有效样本必须 100% 顺利通过
+            _write_manifest(base_manifest)
+            self.assertTrue(
+                verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir),
+                "完整有效样本在未施加任何故障前必须 100% 通过核验！"
             )
+
+            # 2.1 负向用例 1: 缺少上游快照路径 upstream_raw_path -> 必须拦截
+            m = copy.deepcopy(base_manifest)
+            m["retellings"][0]["upstream_raw_path"] = ""
+            _write_manifest(m)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+            _write_manifest(base_manifest)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
 
             # 2.2 负向用例 2: 缺少正文哈希 upstream_content_hash -> 必须拦截
-            m_no_hash = copy.deepcopy(base_manifest)
-            m_no_hash["retellings"][0]["upstream_content_hash"] = ""
-            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
-                json.dump(m_no_hash, mf)
-            self.assertFalse(
-                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
-                "缺少正文哈希时必须坚决拦截！"
-            )
+            m = copy.deepcopy(base_manifest)
+            m["retellings"][0]["upstream_content_hash"] = ""
+            _write_manifest(m)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+            _write_manifest(base_manifest)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
 
-            # 2.3 负向用例 3: 空正文/仅元信息，且哈希为真实空字符串 SHA256 -> 必须拦截
+            # 2.3 负向用例 3: 空正文/仅元信息，且哈希为空字符串 SHA256 -> 必须拦截
             empty_snap_path = os.path.join(self.tmp_dir, "empty_snap.json")
             with open(empty_snap_path, "w", encoding="utf-8") as f:
                 json.dump({
@@ -662,75 +686,152 @@ class TestStableProductionScenarios(unittest.TestCase):
                     "hasFullText": False,
                     "textType": "metadata_only"
                 }, f)
-            m_empty = copy.deepcopy(base_manifest)
-            m_empty["retellings"][0]["raw_id"] = "mock-empty"
-            m_empty["retellings"][0]["source_url"] = "https://example.com/mock-empty"
-            m_empty["retellings"][0]["upstream_raw_path"] = os.path.relpath(empty_snap_path, PROJECT_ROOT)
-            m_empty["retellings"][0]["upstream_content_hash"] = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
-                json.dump(m_empty, mf)
-            self.assertFalse(
-                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
-                "空正文、元信息占位符与空哈希伪造来源必须坚决拦截！"
-            )
+            m = copy.deepcopy(base_manifest)
+            m["retellings"][0]["raw_id"] = "mock-empty"
+            m["retellings"][0]["source_url"] = "https://example.com/mock-empty"
+            m["retellings"][0]["upstream_raw_path"] = os.path.relpath(empty_snap_path, PROJECT_ROOT)
+            m["retellings"][0]["upstream_content_hash"] = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            _write_manifest(m)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+            _write_manifest(base_manifest)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
 
-            # 2.4 负向用例 4: 存在快照但 raw_id 错配 (非空错误ID) -> 必须拦截
-            m_id_mismatch = copy.deepcopy(base_manifest)
-            m_id_mismatch["retellings"][0]["raw_id"] = "mismatched-non-empty-id-999"
-            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
-                json.dump(m_id_mismatch, mf)
-            self.assertFalse(
-                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
-                "声明的 raw_id 与快照真实 ID 不符时必须坚决拦截！"
-            )
+            # 2.4 负向用例 4: 快照侧缺失唯一标识 ID (如缺 id/raw_id) -> 必须拦截，不得静默跳过
+            no_id_snap_path = os.path.join(self.tmp_dir, "snap_no_id.json")
+            valid_txt = "这是一段用于测试缺失ID的真实长文本内容。"
+            valid_hash = hashlib.sha256(valid_txt.encode("utf-8")).hexdigest()
+            with open(no_id_snap_path, "w", encoding="utf-8") as f:
+                json.dump({
+                    "url": "https://example.com/no-id",
+                    "content": valid_txt,
+                    "hasFullText": True,
+                    "textType": "full_text"
+                }, f)
+            m = copy.deepcopy(base_manifest)
+            m["retellings"][0]["source_url"] = "https://example.com/no-id"
+            m["retellings"][0]["upstream_raw_path"] = os.path.relpath(no_id_snap_path, PROJECT_ROOT)
+            m["retellings"][0]["upstream_content_hash"] = valid_hash
+            _write_manifest(m)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "快照缺失ID时必须拦截！")
+            _write_manifest(base_manifest)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
 
-            # 2.5 负向用例 5: 存在快照但来源 URL 错配 -> 必须拦截
-            m_url_mismatch = copy.deepcopy(base_manifest)
-            m_url_mismatch["retellings"][0]["source_url"] = "https://completely-wrong-domain.com/fake-news"
-            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
-                json.dump(m_url_mismatch, mf)
-            self.assertFalse(
-                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
-                "声明的来源 URL 与快照 URL 不符时必须坚决拦截！"
-            )
+            # 2.5 负向用例 5: 快照侧缺失 URL (如缺 url/sourceUrl) -> 必须拦截，不得静默跳过
+            no_url_snap_path = os.path.join(self.tmp_dir, "snap_no_url.json")
+            with open(no_url_snap_path, "w", encoding="utf-8") as f:
+                json.dump({
+                    "id": "mock-no-url-id",
+                    "content": valid_txt,
+                    "hasFullText": True,
+                    "textType": "full_text"
+                }, f)
+            m = copy.deepcopy(base_manifest)
+            m["retellings"][0]["raw_id"] = "mock-no-url-id"
+            m["retellings"][0]["upstream_raw_path"] = os.path.relpath(no_url_snap_path, PROJECT_ROOT)
+            m["retellings"][0]["upstream_content_hash"] = valid_hash
+            _write_manifest(m)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "快照缺失URL时必须拦截！")
+            _write_manifest(base_manifest)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
 
-            # 2.6 负向用例 6: 新单元编号 (如 R45) 注入虚构实体'程东'或'车祸骨折' -> 必须拦截 (证明不依赖R41/R36硬编码)
-            m_new_uid = copy.deepcopy(base_manifest)
-            m_new_uid["retellings"][0]["unit_id"] = "R45"
-            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
-                json.dump(m_new_uid, mf)
-            with open(os.path.join(fake_content_dir, "retellings", "R45.yaml"), "w", encoding="utf-8") as yf:
-                yf.write("合肥少年程东开学发言...")
-            self.assertFalse(
-                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
-                "新单元编号 R45 下包含虚构实体'程东'时必须坚决拦截！"
-            )
+            # 2.6 负向用例 6: 存在快照但 raw_id 错配 -> 必须拦截
+            m = copy.deepcopy(base_manifest)
+            m["retellings"][0]["raw_id"] = "mismatched-non-empty-id-999"
+            _write_manifest(m)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+            _write_manifest(base_manifest)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
 
-            # 2.7 负向用例 7: 评论单元中注入'车祸骨折'事实误传 -> 必须拦截
-            with open(os.path.join(fake_content_dir, "commentaries", "C99.yaml"), "w", encoding="utf-8") as cyf:
-                cyf.write("外卖骑手遭遇车祸骨折引发社会保障探讨...")
-            self.assertFalse(
-                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
-                "评论单元出现'车祸骨折'事实误传时必须坚决拦截！"
-            )
-            # 清理错误评论文件
-            os.remove(os.path.join(fake_content_dir, "commentaries", "C99.yaml"))
+            # 2.7 负向用例 7: 存在快照但来源 URL 错配 -> 必须拦截
+            m = copy.deepcopy(base_manifest)
+            m["retellings"][0]["source_url"] = "https://completely-wrong-domain.com/fake-news"
+            _write_manifest(m)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+            _write_manifest(base_manifest)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
 
-            # 2.8 正向对照：正确绑定与事实无误 -> 检验放行
-            with open(os.path.join(fake_issue_dir, "manifest_prep.json"), "w", encoding="utf-8") as mf:
-                json.dump(base_manifest, mf)
-            # 准备全套有效 retellings
-            for r in base_manifest.get("retellings", []):
-                uid = r.get("unit_id")
-                src_yp = os.path.join(PROJECT_ROOT, "content", "retellings", f"{uid}.yaml")
-                dst_yp = os.path.join(fake_content_dir, "retellings", f"{uid}.yaml")
-                if os.path.exists(src_yp):
-                    shutil.copyfile(src_yp, dst_yp)
+            # 2.8 负向用例 8: 汪洋事件复述正文中注入虚构实体'程东' -> 必须拦截
+            r41_path = os.path.join(fake_content_dir, "retellings", "R41.yaml")
+            with open(r41_path, "r", encoding="utf-8") as yf:
+                r41_orig = yf.read()
+            r41_tampered = r41_orig.replace("汪洋", "程东")
+            with open(r41_path, "w", encoding="utf-8") as yf:
+                yf.write(r41_tampered)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "汪洋事件注入程东必须拦截！")
+            with open(r41_path, "w", encoding="utf-8") as yf:
+                yf.write(r41_orig)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
 
+            # 2.9 负向用例 9: 骑手事件关联评论单元注入'车祸骨折' -> 必须拦截
+            c25_path = os.path.join(fake_content_dir, "commentaries", "C25.yaml")
+            with open(c25_path, "r", encoding="utf-8") as yf:
+                c25_orig = yf.read()
+            c25_tampered = c25_orig.replace("摔倒受重伤", "车祸骨折")
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yf.write(c25_tampered)
+            self.assertFalse(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir), "骑手评论注入车祸骨折必须拦截！")
+            with open(c25_path, "w", encoding="utf-8") as yf:
+                yf.write(c25_orig)
+            self.assertTrue(verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir))
+
+            # 2.10 正向对照用例 10: 正常报道“安徽大学”的合法材料 -> 必须顺利通行 (证明非全局禁词)
+            ahu_txt = "安徽大学在合肥举办全国高校学术论坛，校长出席致辞并签署产学研合作协议。"
+            ahu_hash = hashlib.sha256(ahu_txt.encode("utf-8")).hexdigest()
+            ahu_snap_path = os.path.join(self.tmp_dir, "snap_ahu.json")
+            with open(ahu_snap_path, "w", encoding="utf-8") as f:
+                json.dump({
+                    "id": "comm-ahu-001",
+                    "url": "https://ahu.edu.cn/news/001",
+                    "content": ahu_txt,
+                    "hasFullText": True,
+                    "textType": "full_text"
+                }, f)
+            m_ahu = copy.deepcopy(base_manifest)
+            ahu_unit = {
+                "unit_id": "R99",
+                "title": "安徽大学举办全国学术论坛",
+                "raw_id": "comm-ahu-001",
+                "source_url": "https://ahu.edu.cn/news/001",
+                "upstream_raw_path": os.path.relpath(ahu_snap_path, PROJECT_ROOT),
+                "upstream_content_hash": ahu_hash,
+                "fact_verification": {
+                    "status": "verified",
+                    "verified_entities": ["安徽大学", "合肥"]
+                }
+            }
+            m_ahu["retellings"].append(ahu_unit)
+            _write_manifest(m_ahu)
+            r99_path = os.path.join(fake_content_dir, "retellings", "R99.yaml")
+            with open(r99_path, "w", encoding="utf-8") as yf:
+                yf.write("""schema_version: '1.0'
+id: R99
+title: 安徽大学举办全国学术论坛
+material_paragraphs:
+- 安徽大学在合肥举办全国高校学术论坛，受到各方广泛关注。
+keywords:
+- 安徽大学
+- 合肥
+ref_retelling: 安徽大学在合肥举办全国高校学术论坛，取得丰硕成果。
+""")
             self.assertTrue(
-                verify_fact_and_source_ledger(fake_issue, content_dir=os.path.relpath(fake_content_dir, PROJECT_ROOT)),
-                "全部来源合同合规、事实核验与实体无误时必须顺利放行通过！"
+                verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir),
+                "真实合法的'安徽大学'报道单元必须顺利通过，严禁被当作全局禁词误拦截！"
             )
+            if os.path.exists(r99_path):
+                os.remove(r99_path)
+            _write_manifest(base_manifest)
+
+            # 2.11 正向对照用例 11: 未入选草稿 (如 C9999.yaml) 不干扰本期放行
+            draft_path = os.path.join(fake_content_dir, "commentaries", "C9999.yaml")
+            with open(draft_path, "w", encoding="utf-8") as yf:
+                yf.write("schema_version: '1.0'\nid: C9999\ntitle: 旁支草稿文件\nnotes: 程东草稿记录\n")
+            self.assertTrue(
+                verify_fact_and_source_ledger(fake_issue, content_dir=rel_content_dir),
+                "未在台账中入选的草稿文件 C9999.yaml 绝不能阻塞本期合规发布！"
+            )
+            if os.path.exists(draft_path):
+                os.remove(draft_path)
+
         finally:
             shutil.rmtree(fake_issue_dir, ignore_errors=True)
             shutil.rmtree(fake_content_dir, ignore_errors=True)
@@ -738,4 +839,5 @@ class TestStableProductionScenarios(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
 

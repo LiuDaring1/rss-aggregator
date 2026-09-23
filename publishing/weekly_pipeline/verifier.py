@@ -277,13 +277,17 @@ def verify_fact_and_source_ledger(issue_id: str, content_dir: str = "content") -
             errors.append(f"[{uid}] 读取上游原件 JSON 异常: {e}")
             return
 
-        # 3. 快照 ID 与 URL 对应性检查
-        snap_id = robj.get("id")
-        if snap_id and snap_id != raw_id:
+        # 3. 快照 ID 与 URL 对应性检查 (不得静默跳过缺失)
+        snap_id = robj.get("id") or robj.get("raw_id") or robj.get("item_id")
+        if not snap_id:
+            errors.append(f"[{uid}] 上游快照缺失唯一标识字段 (id/raw_id/item_id)，无法核验快照身份依据")
+        elif snap_id != raw_id:
             errors.append(f"[{uid}] 上游快照 ID 不匹配: 台账声明 {raw_id} != 快照记录 {snap_id}")
 
-        snap_url = robj.get("url") or robj.get("sourceUrl")
-        if snap_url and not are_urls_equivalent(url, snap_url):
+        snap_url = robj.get("url") or robj.get("sourceUrl") or robj.get("source_url")
+        if not snap_url:
+            errors.append(f"[{uid}] 上游快照缺失来源 URL 记录 (url/sourceUrl)，无法核验来源出处")
+        elif not are_urls_equivalent(url, snap_url):
             errors.append(f"[{uid}] 来源 URL 不匹配: 台账声明 {url} != 快照记录 {snap_url}")
 
         # 4. 正文有效性检查 (拦截空正文、元信息占位符、空字符串哈希)
@@ -303,61 +307,100 @@ def verify_fact_and_source_ledger(issue_id: str, content_dir: str = "content") -
     # 1. 检查复述单元合同与实体事实
     for r in manifest.get("retellings", []):
         uid = r.get("unit_id")
+        raw_id = r.get("raw_id")
         _verify_source_contract(r, "复述")
 
-        # 检查正文 YAML 存在性与实体事实
+        # 检查正文 YAML 存在性与结构完整性
         yaml_p = os.path.join(project_root, content_dir, "retellings", f"{uid}.yaml")
         if not os.path.exists(yaml_p):
             errors.append(f"[{uid}] 缺少复述单元文件: {yaml_p}")
             continue
 
-        with open(yaml_p, "r", encoding="utf-8") as yf:
-            ytext = yf.read()
+        try:
+            with open(yaml_p, "r", encoding="utf-8") as yf:
+                ydata = yaml.safe_load(yf) or {}
+        except Exception as ye:
+            errors.append(f"[{uid}] 解析复述单元 YAML 失败: {ye}")
+            continue
 
-        # 通用实体清单核验 (verified_entities 必须能在正文中定位)
+        # 提取面向读者的学生正文字段（杜绝用 editor_notes 等内部注释混充核查结果）
+        title_text = str(ydata.get("title", ""))
+        paras_text = "\n".join(str(p) for p in ydata.get("material_paragraphs", []))
+        ref_text = str(ydata.get("ref_retelling", ""))
+        kw_text = " ".join(str(k) for k in ydata.get("keywords", []))
+        student_text = f"{title_text}\n{paras_text}\n{ref_text}\n{kw_text}"
+
+        # 核心真实实体在学生正文中的存在性核验
         ventities = r.get("fact_verification", {}).get("verified_entities", [])
         if not ventities:
             errors.append(f"[{uid}] 采编台账中未声明核准实体清单 verified_entities")
         else:
-            missing_ents = [e for e in ventities if e not in ytext]
+            missing_ents = [e for e in ventities if e not in student_text]
             if missing_ents:
                 errors.append(f"[{uid}] 正文缺少台账声明的核心真实实体: {', '.join(missing_ents)}")
 
-        # 通用防伪与错配拦截（不依赖固定编号，跨所有单元生效）
-        if "程东" in ytext:
-            errors.append(f"[{uid}] 存在严重事实错配：正文包含虚构实体'程东'（真实报道为汪洋）")
-        if ("安徽大学" in ytext or "安大" in ytext) and "安徽建筑大学" not in ytext:
-            errors.append(f"[{uid}] 存在严重事实错配：正文包含非真实报道实体'安徽大学/安大'")
-        if "车祸骨折" in ytext or "交通事故骨折" in ytext:
-            errors.append(f"[{uid}] 存在事实误传：正文包含'交通事故骨折/车祸骨折'（真实报道为送餐摔倒、颅内血肿）")
+        # 事件绑定防伪与历史错配核验（拒绝全库盲目禁词，仅对对应特定事件执行约束）
+        # (1) 汪洋励志求学事件约束
+        is_wang_yang_event = (raw_id == "ttzl-45357") or ("汪洋" in ventities) or ("汪洋" in r.get("source_key_facts", ""))
+        if is_wang_yang_event:
+            if "程东" in student_text:
+                errors.append(f"[{uid}] 汪洋事件存在严重事实错配：正文包含虚构实体'程东'（真实报道为汪洋）")
+            if ("安徽大学" in student_text or "安大" in student_text) and "安徽建筑大学" not in student_text:
+                errors.append(f"[{uid}] 汪洋事件存在院校错配：包含非真实报道院校'安徽大学/安大'（真实报道为四川师范大学）")
+
+        # (2) 骑手王福民意外维权事件约束
+        is_wang_fumin_event = (raw_id == "comm-bjnews-point-83270da3e9") or ("王福民" in ventities) or ("王福民" in r.get("source_key_facts", ""))
+        if is_wang_fumin_event:
+            if "车祸骨折" in student_text or "交通事故骨折" in student_text:
+                errors.append(f"[{uid}] 骑手事件存在案情误传：正文包含'交通事故骨折/车祸骨折'（真实报道为送餐摔倒、颅内血肿）")
 
     # 2. 检查摘录单元合同
     for ex in manifest.get("excerpts", []):
         _verify_source_contract(ex, "摘录")
 
-    # 3. 检查评论单元事实与关联（确保不脱离复述基础事实，且无虚假事实篡改）
-    comments_dir = os.path.join(project_root, content_dir, "commentaries")
-    if os.path.exists(comments_dir):
-        for cf in os.listdir(comments_dir):
-            if cf.endswith(".yaml") and not cf.startswith("."):
-                cid = cf[:-5]
-                cp = os.path.join(comments_dir, cf)
-                with open(cp, "r", encoding="utf-8") as cyf:
-                    ctext = cyf.read()
-                if "程东" in ctext:
-                    errors.append(f"[{cid}] 评论单元存在严重事实错配：包含虚构实体'程东'")
-                if ("安徽大学" in ctext or "安大" in ctext) and "安徽建筑大学" not in ctext:
-                    errors.append(f"[{cid}] 评论单元存在严重事实错配：包含非真实报道实体'安徽大学/安大'")
-                if "车祸骨折" in ctext or "交通事故骨折" in ctext:
-                    errors.append(f"[{cid}] 评论单元存在事实误传：包含'交通事故骨折/车祸骨折'")
+    # 3. 检查评论单元事实与关联（严格以本期入选评论集合为边界，未入选草稿不阻塞本期发布）
+    for c in manifest.get("commentaries", []):
+        cid = c.get("unit_id")
+        r_ref = c.get("retelling_ref")
+        cp = os.path.join(project_root, content_dir, "commentaries", f"{cid}.yaml")
+        if not os.path.exists(cp):
+            errors.append(f"[{cid}] 缺少入选评论单元文件: {cp}")
+            continue
+
+        try:
+            with open(cp, "r", encoding="utf-8") as cyf:
+                cdata = yaml.safe_load(cyf) or {}
+        except Exception as ce:
+            errors.append(f"[{cid}] 解析入选评论 YAML 失败: {ce}")
+            continue
+
+        c_title = str(cdata.get("title", ""))
+        c_recap = "\n".join(str(p) for p in cdata.get("learning", {}).get("recap_facts", []))
+        c_body = ""
+        speech_body = cdata.get("speech", {}).get("body", [])
+        if isinstance(speech_body, list):
+            for b in speech_body:
+                if isinstance(b, dict):
+                    c_body += "\n" + "\n".join(str(p) for p in b.get("paragraphs", []))
+        c_text = f"{c_title}\n{c_recap}\n{c_body}"
+
+        # 评论单元事件绑定防伪检查
+        if r_ref == "R36" or "王福民" in c_text:
+            if "车祸骨折" in c_text or "交通事故骨折" in c_text:
+                errors.append(f"[{cid}] 评论单元存在事实误传：包含'交通事故骨折/车祸骨折'（真实报道为摔倒受重伤、颅内血肿）")
+        if r_ref == "R41" or "汪洋" in c_text:
+            if "程东" in c_text:
+                errors.append(f"[{cid}] 评论单元存在严重事实错配：包含虚构实体'程东'")
+            if ("安徽大学" in c_text or "安大" in c_text) and "安徽建筑大学" not in c_text:
+                errors.append(f"[{cid}] 评论单元存在院校错配：包含非真实报道院校'安徽大学/安大'")
 
     if errors:
-        print(f"  ❌ 采编台账与语义事实核查未通过，共发现 {len(errors)} 项异常:")
+        print(f"  ❌ 采编台账与信源合同核查未通过，共发现 {len(errors)} 项异常:")
         for err in errors:
             print(f"     - {err}")
         return False
 
-    print(f"  ✅ 采编台账与语义事实核查 100% 通过！15 份信源均有真实上游依据，核心事实经交叉比对完全一致。\n")
+    print(f"  ✅ 采编台账与信源合同核查通过！全部信源均有真实上游依据，事实审查记录状态合规。\n")
     return True
 
 
