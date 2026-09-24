@@ -15,3 +15,7 @@
    - 后置门禁：生成的合订本与各分册物理页数必须与动态规划完全吻合，杜绝跨页截断与空白溢出；
    - 历史复用明示：往期已用材料若入选当期，必须显式标注复用标记与理由，绝不伪装为当周首发。
 6. 私密资料保护：`references/teaching-private/`、`_private/`、`aggr-site/ai.json`、`we-mp-rss/config.yaml` 严格本地保留，绝不提交公开仓库。
+7. 新会话接班与每周出刊标准执行（详见根目录 `AGENTS.md`）：
+   - 周内日常：后台 launchd 与工作台自跑，零人工干预；
+   - 周四 20:00 截稿后，用户在 Antigravity 发送出刊指令，Agent 依次执行：`business_window.py` (算窗口) -> 调工作台 S/A 级入窗池与教师反馈 -> `weekly_runner.py prep` (备料) -> 加工 21 篇内容与 9 幅插画 -> `weekly_runner.py build` (门禁核验与 47 页排版) -> `weekly_runner.py publish`。
+
