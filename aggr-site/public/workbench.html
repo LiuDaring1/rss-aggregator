@@ -691,8 +691,8 @@
   <!-- Notice -->
   <div class="notice-box">
     <strong>📌 教学试发与常规周生产双轨运行说明：</strong><br>
-    当前 <strong>W39（2026-09-24）</strong> 已完成 47 物理页原子构建，定位为<strong>【首次试发件】</strong>，用于今日在课堂进行版面、字号与高中生口语复述易读性的教学实测。<br>
-    下一期 <strong>W40（常规周生产）</strong> 已启动周内持续自动备料，严格遵守周四（10月1日 20:00）资料截止点，当前状态为<strong>【等待计划时间】</strong>，拒绝提前锁定未结束的资料窗口。
+    <span id="notice-cur-issue-desc">当前刊期已完成物理页原子构建，定位为<strong>【首次试发件】</strong>，用于课堂教学实测版面、字号与高中生口语复述易读性。</span><br>
+    <span id="notice-next-issue-desc">下期常规周生产已启动周内持续自动备料，严格遵守周四 20:00 资料截止点，当前状态为<strong>【等待计划时间】</strong>，拒绝提前锁定未结束的资料窗口。</span>
   </div>
 
   <!-- The 4 Core Questions Grid -->
@@ -720,9 +720,9 @@
       </div>
       <div class="q-title">这一周收到了什么？</div>
       <div class="q-summary" id="text-q2">
-        • 全库统一材料：<strong id="val-week-total" style="color:#38bdf8;">--</strong> 篇（正文 <span id="val-week-fulltext">--</span> 篇）<br>
-        • <strong>S/A级重点推荐：</strong><span id="val-week-top" style="color:#10b981; font-weight:700;">--</span> 篇<br>
-        • <strong>需教师特别复核：</strong><span id="val-week-review" style="color:#f59e0b; font-weight:700;">--</span> 篇（艾滋病/敏感隐私）<br>
+        • <strong>本周入窗材料：</strong><strong id="val-week-inwindow" style="color:#38bdf8;">--</strong> 篇（全库：<span id="val-week-total">--</span> 篇）<br>
+        • <strong>S/A级重点推荐：</strong><span id="val-week-top" style="color:#10b981; font-weight:700;">--</span> 篇（本周推荐：<span id="val-week-top-inwindow">--</span> 篇）<br>
+        • <strong>需教师特别复核：</strong><span id="val-week-review" style="color:#f59e0b; font-weight:700;">--</span> 篇（艾滋病/敏感隐私拦截）<br>
         • <strong>待补充正文事实：</strong><span id="val-week-pending" style="color:#94a3b8;">--</span> 篇
       </div>
     </div>
@@ -735,9 +735,9 @@
       </div>
       <div class="q-title">下一期做到哪了？</div>
       <div class="q-summary" id="text-q3">
-        <strong>下期期号：</strong>Issue 2026-W40 (常规周)<br>
-        <strong>资料截止：</strong>2026-10-01 20:00:00 (下周四)<br>
-        <strong>当前进度：</strong>持续采集备料中，尚未截止
+        <strong>下期期号：</strong><span id="val-next-issue-id">加载中...</span><br>
+        <strong>资料截止：</strong><span id="val-next-cutoff">加载中...</span><br>
+        <strong>当前进度：</strong><span id="val-next-stage-desc">持续采集备料中，尚未截止</span>
       </div>
     </div>
 
@@ -852,19 +852,19 @@
 
       <div style="flex: 1; min-width: 300px; background: #0f172a; padding: 16px; border-radius: 8px; border: 1px solid #334155;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <h4 style="font-size: 15px; color: #fff;">🚀 Issue 2026-W40【下期常规周生产】</h4>
+          <h4 style="font-size: 15px; color: #fff;" id="pipeline-title">🚀 下期常规周生产流水线</h4>
           <span class="badge badge-warning" id="w40-status-badge">等待到达资料截止点</span>
         </div>
         <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">
-          <strong>资料截止：</strong>2026-10-01 20:00:00 (下周四)<br>
-          <strong>出刊发放：</strong>2026-10-02 10:00:00 (下周五)<br>
+          <strong>资料截止：</strong><span id="pipeline-cutoff-text">周四 20:00:00</span><br>
+          <strong>出刊发放：</strong><span id="pipeline-delivery-text">周五 10:00:00</span><br>
           <strong>当前说明：</strong>周内持续采集备料中，严禁提前锁定未结束的资料窗口。
         </p>
       </div>
     </div>
 
     <!-- Stepper -->
-    <div style="font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 4px;">下期 (W40) 标准流水线各环节实时看板：</div>
+    <div style="font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 4px;" id="pipeline-subtitle">标准流水线各环节实时看板：</div>
     <div class="stepper" id="pipeline-stepper">
       <!-- Injected via JS -->
     </div>
@@ -873,8 +873,8 @@
   <!-- Section 3: Unified Candidates & Pedagogical Curation Workbench -->
   <div class="section-card">
     <div class="section-title">
-      <span>📚 本周候选材料池与教学选材工作区</span>
-      <span style="font-size: 13px; color: var(--text-sub);" id="window-range-label">窗口范围：2026-09-24 20:00 ~ 2026-10-01 20:00</span>
+      <span>📚 候选材料池与教学选材工作区</span>
+      <span style="font-size: 13px; color: var(--text-sub);" id="window-range-label">业务窗口：加载中...</span>
     </div>
 
     <!-- Pedagogical Banner -->
@@ -904,6 +904,23 @@
           <div class="pedagogical-pill-desc">比对 W38/W39 采编台账，已使用文章自动沉底；教师标记排除的文章持久化隐藏。</div>
         </div>
       </div>
+    </div>
+
+    <!-- Candidate Pool Switcher Tabs -->
+    <div style="display: flex; gap: 8px; margin: 16px 0 12px 0; align-items: center; flex-wrap: wrap;">
+      <span style="font-size: 13px; font-weight: 600; color: #94a3b8;">物料池切换：</span>
+      <button class="btn btn-sm btn-primary active" id="pool-btn-current" onclick="switchCandidatePool('current')">
+        📌 本周候选材料池 (<span id="count-pool-current">0</span>)
+      </button>
+      <button class="btn btn-sm btn-secondary" id="pool-btn-history" onclick="switchCandidatePool('history')">
+        📦 历史备用池 (<span id="count-pool-history">0</span>)
+      </button>
+      <button class="btn btn-sm btn-secondary" id="pool-btn-all" onclick="switchCandidatePool('all')">
+        🌐 全库所有材料 (<span id="count-pool-all">0</span>)
+      </button>
+      <span style="margin-left: auto; font-size: 11px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 4px 10px; border-radius: 4px;">
+        ⚠️ <strong>评分免责声明：</strong>规则初筛分，不代表教师适用性结论
+      </span>
     </div>
 
     <!-- Search & Filter Controls -->
@@ -939,7 +956,7 @@
         <div style="display: flex; gap: 12px; align-items: center; font-size: 12px; color: var(--text-sub);">
           <label>排序方式：</label>
           <select id="sort-select" class="select-control" onchange="applySort(this.value)">
-            <option value="score">🎯 口语教学契合分 (从高到低)</option>
+            <option value="score">🎯 口语教学初筛分 (从高到低)</option>
             <option value="date">🕒 发布时间 (最新在前)</option>
           </select>
 
@@ -957,7 +974,7 @@
       <table>
         <thead>
           <tr>
-            <th style="width: 140px;">适用性 / 得分</th>
+            <th style="width: 140px;">初筛评分 / 适用性<br><span style="font-size: 10px; color: #94a3b8; font-weight: normal;">*规则初筛，非最终结论</span></th>
             <th style="width: 170px;">建议入刊栏目</th>
             <th style="width: 130px;">信源媒体与时间</th>
             <th>报道标题与结构化推荐理由</th>
@@ -1074,6 +1091,11 @@
     </div>
     
     <div class="drawer-body" id="drawer-body">
+      <!-- Disclaimer Banner -->
+      <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 8px 12px; border-radius: 4px; font-size: 12px; color: #fbbf24; margin-bottom: 14px; line-height: 1.5;">
+        ℹ️ <strong>评分免责声明：</strong>此分数为本地规则初筛分，不代表最终教学适用性结论。系统预留 LLM 全文评估与微调打分接口，入刊前以教师审阅把关为准。
+      </div>
+
       <!-- Structured Rationale Box -->
       <div class="drawer-rationale-box" id="drawer-rationale-box">
         <div style="font-weight: 700; color: #fff; margin-bottom: 10px; font-size: 14px;">🎯 教学选材结构化理由</div>
@@ -1155,6 +1177,7 @@
 <script>
 // 全局状态管理
 const state = {
+  pool: 'current', // 'current' (本周自然周窗口) | 'history' (历史备用池) | 'all' (全库)
   search: '',
   suitability: 'all',
   column: 'all',
@@ -1175,6 +1198,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // 60秒静默轮询看板
   setInterval(loadWorkbenchOverview, 60000);
 });
+
+/**
+ * 切换物料池 (本周候选池 / 历史备用池 / 全库材料)
+ */
+function switchCandidatePool(pool) {
+  state.pool = pool;
+  state.page = 1;
+  ['current', 'history', 'all'].forEach(p => {
+    const btn = document.getElementById(`pool-btn-${p}`);
+    if (btn) {
+      if (p === pool) {
+        btn.className = 'btn btn-sm btn-primary active';
+      } else {
+        btn.className = 'btn btn-sm btn-secondary';
+      }
+    }
+  });
+  loadCandidatesTable();
+}
 
 /**
  * 加载顶部概览与各任务健康状态
@@ -1215,11 +1257,22 @@ function renderOverview(d) {
 
   // Q2 Card
   const stats = d.candidatePoolStats || {};
+  const inWinTotal = stats.inWindowTotal !== undefined ? stats.inWindowTotal : (stats.inWindow || 0);
+  document.getElementById('val-week-inwindow').innerText = inWinTotal;
   document.getElementById('val-week-total').innerText = stats.totalUnified || 0;
-  document.getElementById('val-week-fulltext').innerText = stats.fullTextArticles || 0;
   document.getElementById('val-week-top').innerText = stats.recommended || 0;
+  const topInWinEl = document.getElementById('val-week-top-inwindow');
+  if (topInWinEl) topInWinEl.innerText = stats.recommendedInWindow || 0;
   document.getElementById('val-week-review').innerText = stats.needsTeacherReview || 0;
   document.getElementById('val-week-pending').innerText = stats.pendingFacts || 0;
+
+  // Candidate pool buttons counts
+  const countPoolCurrentEl = document.getElementById('count-pool-current');
+  if (countPoolCurrentEl) countPoolCurrentEl.innerText = inWinTotal;
+  const countPoolHistEl = document.getElementById('count-pool-history');
+  if (countPoolHistEl) countPoolHistEl.innerText = stats.historyTotal || 0;
+  const countPoolAllEl = document.getElementById('count-pool-all');
+  if (countPoolAllEl) countPoolAllEl.innerText = stats.totalUnified || 0;
 
   // Tabs counts
   document.getElementById('count-all').innerText = stats.totalUnified || 0;
@@ -1228,12 +1281,58 @@ function renderOverview(d) {
   document.getElementById('count-pending-facts').innerText = stats.pendingFacts || 0;
   document.getElementById('count-excluded').innerText = stats.used || 0;
 
+  // Q3 Card & Dynamic Notice
+  if (d.nextIssue) {
+    const ni = d.nextIssue;
+    const issueIdEl = document.getElementById('val-next-issue-id');
+    if (issueIdEl) issueIdEl.innerText = `${ni.issueId} (${ni.attribute || '常规周'})`;
+    const cutoffEl = document.getElementById('val-next-cutoff');
+    if (cutoffEl) cutoffEl.innerText = ni.cutoffDeadline || '';
+    const stageDescEl = document.getElementById('val-next-stage-desc');
+    if (stageDescEl) stageDescEl.innerText = ni.stageClassificationLabel || '持续采集备料中，尚未截止';
+
+    const pTitleEl = document.getElementById('pipeline-title');
+    if (pTitleEl) pTitleEl.innerText = `🚀 ${ni.issueId}【${ni.attribute || '下期周生产'}】`;
+    const pCutoffEl = document.getElementById('pipeline-cutoff-text');
+    if (pCutoffEl) pCutoffEl.innerText = ni.cutoffDeadline || '周四 20:00:00';
+    const pDeliveryEl = document.getElementById('pipeline-delivery-text');
+    if (pDeliveryEl) pDeliveryEl.innerText = ni.deliveryTime || '周五 10:00:00';
+    const pSubEl = document.getElementById('pipeline-subtitle');
+    if (pSubEl) pSubEl.innerText = `下期 (${ni.issueId}) 标准流水线各环节实时看板：`;
+
+    const noticeNextEl = document.getElementById('notice-next-issue-desc');
+    if (noticeNextEl) {
+      noticeNextEl.innerHTML = `下一期 <strong>${escapeHtml(ni.issueId)}（${escapeHtml(ni.attribute || '常规周生产')}）</strong> 已启动周内持续自动备料，严格遵守周四（${escapeHtml(ni.cutoffDeadline || '')}）资料截止点，当前状态为<strong>【${escapeHtml(ni.stageClassificationLabel || '等待计划时间')}】</strong>，拒绝提前锁定未结束的资料窗口。`;
+    }
+  }
+
+  if (d.currentIssue) {
+    const ci = d.currentIssue;
+    const noticeCurEl = document.getElementById('notice-cur-issue-desc');
+    if (noticeCurEl) {
+      noticeCurEl.innerHTML = `当前 <strong>${escapeHtml(ci.issueId)}</strong> 已完成原子构建，定位为<strong>【${escapeHtml(ci.attribute || '首次试发件')}】</strong>，供课堂教学实测版面、字号与高中生口语复述易读性。`;
+    }
+  }
+
   // Task 1: Commentary Fetch
   document.getElementById('task-commentary-sources').innerText = `${commTask.total_sources - commTask.failed_sources_count} / ${commTask.total_sources || 14} 正常`;
   
   // Task 2: Wenwen Radar
   const wenwenTask = d.tasks.wenwen_radar || {};
   document.getElementById('task-wenwen-count').innerText = `${wenwenTask.totalArticles || 0} 篇 / ${wenwenTask.totalEvents || 0} 事件`;
+  const wenwenBadge = document.getElementById('task-wenwen-badge');
+  if (wenwenBadge) {
+    if (wenwenTask.status === 'active') {
+      wenwenBadge.className = 'badge badge-success';
+      wenwenBadge.innerText = '运行正常';
+    } else if (wenwenTask.status === 'stale') {
+      wenwenBadge.className = 'badge badge-warning';
+      wenwenBadge.innerText = '采集延迟';
+    } else {
+      wenwenBadge.className = 'badge badge-danger';
+      wenwenBadge.innerText = '采集停滞';
+    }
+  }
 
   // Task 3: Analysis Engine
   const analysisTask = d.tasks.analysis_engine || {};
@@ -1254,8 +1353,9 @@ function renderOverview(d) {
   renderStepper(d.nextIssue?.stages);
 
   // Time Window label
-  if (d.windows?.current?.label) {
-    document.getElementById('window-range-label').innerText = `当前窗口：${d.windows.current.label}`;
+  if (d.windows?.activeWindow?.label || d.windows?.current?.label) {
+    const wLabel = d.windows.activeWindow?.label || d.windows.current.label;
+    document.getElementById('window-range-label').innerText = `业务窗口：${wLabel} (周四20:00截止)`;
   }
 }
 
@@ -1294,6 +1394,7 @@ async function loadCandidatesTable() {
 
   try {
     const params = new URLSearchParams({
+      pool: state.pool || 'current',
       search: state.search,
       suitability: state.suitability,
       column: state.column,
@@ -1364,10 +1465,11 @@ function renderCandidatesTable(articles) {
     return `
       <tr>
         <td>
-          <div style="font-weight: 700; font-size: 16px; color: #38bdf8;">
+          <div style="font-weight: 700; font-size: 16px; color: #38bdf8;" title="${escapeHtml(a.scoreDisclaimer || '规则初筛分，不代表教师适用性结论')}">
             ${a.qualityScore || a.score || 0} 分
           </div>
           <div><span class="badge ${badgeClass}" style="font-size: 11px; margin-top: 3px;">${escapeHtml(a.suitabilityLabel || '常规')}</span></div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 2px;" title="规则初筛分，不代表教师适用性结论">规则初筛</div>
           ${teacherTag}
         </td>
         <td>

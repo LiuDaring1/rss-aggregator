@@ -52,8 +52,7 @@ def get_business_window(ref_dt: Optional[datetime.datetime] = None) -> Dict[str,
         "current_start": cur["start_dt"],
         "current_delivery": cur["delivery_dt"],
         "current": cur,
-        "next": res["next_window"],
-        "w40": res["w40_standard_window"]
+        "next": res["next_window"]
     }
 
 
@@ -108,15 +107,19 @@ def get_current_and_next_windows(ref_dt: Optional[datetime.datetime] = None) -> 
     current_window = calculate_window_for_cutoff(current_cutoff)
     next_window = calculate_window_for_cutoff(next_cutoff)
 
-    # 特殊基线标注: W39 为 2026-09-24 试发件, W40 对应常规周窗口 (2026-09-24 20:00 至 2026-10-01 20:00)
-    w40_cutoff = datetime.datetime(2026, 10, 1, 20, 0, 0, tzinfo=BEIJING_TZ)
-    w40_window = calculate_window_for_cutoff(w40_cutoff)
+    # 动态根据出刊发放日期 (delivery_dt) 计算 ISO 周次期号，无任何静态写死
+    cur_deliv = current_window["delivery_dt"]
+    cur_year, cur_week, _ = cur_deliv.isocalendar()
+    current_window["target_issue_id"] = f"issue-{cur_year}-w{cur_week:02d}"
+
+    next_deliv = next_window["delivery_dt"]
+    next_year, next_week, _ = next_deliv.isocalendar()
+    next_window["target_issue_id"] = f"issue-{next_year}-w{next_week:02d}"
 
     return {
         "now": now.isoformat(),
         "current_window": current_window,
-        "next_window": next_window,
-        "w40_standard_window": w40_window
+        "next_window": next_window
     }
 
 
@@ -209,9 +212,12 @@ if __name__ == "__main__":
     res = get_current_and_next_windows()
     print("=== 业务真实时间窗口动态计算 ===")
     print("当前时间:", res["now"])
+    print("当前周期期号:", res["current_window"]["target_issue_id"])
+    print("当前周期起始:", res["current_window"]["start"])
     print("当前周期截稿点:", res["current_window"]["cutoff"])
     print("当前周期发放点:", res["current_window"]["delivery"])
-    print("W40 标准验收窗口:")
-    print("  开始:", res["w40_standard_window"]["start"])
-    print("  截止:", res["w40_standard_window"]["cutoff"])
-    print("  发放:", res["w40_standard_window"]["delivery"])
+    print("下个周期期号:", res["next_window"]["target_issue_id"])
+    print("下个周期起始:", res["next_window"]["start"])
+    print("下个周期截稿点:", res["next_window"]["cutoff"])
+    print("下个周期发放点:", res["next_window"]["delivery"])
+

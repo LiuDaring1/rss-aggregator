@@ -7,7 +7,51 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 
 /**
+ * 获取日期的 ISO 周次
+ */
+export function getISOWeek(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+}
+
+/**
+ * 动态扫描 issues/ 目录获取最新已发布的刊期信息
+ */
+export function getLatestPublishedIssue() {
+  const issuesDir = path.join(PROJECT_ROOT, 'issues');
+  if (!fs.existsSync(issuesDir)) return null;
+  try {
+    const dirs = fs.readdirSync(issuesDir)
+      .filter(d => /^issue-\d{4}-w\d+$/i.test(d))
+      .sort()
+      .reverse();
+
+    for (const d of dirs) {
+      const stateFile = path.join(issuesDir, d, 'production_state.json');
+      if (fs.existsSync(stateFile)) {
+        try {
+          const s = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+          if (s.stage === 'published' || s.published === true || s.status === 'published') {
+            return { issueId: d, ...s };
+          }
+        } catch {}
+      }
+      const manifestFile = path.join(issuesDir, d, 'manifest_prep.json');
+      const pdfFile = path.join(issuesDir, d, `${d}.pdf`);
+      if (fs.existsSync(manifestFile) && fs.existsSync(pdfFile)) {
+        return { issueId: d, status: 'published', pdfPath: `/issues/${d}/${d}.pdf` };
+      }
+    }
+  } catch {}
+  return null;
+}
+
+/**
  * 业务真实时间窗口动态计算 (统一 Asia/Shanghai，周四 20:00 截稿)
+ * 纯算法驱动，无任何静态日期与期号写死
  */
 export function calculateBusinessWindow(refDate = new Date()) {
   // 转换至北京时间 (UTC+8)
@@ -35,17 +79,54 @@ export function calculateBusinessWindow(refDate = new Date()) {
   const nextStart = currentCutoff;
   const nextDelivery = new Date(nextCutoff.getTime() + 14 * 3600 * 1000);
 
-  // W40 常规业务基线窗口: 2026-09-24 20:00 至 2026-10-01 20:00
-  const w40Cutoff = new Date(Date.UTC(2026, 9, 1, 12, 0, 0)); // 2026-10-01 20:00 Beijing is 12:00 UTC
-  const w40Start = new Date(Date.UTC(2026, 8, 24, 12, 0, 0)); // 2026-09-24 20:00 Beijing
-  const w40Delivery = new Date(Date.UTC(2026, 9, 2, 2, 0, 0)); // 2026-10-02 10:00 Beijing
+  const curDelivWeek = getISOWeek(currentDelivery);
+  const curDelivYear = currentDelivery.getFullYear();
+  const curIssueId = `issue-${curDelivYear}-w${String(curDelivWeek).padStart(2, '0')}`;
+
+  const nextDelivWeek = getISOWeek(nextDelivery);
+  const nextDelivYear = nextDelivery.getFullYear();
+  const nextIssueId = `issue-${nextDelivYear}-w${String(nextDelivWeek).padStart(2, '0')}`;
+
+  // 判定当前业务活跃备料窗口:
+  // 若本周刊期已经定版发布（例如 W39 已出刊），则系统当前实际备料的是下一期；
+  // 若当前时间已过周四 20:00，自然滚动到下一期；
+  // 若当前时间仍在周四 20:00 前且本周刊期尚未定版，则备料窗口依然截止于本周四 20:00。
+  const latestPublished = getLatestPublishedIssue();
+  const alreadyPublishedCurrent = latestPublished && latestPublished.issueId === curIssueId;
+
+  const activeWindow = alreadyPublishedCurrent ? {
+    start: nextStart.toISOString(),
+    cutoff: nextCutoff.toISOString(),
+    delivery: nextDelivery.toISOString(),
+    start_dt: nextStart,
+    cutoff_dt: nextCutoff,
+    delivery_dt: nextDelivery,
+    targetIssueId: nextIssueId,
+    label: `${formatDate(nextStart)} 20:00 ~ ${formatDate(nextCutoff)} 20:00`,
+    description: `回望连续7天真实报道 (周四20:00截止，周五10:00发放)`
+  } : {
+    start: currentStart.toISOString(),
+    cutoff: currentCutoff.toISOString(),
+    delivery: currentDelivery.toISOString(),
+    start_dt: currentStart,
+    cutoff_dt: currentCutoff,
+    delivery_dt: currentDelivery,
+    targetIssueId: curIssueId,
+    label: `${formatDate(currentStart)} 20:00 ~ ${formatDate(currentCutoff)} 20:00`,
+    description: `回望连续7天真实报道 (周四20:00截止，周五10:00发放)`
+  };
 
   return {
     now: now.toISOString(),
+    activeWindow,
     current: {
       start: currentStart.toISOString(),
       cutoff: currentCutoff.toISOString(),
       delivery: currentDelivery.toISOString(),
+      start_dt: currentStart,
+      cutoff_dt: currentCutoff,
+      delivery_dt: currentDelivery,
+      targetIssueId: curIssueId,
       label: `${formatDate(currentStart)} 20:00 ~ ${formatDate(currentCutoff)} 20:00`,
       description: `回望连续7天真实报道 (周四20:00截止，周五10:00发放)`
     },
@@ -53,14 +134,11 @@ export function calculateBusinessWindow(refDate = new Date()) {
       start: nextStart.toISOString(),
       cutoff: nextCutoff.toISOString(),
       delivery: nextDelivery.toISOString(),
+      start_dt: nextStart,
+      cutoff_dt: nextCutoff,
+      delivery_dt: nextDelivery,
+      targetIssueId: nextIssueId,
       label: `${formatDate(nextStart)} 20:00 ~ ${formatDate(nextCutoff)} 20:00`
-    },
-    w40: {
-      start: '2026-09-24T20:00:00+08:00',
-      cutoff: '2026-10-01T20:00:00+08:00',
-      delivery: '2026-10-02T10:00:00+08:00',
-      label: '09.24 20:00 ~ 10.01 20:00',
-      description: 'W40常规周窗口 (回望09.24晚至10.01晚连续7天新报道)'
     }
   };
 }
@@ -70,6 +148,129 @@ function formatDate(d) {
   const date = String(d.getDate()).padStart(2, '0');
   return `${m}.${date}`;
 }
+
+/**
+ * 将 Date 转换为北京时间 YYYY-MM-DD
+ */
+export function getBeijingYMD(d) {
+  if (!d) return '';
+  const b = new Date(d.getTime() + (8 * 60 + d.getTimezoneOffset()) * 60000);
+  const y = b.getFullYear();
+  const m = String(b.getMonth() + 1).padStart(2, '0');
+  const date = String(b.getDate()).padStart(2, '0');
+  return `${y}-${m}-${date}`;
+}
+
+/**
+ * 判断文章发布时间是否落在指定业务窗口 [startDt, cutoffDt)
+ * 1. 仅有日期时标记 date_only，截稿日当天标记 ambiguity: true
+ * 2. 落在窗口内 inWindow: true, isHistory: false
+ * 3. 早于窗口起始点 inWindow: false, isHistory: true (进入历史备用池)
+ * 4. 晚于截稿点 inWindow: false, isHistory: false (归入下期)
+ */
+export function classifyArticleWindow(pubDateStr, startDt, cutoffDt) {
+  if (!pubDateStr) {
+    return {
+      inWindow: false,
+      isHistory: true,
+      precision: 'missing_date',
+      ambiguity: false,
+      status: 'missing_date',
+      reason: '缺少发布时间'
+    };
+  }
+  const cleanPub = pubDateStr.trim();
+  const isDateOnly = cleanPub.length <= 10;
+  const startDateStr = getBeijingYMD(startDt);
+  const cutoffDateStr = getBeijingYMD(cutoffDt);
+
+  if (isDateOnly) {
+    if (cleanPub === cutoffDateStr) {
+      return {
+        inWindow: true,
+        isHistory: false,
+        precision: 'date_only',
+        ambiguity: true,
+        status: 'needs_time_confirmation',
+        reason: '发布于截稿当天但缺失具体时分，需确认是否在 20:00 前'
+      };
+    }
+    if (cleanPub >= startDateStr && cleanPub < cutoffDateStr) {
+      return {
+        inWindow: true,
+        isHistory: false,
+        precision: 'date_only',
+        ambiguity: false,
+        status: 'in_window'
+      };
+    }
+    if (cleanPub < startDateStr) {
+      return {
+        inWindow: false,
+        isHistory: true,
+        precision: 'date_only',
+        ambiguity: false,
+        status: 'history'
+      };
+    }
+    return {
+      inWindow: false,
+      isHistory: false,
+      precision: 'date_only',
+      ambiguity: false,
+      status: 'after_cutoff'
+    };
+  }
+
+  try {
+    let dt = new Date(cleanPub.includes(' ') && !cleanPub.includes('+') ? cleanPub.replace(' ', 'T') + '+08:00' : cleanPub);
+    if (isNaN(dt.getTime())) {
+      const datePart = cleanPub.slice(0, 10);
+      return {
+        inWindow: datePart >= startDateStr && datePart <= cutoffDateStr,
+        isHistory: datePart < startDateStr,
+        precision: 'date_only',
+        ambiguity: datePart === cutoffDateStr,
+        status: datePart < startDateStr ? 'history' : 'in_window'
+      };
+    }
+    const t = dt.getTime();
+    if (t >= startDt.getTime() && t < cutoffDt.getTime()) {
+      return {
+        inWindow: true,
+        isHistory: false,
+        precision: 'exact_time',
+        ambiguity: false,
+        status: 'in_window'
+      };
+    } else if (t < startDt.getTime()) {
+      return {
+        inWindow: false,
+        isHistory: true,
+        precision: 'exact_time',
+        ambiguity: false,
+        status: 'history'
+      };
+    } else {
+      return {
+        inWindow: false,
+        isHistory: false,
+        precision: 'exact_time',
+        ambiguity: false,
+        status: 'after_cutoff'
+      };
+    }
+  } catch {
+    return {
+      inWindow: false,
+      isHistory: true,
+      precision: 'unknown',
+      ambiguity: false,
+      status: 'parse_error'
+    };
+  }
+}
+
 
 /**
  * 读取已定版出刊的往期查重库 (W38, W39 等)
@@ -406,9 +607,7 @@ export async function getUnifiedCandidates() {
 
         const evaluation = evaluatePedagogicalSuitability(a, fullText, usedIds, usedUrls, teacherFeedback);
         const pubDateStr = a.publishedAt || '';
-        const isDateOnly = pubDateStr.length <= 10;
-        const cutoffDateStr = windows.current.cutoff.slice(0, 10);
-        const cutoffDayAmbiguity = isDateOnly && pubDateStr === cutoffDateStr;
+        const winClass = classifyArticleWindow(pubDateStr, windows.current.start_dt, windows.current.cutoff_dt);
 
         candidates.push({
           id: a.id,
@@ -418,13 +617,20 @@ export async function getUnifiedCandidates() {
           source: a.sourceName || a.source || '权威媒体',
           sourceId: a.sourceId,
           publishedAt: pubDateStr,
-          datePrecision: isDateOnly ? 'date_only' : 'exact_time',
-          cutoffDayAmbiguity,
+          awardDate: null,
+          datePrecision: winClass.precision,
+          cutoffDayAmbiguity: winClass.ambiguity,
+          inWindow: winClass.inWindow,
+          isHistory: winClass.isHistory,
+          windowStatus: winClass.status,
           hasFullText: !!(a.hasFullText && fullText.length >= 200),
           contentLength: fullText.length,
           url: a.url || '#',
           summary: a.summary || fullText.slice(0, 140) + '...',
           content: fullText,
+          scoreDisclaimer: '规则初筛分，不代表教师适用性结论',
+          modelEvaluation: null,
+          modelEvaluatedAt: null,
           // 教学适用性与推荐
           ...evaluation
         });
@@ -435,6 +641,8 @@ export async function getUnifiedCandidates() {
   }
 
   // 2. 暖文库 (aggr-site/data/wenwen/db.json)
+  // 天天正能量报道：使用 sourcePublishedAt || publishedAt 作为真实报道日期
+  // awardDate 严格作为颁奖元数据，绝不决定自然周入库与出刊窗口
   const wenwenDbPath = path.join(__dirname, 'data', 'wenwen', 'db.json');
   if (fs.existsSync(wenwenDbPath)) {
     try {
@@ -453,19 +661,21 @@ export async function getUnifiedCandidates() {
           } catch {}
         }
 
+        const realPublishedAt = a.sourcePublishedAt || a.publishedAt || '';
+        const awardDate = a.awardDate || null;
+        const winClass = classifyArticleWindow(realPublishedAt, windows.current.start_dt, windows.current.cutoff_dt);
+
         const adaptedArticle = {
           id,
           title: a.title,
-          sourceName: a.media || '暖文雷达',
-          publishedAt: a.awardDate || a.publishedAt || '',
+          sourceName: a.media || '天天正能量',
+          publishedAt: realPublishedAt,
           url: a.url,
           hasFullText: fullText.length >= 200,
           summary: fullText.slice(0, 140) + '...'
         };
 
         const evaluation = evaluatePedagogicalSuitability(adaptedArticle, fullText, usedIds, usedUrls, teacherFeedback);
-        const pubDateStr = adaptedArticle.publishedAt;
-        const isDateOnly = pubDateStr.length <= 10;
 
         candidates.push({
           id,
@@ -474,14 +684,21 @@ export async function getUnifiedCandidates() {
           title: a.title,
           source: a.media || '天天正能量',
           sourceId: 'wenwen',
-          publishedAt: pubDateStr,
-          datePrecision: isDateOnly ? 'date_only' : 'exact_time',
-          cutoffDayAmbiguity: false,
+          publishedAt: realPublishedAt,
+          awardDate: awardDate,
+          datePrecision: winClass.precision,
+          cutoffDayAmbiguity: winClass.ambiguity,
+          inWindow: winClass.inWindow,
+          isHistory: winClass.isHistory,
+          windowStatus: winClass.status,
           hasFullText: fullText.length >= 200,
           contentLength: fullText.length,
           url: a.url || '#',
           summary: fullText.slice(0, 140) + '...',
           content: fullText,
+          scoreDisclaimer: '规则初筛分，不代表教师适用性结论',
+          modelEvaluation: null,
+          modelEvaluatedAt: null,
           // 教学适用性与推荐
           ...evaluation
         });
@@ -495,9 +712,10 @@ export async function getUnifiedCandidates() {
 }
 
 /**
- * 分页与全量搜索查询 API
+ * 分页与全量搜索查询 API (支持 current / history / all 候选池隔离)
  */
 export async function queryCandidates({
+  pool = 'current',
   search = '',
   suitability = 'all',
   column = 'all',
@@ -508,6 +726,14 @@ export async function queryCandidates({
 } = {}) {
   const allCandidates = await getUnifiedCandidates();
   let filtered = allCandidates;
+
+  // 0. 候选池隔离 (current: 本周业务窗口 [current_start, current_cutoff) | history: 历史备用池 | all: 全库所有材料)
+  if (pool === 'current') {
+    filtered = filtered.filter(a => a.inWindow === true);
+  } else if (pool === 'history') {
+    filtered = filtered.filter(a => a.isHistory === true);
+  }
+  // pool === 'all' 则不做窗口限制
 
   // 1. 文本搜索 (标题与正文)
   if (search && search.trim()) {
@@ -564,6 +790,7 @@ export async function queryCandidates({
     page: currentPage,
     pageSize,
     totalPages,
+    pool,
     articles: paginatedArticles
   };
 }
@@ -602,17 +829,46 @@ export async function getWorkbenchData() {
   }
 
   // 暖文雷达状态 (aggr-site/data/wenwen/db.json)
+  // 根据实际进程采集时间与执行情况动态判定 active / stale / stopped
   const wenwenDbPath = path.join(__dirname, 'data', 'wenwen', 'db.json');
-  let wenwenMeta = { lastScrapeAt: null, totalArticles: 0, totalEvents: 0 };
+  let wenwenMeta = { lastCollectAt: null, lastAnalyzeAt: null, totalArticles: 0, totalEvents: 0 };
+  let wenwenStatus = 'stopped';
+  let wenwenStatusLabel = '未运行';
+
   if (fs.existsSync(wenwenDbPath)) {
     try {
       const wdb = JSON.parse(fs.readFileSync(wenwenDbPath, 'utf8'));
+      const lastCollect = wdb.meta?.lastCollectAt || wdb.meta?.lastScrapeAt || null;
+      const lastAnalyze = wdb.meta?.lastAnalyzeAt || null;
       wenwenMeta = {
-        lastScrapeAt: wdb.meta?.lastScrapeAt || null,
-        lastAnalyzeAt: wdb.meta?.lastAnalyzeAt || null,
+        lastCollectAt: lastCollect,
+        lastAnalyzeAt: lastAnalyze,
         totalArticles: Object.keys(wdb.articleIndex || {}).length,
         totalEvents: Object.keys(wdb.events || {}).length
       };
+
+      if (process.env.AGGR_AUTOTASKS === 'off') {
+        wenwenStatus = 'stopped';
+        wenwenStatusLabel = '已手动暂停 (AGGR_AUTOTASKS=off)';
+      } else if (lastCollect) {
+        const lastT = new Date(lastCollect).getTime();
+        const diffHours = (now.getTime() - lastT) / (3600 * 1000);
+        if (diffHours <= 12) {
+          wenwenStatus = 'active';
+          wenwenStatusLabel = diffHours < 1
+            ? `运行正常 (最近采集: ${Math.max(1, Math.round(diffHours * 60))} 分钟前)`
+            : `运行正常 (最近采集: ${Math.round(diffHours)} 小时前)`;
+        } else if (diffHours <= 24) {
+          wenwenStatus = 'stale';
+          wenwenStatusLabel = `采集延迟 (距离上次采集已 ${Math.round(diffHours)} 小时)`;
+        } else {
+          wenwenStatus = 'stopped';
+          wenwenStatusLabel = `采集停滞 (距离上次采集超过 ${Math.round(diffHours)} 小时)`;
+        }
+      } else {
+        wenwenStatus = 'stopped';
+        wenwenStatusLabel = '未见采集记录';
+      }
     } catch {}
   }
 
@@ -629,7 +885,7 @@ export async function getWorkbenchData() {
     } catch {}
   }
 
-  // AI 分析引擎状态
+  // AI 分析引擎状态与免责声明
   let aiEngineStatus = 'rule_screening';
   let aiEngineLabel = '本地规则初筛（未配置 AI 密钥，未经教学复核）';
   if (process.env.GLM_API_KEY) {
@@ -637,17 +893,26 @@ export async function getWorkbenchData() {
     aiEngineLabel = 'GLM-5 在线模型分析就绪';
   }
 
-  // 候选池概况
+  // 候选池动态统计 (严格区隔在窗口内与历史备用)
   const allCandidates = await getUnifiedCandidates();
+  const inWindowCandidates = allCandidates.filter(a => a.inWindow);
+  const historyCandidates = allCandidates.filter(a => a.isHistory);
   const recommendedCount = allCandidates.filter(a => a.suitability === 'recommended' || a.suitability === 'teacher_approved').length;
+  const inWindowRecommendedCount = inWindowCandidates.filter(a => a.suitability === 'recommended' || a.suitability === 'teacher_approved').length;
   const needsReviewCount = allCandidates.filter(a => a.suitability === 'needs_teacher_review').length;
+  const inWindowNeedsReviewCount = inWindowCandidates.filter(a => a.suitability === 'needs_teacher_review').length;
   const pendingFactsCount = allCandidates.filter(a => a.suitability === 'pending_facts').length;
+  const inWindowPendingFactsCount = inWindowCandidates.filter(a => a.suitability === 'pending_facts').length;
   const usedCount = allCandidates.filter(a => a.isUsed).length;
 
-  // 本周在窗口内条目统计 (以 2026-09-24 20:00 为起始的 W40 周期)
-  const inWindowCandidates = allCandidates.filter(a => {
-    return a.publishedAt >= '2026-09-24';
-  });
+  // 刊期动态关联
+  const latestPublished = getLatestPublishedIssue();
+  const curIssueId = windows.current.targetIssueId;
+  const alreadyPublishedCurrent = latestPublished && latestPublished.issueId === curIssueId;
+  const targetIssue = alreadyPublishedCurrent ? windows.next : windows.current;
+
+  const formatDeadline = (d) => `${formatDate(d)} 20:00:00`;
+  const formatDelivery = (d) => `${formatDate(d)} 10:00:00`;
 
   return {
     timestamp: now.toISOString(),
@@ -668,9 +933,10 @@ export async function getWorkbenchData() {
       wenwen_radar: {
         label: '暖文雷达调度 (Node.js 后台)',
         cadence: '采集 6h / 分析 20min 周期自跑',
-        status: 'active',
-        statusLabel: '运行正常',
-        lastScrapeAt: wenwenMeta.lastScrapeAt,
+        status: wenwenStatus,
+        statusLabel: wenwenStatusLabel,
+        lastScrapeAt: wenwenMeta.lastCollectAt,
+        lastCollectAt: wenwenMeta.lastCollectAt,
         lastAnalyzeAt: wenwenMeta.lastAnalyzeAt,
         totalArticles: wenwenMeta.totalArticles,
         totalEvents: wenwenMeta.totalEvents
@@ -678,7 +944,9 @@ export async function getWorkbenchData() {
       analysis_engine: {
         label: '选材分析与推荐引擎',
         status: aiEngineStatus,
-        statusLabel: aiEngineLabel
+        statusLabel: aiEngineLabel,
+        disclaimer: '规则初筛分，不代表教师适用性结论',
+        modelEvaluationSupported: true
       },
       backup: {
         label: '数据保存与隔离恢复测试',
@@ -691,37 +959,49 @@ export async function getWorkbenchData() {
     },
     candidatePoolStats: {
       totalUnified: allCandidates.length,
-      inWindow: inWindowCandidates.length,
+      inWindowTotal: inWindowCandidates.length,
+      historyTotal: historyCandidates.length,
       recommended: recommendedCount,
+      recommendedInWindow: inWindowRecommendedCount,
       needsTeacherReview: needsReviewCount,
+      needsTeacherReviewInWindow: inWindowNeedsReviewCount,
       pendingFacts: pendingFactsCount,
+      pendingFactsInWindow: inWindowPendingFactsCount,
       used: usedCount,
       fullTextArticles: allCandidates.filter(a => a.hasFullText).length
     },
-    // 返回前 20 条优质候选作为即时看板展示
-    topCandidates: allCandidates
+    // 看板推荐榜：优先展示窗口内优质候选
+    topCandidates: (inWindowCandidates.length > 0 ? inWindowCandidates : allCandidates)
       .filter(a => a.suitability === 'recommended' || a.suitability === 'teacher_approved')
-      .sort((a, b) => b.qualityScore - a.qualityScore)
+      .sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0))
       .slice(0, 20),
     currentIssue: {
-      issueId: 'issue-2026-w39',
-      attribute: '首次试发件 (Trial Release)',
+      issueId: latestPublished?.issueId || curIssueId,
+      attribute: latestPublished?.issueId === 'issue-2026-w39' ? '首次试发件 (Trial Release)' : '往期正式发刊',
       attributeDesc: '已定版发布 (47页)，供课堂教学实测版面与口语复述易读性',
       status: 'published',
       statusLabel: '已发布',
-      pdfPath: '/issues/issue-2026-w39/issue-2026-w39.pdf',
-      reviewSiteUrl: '/review/issues/issue-2026-w39/index.html'
+      pdfPath: latestPublished?.pdfPath || `/issues/${latestPublished?.issueId || curIssueId}/${latestPublished?.issueId || curIssueId}.pdf`,
+      reviewSiteUrl: `/review/issues/${latestPublished?.issueId || curIssueId}/index.html`
     },
     nextIssue: {
-      issueId: 'issue-2026-w40',
+      issueId: targetIssue.targetIssueId,
       attribute: '常规周生产 (Regular Weekly Cadence)',
       cadenceRule: '每周四 20:00 资料截止 | 每周五 10:00 发放 | 回望连续 7 天',
-      cutoffDeadline: '2026-10-01 20:00:00 (下周四)',
-      deliveryTime: '2026-10-02 10:00:00 (下周五)',
+      cutoffDeadline: `${formatDeadline(targetIssue.cutoff_dt)} (周四)`,
+      deliveryTime: `${formatDelivery(targetIssue.delivery_dt)} (周五)`,
+      windowRange: targetIssue.label,
       stage: 'prep',
       stageClassification: 'waiting_for_schedule',
       stageClassificationLabel: '等待计划时间（周内正常采集备料中）',
-      actionNeeded: '当前无须人工干预。周四 20:00 截稿后，教师进入工作台审阅 S/A 级推荐材料并确认入刊。'
+      actionNeeded: '当前无须人工干预。周四 20:00 截稿后，教师进入工作台审阅 S/A 级推荐材料并确认入刊。',
+      stages: [
+        { name: '周内持续采编备料', status: 'active', note: `正在汇聚 [${targetIssue.label}] 真实报道` },
+        { name: '周四截稿前夕核验', status: 'waiting_for_schedule', note: '等待周四 20:00 资料截稿窗口封闭' },
+        { name: '智能优选与教师选材', status: 'waiting_for_schedule', note: '待截稿后教师下达入选确认指令' },
+        { name: '原子排版与全门禁核验', status: 'waiting_for_schedule', note: '待选材定稿后自动执行' },
+        { name: '定版发放 (周五 10:00)', status: 'waiting_for_schedule', note: '待全门禁通过后发放' }
+      ]
     }
   };
 }

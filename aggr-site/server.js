@@ -408,6 +408,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     if (url.pathname === '/api/workbench/articles') {
+      const pool = url.searchParams.get('pool') || 'current';
       const search = url.searchParams.get('search') || '';
       const suitability = url.searchParams.get('suitability') || 'all';
       const column = url.searchParams.get('column') || 'all';
@@ -417,6 +418,7 @@ const server = http.createServer(async (req, res) => {
       const pageSize = Number(url.searchParams.get('pageSize') || 20);
 
       const result = await queryCandidates({
+        pool,
         search,
         suitability,
         column,

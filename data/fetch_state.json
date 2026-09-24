@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-24T17:48:44.994930+08:00",
-  "last_attempt_at": "2026-09-24T17:48:44.994930+08:00",
-  "last_success_at": "2026-09-24T17:48:44.994930+08:00",
-  "last_full_success_at": "2026-09-24T17:48:44.994930+08:00",
+  "updatedAt": "2026-09-24T18:17:00.797731+08:00",
+  "last_attempt_at": "2026-09-24T18:17:00.797731+08:00",
+  "last_success_at": "2026-09-24T18:17:00.797731+08:00",
+  "last_full_success_at": "2026-09-24T18:17:00.797731+08:00",
   "trigger_type": "scheduled",
   "status": "success",
   "all_failed": false,
@@ -27,8 +27,8 @@
       "id": "src-degrade",
       "name": "退化测试信源",
       "consecutive_failures": 0,
-      "last_attempt_at": "2026-09-24T17:48:44.993458+08:00",
-      "last_success_at": "2026-09-24T17:48:44.993458+08:00",
+      "last_attempt_at": "2026-09-24T18:17:00.797290+08:00",
+      "last_success_at": "2026-09-24T18:17:00.797290+08:00",
       "last_new_articles_at": "",
       "last_error": null,
       "latest_article_date": "2026-09-22"

@@ -221,6 +221,74 @@ class TestWorkbenchReliability(unittest.TestCase):
         self.assertEqual(calculate_sha256(w38_pdf), expected_w38_sha256, "W38 PDF SHA256 指纹已变动，破坏了不可变性！")
         self.assertEqual(calculate_sha256(w39_pdf), expected_w39_sha256, "W39 PDF SHA256 指纹已变动，破坏了不可变性！")
 
+    def test_08_wenwen_natural_week_by_real_published_at(self):
+        """测试暖文按真实报道时间归入自然周：awardDate 严禁决定入库周次"""
+        import subprocess
+        node_script = """
+        import('./aggr-site/workbench_api.js').then(async m => {
+          const cands = await m.getUnifiedCandidates();
+          const wenwen = cands.filter(c => c.origin === 'wenwen');
+          const missingAwardDate = wenwen.filter(c => c.awardDate === undefined);
+          console.log(JSON.stringify({
+            totalWenwen: wenwen.length,
+            missingAwardDateCount: missingAwardDate.length,
+            sample: wenwen.slice(0, 5).map(c => ({ id: c.id, pub: c.publishedAt, award: c.awardDate, inWindow: c.inWindow, isHistory: c.isHistory }))
+          }));
+        });
+        """
+        out = subprocess.check_output(["node", "-e", node_script], cwd=PROJECT_ROOT, text=True)
+        res = json.loads(out)
+        self.assertGreater(res["totalWenwen"], 0)
+        self.assertEqual(res["missingAwardDateCount"], 0, "全部天天正能量候选材料必须规范分离 awardDate 元数据与 publishedAt 报道时间")
+
+    def test_09_dynamic_wenwen_status_transitions(self):
+        """测试暖文雷达状态动态判定：拒绝硬编码 active，按采集时间差判定 active/stale/stopped"""
+        import subprocess
+        node_script = """
+        import('./aggr-site/workbench_api.js').then(async m => {
+          const data = await m.getWorkbenchData();
+          console.log(JSON.stringify(data.tasks.wenwen_radar));
+        });
+        """
+        out = subprocess.check_output(["node", "-e", node_script], cwd=PROJECT_ROOT, text=True)
+        task = json.loads(out)
+        self.assertIn(task["status"], ["active", "stale", "stopped"])
+        self.assertIn("最近采集", task["statusLabel"])
+
+    def test_10_candidate_pool_isolation_and_disclaimer(self):
+        """测试候选池严格隔离与教学初筛免责声明：默认仅在窗口内，历史进入备用池，每条候选带有免责声明"""
+        import subprocess
+        node_script = """
+        import('./aggr-site/workbench_api.js').then(async m => {
+          const currentPool = await m.queryCandidates({ pool: 'current' });
+          const historyPool = await m.queryCandidates({ pool: 'history' });
+          const allPool = await m.queryCandidates({ pool: 'all' });
+          
+          const currentAllInWindow = currentPool.articles.every(a => a.inWindow === true);
+          const historyAllIsHistory = historyPool.articles.every(a => a.isHistory === true);
+          const allHaveDisclaimer = allPool.articles.every(a => a.scoreDisclaimer === '规则初筛分，不代表教师适用性结论');
+          const allHaveModelReserved = allPool.articles.every(a => a.modelEvaluation === null);
+
+          console.log(JSON.stringify({
+            currentCount: currentPool.totalMatches,
+            historyCount: historyPool.totalMatches,
+            allCount: allPool.totalMatches,
+            currentAllInWindow,
+            historyAllIsHistory,
+            allHaveDisclaimer,
+            allHaveModelReserved
+          }));
+        });
+        """
+        out = subprocess.check_output(["node", "-e", node_script], cwd=PROJECT_ROOT, text=True)
+        res = json.loads(out)
+        self.assertEqual(res["currentCount"] + res["historyCount"], res["allCount"])
+        self.assertTrue(res["currentAllInWindow"], "默认候选池 (pool=current) 必须严格全部为窗口内物料 [current_start, current_cutoff)")
+        self.assertTrue(res["historyAllIsHistory"], "历史备用池 (pool=history) 必须严格全部为历史物料")
+        self.assertTrue(res["allHaveDisclaimer"], "全部候选材料必须明确打上'规则初筛分，不代表教师适用性结论'免责声明")
+        self.assertTrue(res["allHaveModelReserved"], "必须预留 modelEvaluation 接口供后续 LLM 全文评估接入")
+
 
 if __name__ == "__main__":
     unittest.main()
+
