@@ -35,7 +35,7 @@
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1240px;
       margin: 0 auto;
       padding: 24px 20px;
     }
@@ -152,16 +152,18 @@
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       padding: 3px 8px;
-      border-radius: 12px;
+      border-radius: 6px;
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
     }
     .badge-success { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
     .badge-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning); }
     .badge-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
     .badge-info { background: var(--info-bg); color: var(--info); border: 1px solid var(--info); }
+    .badge-secondary { background: #334155; color: #94a3b8; border: 1px solid #475569; }
+    .badge-primary { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
 
     .pulse {
       width: 8px;
@@ -279,12 +281,94 @@
     .step-label { font-size: 13px; font-weight: 500; color: #fff; margin-bottom: 2px; }
     .step-sub { font-size: 11px; color: var(--text-sub); }
 
+    /* Scoring Explainer Banner */
+    .scoring-explainer-box {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid #3b82f6;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+    .scoring-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .scoring-pill {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 10px 12px;
+      border-radius: 6px;
+    }
+    .scoring-pill-title {
+      font-weight: 600;
+      color: #38bdf8;
+      margin-bottom: 3px;
+      font-size: 12px;
+    }
+    .scoring-pill-desc {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    /* Filter & Controls Bar */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { border-color: #64748b; color: #fff; }
+    .tab-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    .sort-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+    .sort-select {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #f8fafc;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+    }
+
     /* Articles Table */
     .table-container {
       overflow-x: auto;
       border: 1px solid var(--card-border);
       border-radius: 8px;
-      margin-top: 12px;
+      margin-top: 8px;
     }
     table {
       width: 100%;
@@ -307,12 +391,16 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #243248; cursor: pointer; }
 
-    .article-title-cell {
-      font-weight: 500;
-      color: #f1f5f9;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .tag-chip {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      margin-right: 4px;
+      margin-top: 3px;
     }
 
     /* Modal / Drawer for Reading */
@@ -347,7 +435,7 @@
       align-items: flex-start;
     }
     .drawer-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-    .drawer-meta { font-size: 12px; color: var(--text-sub); display: flex; gap: 12px; }
+    .drawer-meta { font-size: 12px; color: var(--text-sub); display: flex; gap: 12px; flex-wrap: wrap; }
     .drawer-close {
       background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 4px;
     }
@@ -451,7 +539,7 @@
       </div>
       <div class="q-title">现在有没有在工作？</div>
       <div class="q-summary" id="text-q1">
-        macOS launchd 定时守护每小时抓取 11 路权威时评源。<br>
+        macOS launchd 每天 <strong>2 次</strong>（09:30、18:30）轻量轮询，机器无负担。<br>
         <strong>上次成功：</strong><span id="val-last-crawl">正在获取...</span><br>
         <strong>下次计划：</strong><span id="val-next-crawl">正在获取...</span>
       </div>
@@ -461,13 +549,13 @@
     <div class="question-card q2">
       <div class="q-number">
         <span>问题 ②</span>
-        <span id="badge-q2" class="badge badge-info">本周备料中</span>
+        <span id="badge-q2" class="badge badge-info">智能优选池</span>
       </div>
       <div class="q-title">这一周收到了什么？</div>
       <div class="q-summary" id="text-q2">
-        本周累计新增 <strong id="val-week-total" style="color:#38bdf8;">--</strong> 篇时评报道。<br>
-        完整正文：<span id="val-week-fulltext">--</span> 篇 | 纯元数据：<span id="val-week-meta">--</span> 篇<br>
-        总信源库累计容纳：<span id="val-db-total">--</span> 篇
+        本周累计入库 <strong id="val-week-total" style="color:#38bdf8;">--</strong> 篇。<br>
+        <strong>S/A级高分优选：</strong><span id="val-week-top" style="color:#10b981; font-weight:700;">--</span> 篇（完整正文 <span id="val-week-fulltext">--</span> 篇）<br>
+        往期已用自动沉底：<span id="val-week-used">--</span> 篇
       </div>
     </div>
 
@@ -494,8 +582,8 @@
       <div class="q-title">我要做什么？</div>
       <div class="q-summary" id="text-q4">
         1. <strong>今天重点：</strong>下载打印 W39 试发件，实测学生阅读反馈。<br>
-        2. <strong>周内日常：</strong>后台全自动抓取，无需人工盯防。<br>
-        3. <strong>下周四晚：</strong>截止后进入工作台确认选题与出刊。
+        2. <strong>周内日常：</strong>后台每日2次自动优选，无需人工盯防。<br>
+        3. <strong>下周四晚：</strong>截止后直接根据 S/A 级高分榜定版出刊。
       </div>
     </div>
   </div>
@@ -517,18 +605,18 @@
       </div>
       <div class="stat-item">
         <div class="stat-label">轮询执行频率</div>
-        <div class="stat-val">每 60 分钟 / 次</div>
-        <div class="stat-hint">平缓抓取，内置随机退避防反爬</div>
+        <div class="stat-val">每日 2 次 (09:30 / 18:30)</div>
+        <div class="stat-hint">轻量低负载，早间傍晚各一轮，兼顾新评</div>
       </div>
       <div class="stat-item">
         <div class="stat-label">活跃权威信源通道</div>
         <div class="stat-val" id="sys-source-count">11 / 11 正常</div>
-        <div class="stat-hint">涵盖人民网、央视网、新华网、中新网等</div>
+        <div class="stat-hint">人民网、央视网、新华网、澎湃、新京报等</div>
       </div>
       <div class="stat-item">
         <div class="stat-label">调度健康判定</div>
         <div class="stat-val" id="sys-health-status">正常</div>
-        <div class="stat-hint">上次成功在 3 小时内，未发生静默停摆</div>
+        <div class="stat-hint">上次成功在 24 小时内，未发生静默停摆</div>
       </div>
     </div>
 
@@ -580,29 +668,80 @@
     </div>
   </div>
 
-  <!-- Section 3: This Week's Intake & Article Reading Drawer -->
+  <!-- Section 3: This Week's Intake & Pedagogical Scoring Engine -->
   <div class="section-card">
     <div class="section-title">
-      <span>📚 本周候选材料池（点击单篇可调出原文抽屉研读）</span>
-      <span style="font-size: 13px; color: var(--text-sub);">窗口起始：2026-09-21 00:00 起采集入库</span>
+      <span>📚 本周候选池与 5 维智能优选排序</span>
+      <span style="font-size: 13px; color: var(--text-sub);">窗口起始：2026-09-21 00:00 起采集</span>
     </div>
-    <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 12px;">
-      信源已全部完成去重与正文清洗。标有 <span class="badge badge-success" style="font-size: 11px;">完整正文</span> 的文章已保存在本地，可供周四选题直接选用。
-    </p>
 
+    <!-- Explainer Box for the 5-Dimension Scoring Engine -->
+    <div class="scoring-explainer-box">
+      <div style="font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+        <span>💡 系统如何从海量文稿中自动优选排序？</span>
+        <span class="badge badge-primary">针对高中英语口语教学定制</span>
+      </div>
+      <div>
+        系统内置 <strong>0 ~ 100 分多维打分引擎</strong>，对采集到的每篇报道进行自动化质量评估与角色适配分类，评分最高的优质素材自动置顶，无需人工翻阅百篇原始公文：
+      </div>
+      <div class="scoring-grid">
+        <div class="scoring-pill">
+          <div class="scoring-pill-title">① 正文完整与篇幅 (25分)</div>
+          <div class="scoring-pill-desc">必须有清洗正文；800~2500字最适提炼复述与深度词句；纯元数据扣25分。</div>
+        </div>
+        <div class="scoring-pill">
+          <div class="scoring-pill-title">② 口语生活契合 (30分)</div>
+          <div class="scoring-pill-desc">优先校园教育、青年成长、AI科技生活与社会公德；宏观政务例会扣30分。</div>
+        </div>
+        <div class="scoring-pill">
+          <div class="scoring-pill-title">③ 叙事动作性 (15分)</div>
+          <div class="scoring-pill-desc">识别具体人物、冲突与行动场景，优先推荐至【第1分册：9篇口语复述+配图】。</div>
+        </div>
+        <div class="scoring-pill">
+          <div class="scoring-pill-title">④ 思辨双向论辩 (15分)</div>
+          <div class="scoring-pill-desc">识别“该不该/为何/岂能”等立论句型，优先推荐至【第2分册：6篇时评思辨】。</div>
+        </div>
+        <div class="scoring-pill">
+          <div class="scoring-pill-title">⑤ 往期防重沉底 (-60分)</div>
+          <div class="scoring-pill-desc">自动比对 W38/W39 采编台账，已使用文章打标并强行沉底，杜绝重复选题。</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter & Sort Bar -->
+    <div class="filter-bar">
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="tab-btn active" data-filter="all" onclick="setFilter('all')">全部候选 (<span id="count-all">0</span>)</button>
+        <button class="tab-btn" data-filter="top" onclick="setFilter('top')">⭐️ S/A级重点优选 (<span id="count-top">0</span>)</button>
+        <button class="tab-btn" data-filter="retelling" onclick="setFilter('retelling')">🎯 建议口语复述</button>
+        <button class="tab-btn" data-filter="debate" onclick="setFilter('debate')">💡 建议时评思辨</button>
+        <button class="tab-btn" data-filter="used" onclick="setFilter('used')">🚫 往期已用 (<span id="count-used">0</span>)</button>
+      </div>
+
+      <div class="sort-control">
+        <label for="sort-select">排序依据：</label>
+        <select id="sort-select" class="sort-select" onchange="changeSort(this.value)">
+          <option value="score">🎯 智能优选得分 (由高到低)</option>
+          <option value="date">🕒 发布时间 (最新在前)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Table -->
     <div class="table-container">
       <table>
         <thead>
           <tr>
-            <th style="width: 140px;">信源媒体</th>
-            <th>报道标题</th>
-            <th style="width: 110px;">正文状态</th>
-            <th style="width: 150px;">发布时间</th>
-            <th style="width: 80px;">操作</th>
+            <th style="width: 140px;">优选评分 / 等级</th>
+            <th style="width: 180px;">建议适配栏目与标签</th>
+            <th style="width: 130px;">信源媒体</th>
+            <th>报道标题与摘要</th>
+            <th style="width: 100px;">正文状态</th>
+            <th style="width: 75px;">操作</th>
           </tr>
         </thead>
         <tbody id="articles-table-body">
-          <tr><td colspan="5" style="text-align: center; color: #94a3b8;">正在加载本周候选材料...</td></tr>
+          <tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px;">正在加载本周候选材料...</td></tr>
         </tbody>
       </table>
     </div>
@@ -628,15 +767,21 @@
       </thead>
       <tbody>
         <tr>
-          <td><strong>新闻与评论持续采集</strong></td>
+          <td><strong>新闻与评论定时采集</strong></td>
           <td><span class="tag-auto">macOS launchd</span></td>
-          <td>每小时定时拉取 11 路权威信源，原子写入本地 JSON 库；内置随机退避防封控；抓取失败记入错误日志，下次重试。</td>
+          <td>每天 2 次（09:30、18:30）定时拉取 11 路权威信源，原子写入本地；内置随机退避防封控；轻量低负载。</td>
           <td>关机时暂停；唤醒或开机后 launchd 自动补跑错过的最近一次抓取，无需手动干预。</td>
         </tr>
         <tr>
-          <td><strong>长文质量防退化锁定</strong></td>
+          <td><strong>智能优选与口语打分 (0~100分)</strong></td>
+          <td><span class="tag-auto">全自动打分引擎</span></td>
+          <td>按正文完整度、高中口语契合度、叙事动作性、思辨争议度自动量化打分，S/A级排到最前。</td>
+          <td>全自动本地比对计算。</td>
+        </tr>
+        <tr>
+          <td><strong>长文质量防退化与往期防重</strong></td>
           <td><span class="tag-auto">全自动脚本</span></td>
-          <td>若外部源站发生改版或返回降级短文，自动保留既有更优长文版本，并打标 degraded 警告。</td>
+          <td>若外部源站发生改版或返回降级短文，自动保留既有更优长文；已用文章自动扣60分沉底。</td>
           <td>全自动本地比对拦截。</td>
         </tr>
         <tr>
@@ -648,7 +793,7 @@
         <tr>
           <td><strong>选题审阅与采编 (21篇)</strong></td>
           <td><span class="tag-agent">Agent + 教师</span></td>
-          <td>到达周四 20:00 截止点后，由教师下达出刊指令或点击工作台发起唤醒，Agent 负责高质量采编 9 复述 + 6 评论 + 6 摘录。</td>
+          <td>到达周四 20:00 截止点后，由教师下达出刊指令或点击工作台发起唤醒，Agent 从高分榜中采编 9 复述 + 6 评论 + 6 摘录。</td>
           <td>Agent 依会话指令唤醒执行，避免无意义的无人空转消耗。</td>
         </tr>
         <tr>
@@ -684,6 +829,7 @@
         <div class="drawer-meta">
           <span id="drawer-source" style="color: #38bdf8;">信源媒体</span>
           <span id="drawer-date">发布时间</span>
+          <span id="drawer-score-badge" class="badge badge-success">90分 · S级</span>
           <a id="drawer-link" href="#" target="_blank" style="color: #a855f7; text-decoration: underline;">查看原始网页 ↗</a>
         </div>
       </div>
@@ -696,7 +842,9 @@
 </div>
 
 <script>
-let currentArticles = [];
+let allArticles = [];
+let currentFilter = 'all';
+let currentSort = 'score';
 
 // 页面加载即初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -738,14 +886,15 @@ function renderWorkbench(d) {
   const minsAgo = d.scheduler.minutesSinceLastCrawl !== null ? `(${d.scheduler.minutesSinceLastCrawl} 分钟前)` : '';
   lastCrawlSpan.innerText = `${lastTime} ${minsAgo}`;
 
-  const nextTime = d.scheduler.nextScheduledTime ? new Date(d.scheduler.nextScheduledTime).toLocaleTimeString('zh-CN', { hour12: false }) : '预计下个整点';
+  const nextTime = d.scheduler.nextScheduledTime ? new Date(d.scheduler.nextScheduledTime).toLocaleString('zh-CN', { hour12: false }) : '09:30 / 18:30';
   nextCrawlSpan.innerText = nextTime;
 
   // Q2: 这一周收到了什么？
   document.getElementById('val-week-total').innerText = d.intakeStats.thisWeekTotal;
+  const topTotal = (d.intakeStats.sTierCount || 0) + (d.intakeStats.aTierCount || 0);
+  document.getElementById('val-week-top').innerText = topTotal;
   document.getElementById('val-week-fulltext').innerText = d.intakeStats.thisWeekFullText;
-  document.getElementById('val-week-meta').innerText = d.intakeStats.thisWeekMetadataOnly;
-  document.getElementById('val-db-total').innerText = d.intakeStats.totalArticles;
+  document.getElementById('val-week-used').innerText = d.intakeStats.usedCount || 0;
 
   // Q3: 下一期做到哪了？
   const textQ3 = document.getElementById('text-q3');
@@ -760,15 +909,20 @@ function renderWorkbench(d) {
     '<span style="color:#10b981;">● 已就绪运行</span>' : '<span style="color:#ef4444;">未启动</span>';
   document.getElementById('sys-source-count').innerText = `${d.intakeStats.activeSources} / ${d.intakeStats.totalSources || 11} 活跃`;
   document.getElementById('sys-health-status').innerHTML = d.scheduler.status === 'active' ?
-    '<span style="color:#10b981;">良好</span>' : '<span style="color:#f59e0b;">需关注</span>';
+    '<span style="color:#10b981;">良好 (每日2次)</span>' : '<span style="color:#f59e0b;">需关注</span>';
   document.getElementById('sys-log-snippet').innerText = d.scheduler.lastLogSnippet || '暂无最近日志';
+
+  // Counts for tabs
+  document.getElementById('count-all').innerText = d.intakeStats.thisWeekTotal;
+  document.getElementById('count-top').innerText = topTotal;
+  document.getElementById('count-used').innerText = d.intakeStats.usedCount || 0;
 
   // Stepper
   renderStepper(d.nextIssue.stages);
 
   // Table of Articles
-  currentArticles = d.thisWeekArticles || [];
-  renderArticlesTable(currentArticles);
+  allArticles = d.thisWeekArticles || [];
+  applyFilterAndRender();
 }
 
 function renderStepper(stages) {
@@ -797,33 +951,93 @@ function renderStepper(stages) {
   }).join('');
 }
 
+function setFilter(filterType) {
+  currentFilter = filterType;
+  document.querySelectorAll('#filter-tabs .tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filterType);
+  });
+  applyFilterAndRender();
+}
+
+function changeSort(sortVal) {
+  currentSort = sortVal;
+  applyFilterAndRender();
+}
+
+function applyFilterAndRender() {
+  let filtered = [...allArticles];
+
+  // 1. 过滤
+  if (currentFilter === 'top') {
+    filtered = filtered.filter(a => (a.tier === 'S' || a.tier === 'A') && !a.isUsed);
+  } else if (currentFilter === 'retelling') {
+    filtered = filtered.filter(a => a.recommendedRole && a.recommendedRole.includes('复述') && !a.isUsed);
+  } else if (currentFilter === 'debate') {
+    filtered = filtered.filter(a => a.recommendedRole && a.recommendedRole.includes('时评') && !a.isUsed);
+  } else if (currentFilter === 'used') {
+    filtered = filtered.filter(a => a.isUsed);
+  }
+
+  // 2. 排序
+  if (currentSort === 'score') {
+    filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
+  } else if (currentSort === 'date') {
+    filtered.sort((a, b) => (b.publishedAt || '').localeCompare(a.publishedAt || ''));
+  }
+
+  renderArticlesTable(filtered);
+}
+
 function renderArticlesTable(articles) {
   const tbody = document.getElementById('articles-table-body');
   if (!articles || articles.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 20px;">本周暂无新增入库文章</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">当前筛选条件无文章</td></tr>';
     return;
   }
 
   tbody.innerHTML = articles.map(a => {
     const isFull = a.hasFullText;
-    const badge = isFull ? 
+    const fullBadge = isFull ? 
       '<span class="badge badge-success" style="font-size: 11px;">完整正文</span>' : 
-      '<span class="badge badge-warning" style="font-size: 11px;">元数据</span>';
-    const dateStr = a.publishedAt ? a.publishedAt.slice(0, 16) : '未知';
+      '<span class="badge badge-secondary" style="font-size: 11px;">元数据</span>';
     
+    const dateStr = a.publishedAt ? a.publishedAt.slice(0, 16) : '未知';
+    const tagsHtml = (a.tags || []).map(t => `<span class="tag-chip">${escapeHtml(t)}</span>`).join('');
+    
+    let tierColor = 'var(--text-sub)';
+    if (a.tier === 'S') tierColor = '#10b981';
+    else if (a.tier === 'A') tierColor = '#38bdf8';
+    else if (a.tier === 'B') tierColor = '#f59e0b';
+    else if (a.tier === 'USED') tierColor = '#ef4444';
+
     return `
       <tr onclick="openArticleDrawer('${a.id}')">
+        <td>
+          <div style="font-weight: 700; font-size: 15px; color: ${tierColor};">
+            ${a.score} 分
+          </div>
+          <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px;">
+            ${escapeHtml(a.tierLabel || '常规')}
+          </div>
+        </td>
+        <td>
+          <div style="font-weight: 600; font-size: 12px; color: #f1f5f9;">
+            ${escapeHtml(a.recommendedRole || '常规备选')}
+          </div>
+          <div>${tagsHtml}</div>
+        </td>
         <td style="color: #94a3b8; font-weight: 500;">${escapeHtml(a.source)}</td>
         <td>
-          <div class="article-title-cell">
-            <span>${escapeHtml(a.title)}</span>
+          <div style="font-weight: 500; color: #f8fafc; font-size: 14px;">
+            ${escapeHtml(a.title)}
           </div>
-          <div style="font-size: 12px; color: #64748b; margin-top: 2px;">${escapeHtml(a.summary || '')}</div>
+          <div style="font-size: 12px; color: #64748b; margin-top: 3px; line-height: 1.4;">
+            ${escapeHtml(a.summary || '')}
+          </div>
         </td>
-        <td>${badge}</td>
-        <td style="color: #94a3b8; font-size: 12px;">${escapeHtml(dateStr)}</td>
+        <td>${fullBadge}</td>
         <td>
-          <button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="event.stopPropagation(); openArticleDrawer('${a.id}')">
+          <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="event.stopPropagation(); openArticleDrawer('${a.id}')">
             阅读
           </button>
         </td>
@@ -837,6 +1051,7 @@ async function openArticleDrawer(articleId) {
   const titleEl = document.getElementById('drawer-title');
   const sourceEl = document.getElementById('drawer-source');
   const dateEl = document.getElementById('drawer-date');
+  const scoreBadgeEl = document.getElementById('drawer-score-badge');
   const linkEl = document.getElementById('drawer-link');
   const bodyEl = document.getElementById('drawer-body');
 
@@ -844,19 +1059,19 @@ async function openArticleDrawer(articleId) {
   titleEl.innerText = '加载中...';
   bodyEl.innerText = '正在调阅原文正文详情...';
 
-  // 先从本地列表找缓存
-  const cached = currentArticles.find(a => a.id === articleId);
+  const cached = allArticles.find(a => a.id === articleId);
   if (cached) {
     titleEl.innerText = cached.title;
     sourceEl.innerText = cached.source;
     dateEl.innerText = cached.publishedAt || '';
+    scoreBadgeEl.innerText = `${cached.score}分 · ${cached.tier}级`;
+    scoreBadgeEl.className = `badge ${cached.tierBadge || 'badge-success'}`;
     linkEl.href = cached.url;
     if (cached.content) {
       bodyEl.innerText = cached.content;
     }
   }
 
-  // 再请求后端 /api/workbench/article 确保获取最完整字段
   try {
     const res = await fetch(`/api/workbench/article?id=${encodeURIComponent(articleId)}`);
     if (res.ok) {
