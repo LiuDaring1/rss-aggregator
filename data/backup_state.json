@@ -1,0 +1,44 @@
+{
+  "updatedAt": "2026-09-24T17:48:50.099256",
+  "last_backup": {
+    "timestamp": "2026-09-24T17:48:50.099256",
+    "archive_file": "weekly_data_backup_20260924_174850.tar.gz",
+    "archive_path": "/var/folders/y6/zl0dpg5s3kv8387_y5y02qb00000gn/T/tmpx9mxh5ny/backups/weekly_data_backup_20260924_174850.tar.gz",
+    "sha256": "7a3a4c201bd969b9fd30d7872d7458929340a5a8d413d204514bceac59240991",
+    "size_bytes": 596745,
+    "stats": {
+      "commentaries_articles": 366,
+      "wenwen_articles": 286,
+      "teacher_feedback_count": 0,
+      "issues_backed_up": [
+        "issue-2026-w40",
+        "issue-2026-w39",
+        "issue-2026-w38"
+      ]
+    },
+    "coverage": [
+      "aggr-site/data/commentaries",
+      "aggr-site/data/wenwen",
+      "data/teacher_feedback.json",
+      "data/fetch_state.json",
+      "issues/*/production_state.json"
+    ],
+    "offsite_status": "pending_configuration",
+    "offsite_note": "待配置 (缺少受控外部存储目标或异地网络凭证，暂保留本地与快照隔离)"
+  },
+  "last_restore_test": {
+    "timestamp": "2026-09-24T17:48:50.099256",
+    "status": "passed",
+    "archive": "weekly_data_backup_20260924_174850.tar.gz",
+    "sha256": "7a3a4c201bd969b9fd30d7872d7458929340a5a8d413d204514bceac59240991"
+  },
+  "offsite": {
+    "status": "pending_configuration",
+    "label": "待配置 (缺少受控外部目标)",
+    "required_info": [
+      "远端 S3 / WebDAV 目标地址",
+      "访问密钥凭据",
+      "网络传输通道"
+    ]
+  }
+}

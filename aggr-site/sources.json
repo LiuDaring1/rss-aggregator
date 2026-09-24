@@ -86,5 +86,38 @@
     "url": "http://127.0.0.1:1200/rednet/channel/33216",
     "category": "评论",
     "enabled": true
+  },
+  {
+    "id": "chinanews-scroll",
+    "name": "中新网·事实滚动",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/chinanews?limit=10",
+    "category": "事实报道",
+    "enabled": true,
+    "topic": "青年生活与技能/文化非遗",
+    "institution": "中国新闻社",
+    "description": "中央重点新闻网站滚动事实新闻，覆盖青年技能、体育与文化非遗事件"
+  },
+  {
+    "id": "thepaper-featured",
+    "name": "澎湃·精选头条",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/thepaper/featured?limit=10",
+    "category": "事实报道",
+    "enabled": true,
+    "topic": "青年出行与民生消费趋势",
+    "institution": "澎湃新闻",
+    "description": "主流新媒体首页精选事实报道，覆盖社会民生、消费新现象与家庭青年趋势"
+  },
+  {
+    "id": "infzm-hot",
+    "name": "南方周末·热门纪实",
+    "type": "rsshub",
+    "url": "http://127.0.0.1:1200/infzm/hot?limit=10",
+    "category": "事实报道",
+    "enabled": true,
+    "topic": "一线劳动者与乡村边贸纪实",
+    "institution": "南方周末",
+    "description": "深度调查特稿媒体热门事实纪实，涵盖口岸货车司机、边贸冷链与基层劳动者真实故事"
   }
 ]

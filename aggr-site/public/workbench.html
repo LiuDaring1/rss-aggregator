@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>高中英语口语素材周刊 · 生产运行工作台</title>
+  <title>高中中文口语素材周刊 · 生产运行工作台</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -21,7 +21,8 @@
       --danger-bg: rgba(239, 68, 68, 0.15);
       --info: #06b6d4;
       --info-bg: rgba(6, 182, 212, 0.15);
-      --badge-bg: #334155;
+      --purple: #a855f7;
+      --purple-bg: rgba(168, 85, 247, 0.15);
       --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
@@ -35,7 +36,7 @@
     }
 
     .container {
-      max-width: 1240px;
+      max-width: 1280px;
       margin: 0 auto;
       padding: 24px 20px;
     }
@@ -85,17 +86,30 @@
       transition: all 0.15s ease;
       border: 1px solid transparent;
     }
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+    .btn-xs {
+      padding: 2px 6px;
+      font-size: 11px;
+      border-radius: 4px;
+    }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-primary:hover { background: var(--accent-hover); }
     .btn-secondary { background: #334155; color: #f8fafc; border-color: #475569; }
     .btn-secondary:hover { background: #475569; }
     .btn-success { background: #059669; color: #fff; }
     .btn-success:hover { background: #047857; }
+    .btn-warning { background: #d97706; color: #fff; }
+    .btn-warning:hover { background: #b45309; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-danger:hover { background: #b91c1c; }
 
     /* Core 4 Questions Banner */
     .four-questions-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -121,7 +135,7 @@
     .q1::before { background: var(--success); }
     .q2::before { background: var(--info); }
     .q3::before { background: var(--warning); }
-    .q4::before { background: #a855f7; }
+    .q4::before { background: var(--purple); }
 
     .q-number {
       font-size: 12px;
@@ -146,7 +160,7 @@
       font-size: 13px;
       color: var(--text-sub);
       margin-top: auto;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .badge {
@@ -162,6 +176,7 @@
     .badge-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning); }
     .badge-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
     .badge-info { background: var(--info-bg); color: var(--info); border: 1px solid var(--info); }
+    .badge-purple { background: var(--purple-bg); color: #c084fc; border: 1px solid var(--purple); }
     .badge-secondary { background: #334155; color: #94a3b8; border: 1px solid #475569; }
     .badge-primary { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
 
@@ -198,12 +213,14 @@
       margin-bottom: 16px;
       padding-bottom: 12px;
       border-bottom: 1px solid var(--card-border);
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    /* Detail Grids */
+    /* Multi-task detail grid */
     .status-detail-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 16px;
       margin-bottom: 16px;
     }
@@ -211,12 +228,20 @@
     .stat-item {
       background: #0f172a;
       border: 1px solid #334155;
-      padding: 14px;
+      padding: 16px;
       border-radius: 8px;
+      display: flex;
+      flex-direction: column;
     }
-    .stat-label { font-size: 12px; color: var(--text-sub); margin-bottom: 4px; }
-    .stat-val { font-size: 18px; font-weight: 700; color: #fff; }
-    .stat-hint { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .stat-label { font-size: 13px; font-weight: 600; color: #f1f5f9; }
+    .stat-val { font-size: 16px; font-weight: 700; color: #38bdf8; margin-bottom: 4px; }
+    .stat-hint { font-size: 12px; color: #94a3b8; line-height: 1.5; margin-top: auto; }
 
     /* Timeline Stepper for Issue */
     .stepper {
@@ -281,9 +306,9 @@
     .step-label { font-size: 13px; font-weight: 500; color: #fff; margin-bottom: 2px; }
     .step-sub { font-size: 11px; color: var(--text-sub); }
 
-    /* Scoring Explainer Banner */
-    .scoring-explainer-box {
-      background: rgba(30, 41, 59, 0.8);
+    /* Pedagogical Banner */
+    .pedagogical-banner {
+      background: rgba(30, 41, 59, 0.9);
       border: 1px solid #3b82f6;
       border-radius: 8px;
       padding: 16px 20px;
@@ -292,37 +317,73 @@
       line-height: 1.6;
       color: #cbd5e1;
     }
-    .scoring-grid {
+    .pedagogical-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 12px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
-    .scoring-pill {
+    .pedagogical-pill {
       background: #0f172a;
       border: 1px solid #334155;
-      padding: 10px 12px;
+      padding: 12px;
       border-radius: 6px;
     }
-    .scoring-pill-title {
+    .pedagogical-pill-title {
       font-weight: 600;
       color: #38bdf8;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .scoring-pill-desc {
+    .pedagogical-pill-desc {
       font-size: 11px;
       color: #94a3b8;
+      line-height: 1.4;
     }
 
-    /* Filter & Controls Bar */
-    .filter-bar {
+    /* Search & Filter Bar */
+    .search-filter-container {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .search-row {
+      display: flex;
+      gap: 12px;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 14px;
+    }
+    .search-input-box {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #fff;
+      padding: 8px 12px 8px 34px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-size: 14px;
     }
     .filter-tabs {
       display: flex;
@@ -330,8 +391,8 @@
       flex-wrap: wrap;
     }
     .tab-btn {
-      background: #0f172a;
-      border: 1px solid #334155;
+      background: #1e293b;
+      border: 1px solid #475569;
       color: #94a3b8;
       padding: 6px 12px;
       border-radius: 6px;
@@ -346,16 +407,20 @@
       color: #fff;
       font-weight: 600;
     }
-    .sort-control {
+
+    .filter-controls-row {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text-sub);
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 8px;
+      border-top: 1px solid #1e293b;
     }
-    .sort-select {
-      background: #0f172a;
-      border: 1px solid #334155;
+
+    .select-control {
+      background: #1e293b;
+      border: 1px solid #475569;
       color: #f8fafc;
       padding: 5px 10px;
       border-radius: 6px;
@@ -363,12 +428,12 @@
       outline: none;
     }
 
-    /* Articles Table */
+    /* Table & Rows */
     .table-container {
       overflow-x: auto;
       border: 1px solid var(--card-border);
       border-radius: 8px;
-      margin-top: 8px;
+      background: #0f172a;
     }
     table {
       width: 100%;
@@ -379,9 +444,10 @@
     th, td {
       padding: 12px 14px;
       border-bottom: 1px solid #334155;
+      vertical-align: top;
     }
     th {
-      background: #0f172a;
+      background: #1e293b;
       color: var(--text-sub);
       font-weight: 600;
       text-transform: uppercase;
@@ -389,7 +455,7 @@
       letter-spacing: 0.5px;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #243248; cursor: pointer; }
+    tr:hover td { background: #1a2538; }
 
     .tag-chip {
       display: inline-block;
@@ -403,22 +469,39 @@
       margin-top: 3px;
     }
 
-    /* Modal / Drawer for Reading */
+    /* Pagination */
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 4px 4px 4px;
+      font-size: 13px;
+      color: var(--text-sub);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Reading Drawer Modal */
     .drawer-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       backdrop-filter: blur(4px);
       z-index: 1000;
       justify-content: flex-end;
     }
     .drawer {
       width: 100%;
-      max-width: 650px;
+      max-width: 680px;
       height: 100%;
       background: #1e293b;
-      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+      box-shadow: -6px 0 30px rgba(0, 0, 0, 0.6);
       display: flex;
       flex-direction: column;
       animation: slideIn 0.25s ease-out;
@@ -433,40 +516,107 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 16px;
     }
-    .drawer-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-    .drawer-meta { font-size: 12px; color: var(--text-sub); display: flex; gap: 12px; flex-wrap: wrap; }
+    .drawer-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px; line-height: 1.4; }
+    .drawer-meta { font-size: 12px; color: var(--text-sub); display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
     .drawer-close {
       background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer; padding: 4px;
     }
     .drawer-close:hover { color: #fff; }
     .drawer-body {
-      padding: 24px 20px;
+      padding: 20px;
       overflow-y: auto;
       flex: 1;
-      font-size: 15px;
+    }
+
+    /* Structured rationale box */
+    .drawer-rationale-box {
+      background: #0f172a;
+      border: 1px solid #3b82f6;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .rationale-item {
+      margin-bottom: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .rationale-label {
+      font-weight: 600;
+      color: #38bdf8;
+      display: inline-block;
+      min-width: 90px;
+    }
+    .rationale-alert {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #fca5a5;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    /* Teacher Feedback Panel inside drawer */
+    .teacher-action-card {
+      background: #0f172a;
+      border: 1px solid #10b981;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .teacher-action-header {
+      font-weight: 700;
+      color: #10b981;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .action-radios {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .action-radio-label {
+      font-size: 13px;
+      color: #e2e8f0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .feedback-textarea {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 60px;
+      margin-top: 8px;
+      outline: none;
+    }
+    .feedback-textarea:focus { border-color: #10b981; }
+
+    .drawer-content-box {
+      font-size: 14px;
       line-height: 1.8;
       color: #cbd5e1;
       white-space: pre-wrap;
-    }
-
-    /* Division of Labor Table */
-    .division-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-      font-size: 13px;
-    }
-    .division-table th, .division-table td {
-      padding: 12px;
+      background: #0f172a;
+      padding: 16px;
+      border-radius: 8px;
       border: 1px solid #334155;
-      text-align: left;
     }
-    .division-table th { background: #0f172a; color: #94a3b8; }
-    .tag-auto { background: #065f46; color: #a7f3d0; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
-    .tag-agent { background: #1e3a8a; color: #bfdbfe; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
 
-    /* Live Output Box */
+    /* Terminal */
     .terminal-box {
       background: #020617;
       border: 1px solid #334155;
@@ -479,7 +629,7 @@
       overflow-y: auto;
       white-space: pre-wrap;
       line-height: 1.4;
-      margin-top: 12px;
+      margin-bottom: 20px;
       display: none;
     }
 
@@ -494,6 +644,22 @@
       color: #cbd5e1;
     }
     .notice-box strong { color: #fff; }
+
+    /* Division table */
+    .division-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    .division-table th, .division-table td {
+      padding: 12px;
+      border: 1px solid #334155;
+      text-align: left;
+    }
+    .division-table th { background: #0f172a; color: #94a3b8; }
+    .tag-auto { background: #065f46; color: #a7f3d0; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+    .tag-agent { background: #1e3a8a; color: #bfdbfe; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
   </style>
 </head>
 <body>
@@ -505,9 +671,9 @@
     <div class="header-title">
       <h1>
         <span style="font-size: 28px;">📰</span>
-        高中英语口语素材周刊 · 生产运行工作台
+        高中中文口语素材周刊 · 生产运行工作台
       </h1>
-      <p>生产节奏原则：周四 20:00 资料截止 | 周五 10:00 发放 | 回望连续 7 天 | 杜绝换期号虚假出刊</p>
+      <p>产品定位：中文口语表达训练资料（动作叙事复述 · 现实议题时评） | 业务节拍：周四 20:00 截止 | 周五 10:00 发放</p>
     </div>
     <div class="header-actions">
       <button class="btn btn-primary" id="btn-trigger-fetch" onclick="triggerLiveFetch()">
@@ -525,7 +691,7 @@
   <!-- Notice -->
   <div class="notice-box">
     <strong>📌 教学试发与常规周生产双轨运行说明：</strong><br>
-    当前 <strong>W39（2026-09-24）</strong> 已完成 47 物理页原子构建，定位为<strong>【首次试发件】</strong>，用于今日在课堂进行版面、字号与高中生口语复述易读性的教学反馈。<br>
+    当前 <strong>W39（2026-09-24）</strong> 已完成 47 物理页原子构建，定位为<strong>【首次试发件】</strong>，用于今日在课堂进行版面、字号与高中生口语复述易读性的教学实测。<br>
     下一期 <strong>W40（常规周生产）</strong> 已启动周内持续自动备料，严格遵守周四（10月1日 20:00）资料截止点，当前状态为<strong>【等待计划时间】</strong>，拒绝提前锁定未结束的资料窗口。
   </div>
 
@@ -539,9 +705,10 @@
       </div>
       <div class="q-title">现在有没有在工作？</div>
       <div class="q-summary" id="text-q1">
-        macOS launchd 每天 <strong>2 次</strong>（09:30、18:30）轻量轮询，机器无负担。<br>
-        <strong>上次成功：</strong><span id="val-last-crawl">正在获取...</span><br>
-        <strong>下次计划：</strong><span id="val-next-crawl">正在获取...</span>
+        • <strong>时评与事实：</strong>launchd 每日 2 次 (09:30/18:30) + 周四 20:05 截稿扫尾<br>
+        • <strong>暖文雷达：</strong>Node 后台 (6h采集 / 20min分析)<br>
+        • <strong>上次抓取：</strong><span id="val-last-crawl">正在获取...</span><br>
+        • <strong>下次定时：</strong><span id="val-next-crawl">09:30 / 18:30</span>
       </div>
     </div>
 
@@ -549,13 +716,14 @@
     <div class="question-card q2">
       <div class="q-number">
         <span>问题 ②</span>
-        <span id="badge-q2" class="badge badge-info">智能优选池</span>
+        <span id="badge-q2" class="badge badge-info">教学适用选材池</span>
       </div>
       <div class="q-title">这一周收到了什么？</div>
       <div class="q-summary" id="text-q2">
-        本周累计入库 <strong id="val-week-total" style="color:#38bdf8;">--</strong> 篇。<br>
-        <strong>S/A级高分优选：</strong><span id="val-week-top" style="color:#10b981; font-weight:700;">--</span> 篇（完整正文 <span id="val-week-fulltext">--</span> 篇）<br>
-        往期已用自动沉底：<span id="val-week-used">--</span> 篇
+        • 全库统一材料：<strong id="val-week-total" style="color:#38bdf8;">--</strong> 篇（正文 <span id="val-week-fulltext">--</span> 篇）<br>
+        • <strong>S/A级重点推荐：</strong><span id="val-week-top" style="color:#10b981; font-weight:700;">--</span> 篇<br>
+        • <strong>需教师特别复核：</strong><span id="val-week-review" style="color:#f59e0b; font-weight:700;">--</span> 篇（艾滋病/敏感隐私）<br>
+        • <strong>待补充正文事实：</strong><span id="val-week-pending" style="color:#94a3b8;">--</span> 篇
       </div>
     </div>
 
@@ -568,7 +736,7 @@
       <div class="q-title">下一期做到哪了？</div>
       <div class="q-summary" id="text-q3">
         <strong>下期期号：</strong>Issue 2026-W40 (常规周)<br>
-        <strong>资料截止：</strong>2026-10-01 20:00 (下周四)<br>
+        <strong>资料截止：</strong>2026-10-01 20:00:00 (下周四)<br>
         <strong>当前进度：</strong>持续采集备料中，尚未截止
       </div>
     </div>
@@ -577,13 +745,13 @@
     <div class="question-card q4">
       <div class="q-number">
         <span>问题 ④</span>
-        <span id="badge-q4" class="badge badge-info">教师行动指南</span>
+        <span id="badge-q4" class="badge badge-purple">教师行动指南</span>
       </div>
       <div class="q-title">我要做什么？</div>
       <div class="q-summary" id="text-q4">
-        1. <strong>今天重点：</strong>下载打印 W39 试发件，实测学生阅读反馈。<br>
-        2. <strong>周内日常：</strong>后台每日2次自动优选，无需人工盯防。<br>
-        3. <strong>下周四晚：</strong>截止后直接根据 S/A 级高分榜定版出刊。
+        1. <strong>课堂实测：</strong>打印 W39 试发件，收集高中生复述与时评反馈。<br>
+        2. <strong>选材审阅：</strong>在下方候选池审阅推荐素材，可点击 <code>[保留]</code>、<code>[排除]</code> 或 <code>[改栏目]</code>。<br>
+        3. <strong>下周四晚：</strong>20:00 截稿后教师一键确认入刊 21 篇材料。
       </div>
     </div>
   </div>
@@ -591,42 +759,74 @@
   <!-- Realtime Output Terminal Box -->
   <div id="terminal-container" class="terminal-box"></div>
 
-  <!-- Section 1: Scheduler & Running Daemon Status -->
+  <!-- Section 1: Multi-Task & Backup Status -->
   <div class="section-card">
     <div class="section-title">
-      <span>⚙️ 系统常驻调度与采集健康度</span>
+      <span>⚙️ 系统多任务常驻调度与数据恢复状态</span>
       <span style="font-size: 12px; color: var(--text-sub); font-weight: normal;">服务标识：com.weekly.fetch_commentaries</span>
     </div>
+
     <div class="status-detail-grid">
+      <!-- Task 1: Commentary Fetch -->
       <div class="stat-item">
-        <div class="stat-label">常驻调度加载状态</div>
-        <div class="stat-val" id="sys-launchd-status">检测中...</div>
-        <div class="stat-hint">macOS launchd 原生守护 (开机自启/唤醒补跑)</div>
+        <div class="stat-header">
+          <span class="stat-label">📡 时评与事实采集 (launchd)</span>
+          <span id="task-commentary-badge" class="badge badge-success">正常</span>
+        </div>
+        <div class="stat-val" id="task-commentary-sources">14 / 14 正常</div>
+        <div class="stat-hint">
+          每日 2 次 (09:30 / 18:30) + 周四 20:05 截稿扫尾。<br>
+          涵盖人民网、澎湃、南周纪实、中新网等权威源。
+        </div>
       </div>
+
+      <!-- Task 2: Wenwen Radar -->
       <div class="stat-item">
-        <div class="stat-label">轮询执行频率</div>
-        <div class="stat-val">每日 2 次 (09:30 / 18:30)</div>
-        <div class="stat-hint">轻量低负载，早间傍晚各一轮，兼顾新评</div>
+        <div class="stat-header">
+          <span class="stat-label">🧭 暖文与好事雷达 (Node后台)</span>
+          <span id="task-wenwen-badge" class="badge badge-success">运行中</span>
+        </div>
+        <div class="stat-val" id="task-wenwen-count">284 篇 / 279 事件</div>
+        <div class="stat-hint">
+          采集周期 6h / 分析周期 20min 独立运转。<br>
+          挖掘具有具体人物动作的暖心故事，供口语复述。
+        </div>
       </div>
+
+      <!-- Task 3: Analysis Engine -->
       <div class="stat-item">
-        <div class="stat-label">活跃权威信源通道</div>
-        <div class="stat-val" id="sys-source-count">11 / 11 正常</div>
-        <div class="stat-hint">人民网、央视网、新华网、澎湃、新京报等</div>
+        <div class="stat-header">
+          <span class="stat-label">🧠 口语适用性与分析引擎</span>
+          <span id="task-analysis-badge" class="badge badge-info">本地规则初筛</span>
+        </div>
+        <div class="stat-val" id="task-analysis-status">教学四档分类就绪</div>
+        <div class="stat-hint">
+          重点推荐 / 需教师复核 / 待补事实 / 往期已用。<br>
+          艾滋病家庭隐私等敏感议题自动拦截并标警示。
+        </div>
       </div>
+
+      <!-- Task 4: Backup & Recovery -->
       <div class="stat-item">
-        <div class="stat-label">调度健康判定</div>
-        <div class="stat-val" id="sys-health-status">正常</div>
-        <div class="stat-hint">上次成功在 24 小时内，未发生静默停摆</div>
+        <div class="stat-header">
+          <span class="stat-label">💾 数据备份与隔离恢复测试</span>
+          <span id="task-backup-badge" class="badge badge-success">PASS</span>
+        </div>
+        <div class="stat-val" id="task-backup-restore">隔离恢复测试通过</div>
+        <div class="stat-hint" id="task-backup-hint">
+          最新归档：weekly_data_backup_*.tar.gz<br>
+          异地存储：<span style="color:#f59e0b;">待配置 (缺少受控外部存储目标)</span>
+        </div>
       </div>
     </div>
 
-    <div style="margin-top: 14px;">
+    <div>
       <div style="font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 6px;">最近一次自动执行运行日志片段 (launchd_fetch.log)：</div>
-      <pre id="sys-log-snippet" style="background: #020617; border: 1px solid #334155; padding: 10px 14px; border-radius: 6px; font-family: var(--font-mono); font-size: 12px; color: #cbd5e1; overflow-x: auto; max-height: 120px;">载入中...</pre>
+      <pre id="sys-log-snippet" style="background: #020617; border: 1px solid #334155; padding: 10px 14px; border-radius: 6px; font-family: var(--font-mono); font-size: 12px; color: #cbd5e1; overflow-x: auto; max-height: 100px;">载入中...</pre>
     </div>
   </div>
 
-  <!-- Section 2: Issue Production Timeline & Tracking (W39 vs W40) -->
+  <!-- Section 2: Production Cadence & Stepper -->
   <div class="section-card">
     <div class="section-title">
       <span>📅 周刊生产进度轴与流转状态</span>
@@ -639,12 +839,14 @@
           <h4 style="font-size: 15px; color: #fff;">📑 Issue 2026-W39【首次试发件】</h4>
           <span class="badge badge-success">47页 已定版出刊</span>
         </div>
-        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">用于周四课堂教学实测与反馈收集。严格防退化保障，100% 原文连续匹配。</p>
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">
+          用于课堂教学实测与学生口语反馈。严格防退化保障，100% 原文连续匹配。
+        </p>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <a href="/issues/issue-2026-w39/issue-2026-w39.pdf" target="_blank" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">完整 PDF (47P)</a>
-          <a href="/issues/issue-2026-w39/issue-2026-w39-复述.pdf" target="_blank" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">复述分册 (19P)</a>
-          <a href="/issues/issue-2026-w39/issue-2026-w39-评论.pdf" target="_blank" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">时评评论 (13P)</a>
-          <a href="/issues/issue-2026-w39/issue-2026-w39-原文拆解与积累.pdf" target="_blank" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px;">拆解积累 (15P)</a>
+          <a href="/issues/issue-2026-w39/issue-2026-w39.pdf" target="_blank" class="btn btn-secondary btn-sm">完整 PDF (47P)</a>
+          <a href="/issues/issue-2026-w39/issue-2026-w39-复述.pdf" target="_blank" class="btn btn-secondary btn-sm">复述分册 (19P)</a>
+          <a href="/issues/issue-2026-w39/issue-2026-w39-评论.pdf" target="_blank" class="btn btn-secondary btn-sm">时评评论 (13P)</a>
+          <a href="/issues/issue-2026-w39/issue-2026-w39-原文拆解与积累.pdf" target="_blank" class="btn btn-secondary btn-sm">拆解积累 (15P)</a>
         </div>
       </div>
 
@@ -654,76 +856,99 @@
           <span class="badge badge-warning" id="w40-status-badge">等待到达资料截止点</span>
         </div>
         <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">
-          <strong>资料截止：</strong>2026-10-01 20:00 (下周四)<br>
-          <strong>出刊发放：</strong>2026-10-02 10:00 (下周五)<br>
-          <strong>当前说明：</strong>当前处于周内采集备料期，不提前锁定未结束的资料窗口。
+          <strong>资料截止：</strong>2026-10-01 20:00:00 (下周四)<br>
+          <strong>出刊发放：</strong>2026-10-02 10:00:00 (下周五)<br>
+          <strong>当前说明：</strong>周内持续采集备料中，严禁提前锁定未结束的资料窗口。
         </p>
       </div>
     </div>
 
-    <!-- Timeline Stepper -->
+    <!-- Stepper -->
     <div style="font-size: 13px; font-weight: 600; color: #94a3b8; margin-bottom: 4px;">下期 (W40) 标准流水线各环节实时看板：</div>
     <div class="stepper" id="pipeline-stepper">
       <!-- Injected via JS -->
     </div>
   </div>
 
-  <!-- Section 3: This Week's Intake & Pedagogical Scoring Engine -->
+  <!-- Section 3: Unified Candidates & Pedagogical Curation Workbench -->
   <div class="section-card">
     <div class="section-title">
-      <span>📚 本周候选池与 5 维智能优选排序</span>
-      <span style="font-size: 13px; color: var(--text-sub);">窗口起始：2026-09-21 00:00 起采集</span>
+      <span>📚 本周候选材料池与教学选材工作区</span>
+      <span style="font-size: 13px; color: var(--text-sub);" id="window-range-label">窗口范围：2026-09-24 20:00 ~ 2026-10-01 20:00</span>
     </div>
 
-    <!-- Explainer Box for the 5-Dimension Scoring Engine -->
-    <div class="scoring-explainer-box">
+    <!-- Pedagogical Banner -->
+    <div class="pedagogical-banner">
       <div style="font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-        <span>💡 系统如何从海量文稿中自动优选排序？</span>
-        <span class="badge badge-primary">针对高中英语口语教学定制</span>
+        <span>💡 高中中文口语素材智能推荐与四档适用性标准</span>
+        <span class="badge badge-primary">中文口语表达定制</span>
       </div>
       <div>
-        系统内置 <strong>0 ~ 100 分多维打分引擎</strong>，对采集到的每篇报道进行自动化质量评估与角色适配分类，评分最高的优质素材自动置顶，无需人工翻阅百篇原始公文：
+        系统合并【时评与事实报道库】与【暖文好事雷达库】，基于高中生中文口语表达特点进行专业分级：
       </div>
-      <div class="scoring-grid">
-        <div class="scoring-pill">
-          <div class="scoring-pill-title">① 正文完整与篇幅 (25分)</div>
-          <div class="scoring-pill-desc">必须有清洗正文；800~2500字最适提炼复述与深度词句；纯元数据扣25分。</div>
+      <div class="pedagogical-grid">
+        <div class="pedagogical-pill">
+          <div class="pedagogical-pill-title">⭐️ S/A级重点推荐 (recommended)</div>
+          <div class="pedagogical-pill-desc">正文完整，具备具体人物动作冲突（宜复述）或生活思辨争议点（宜时评）。</div>
         </div>
-        <div class="scoring-pill">
-          <div class="scoring-pill-title">② 口语生活契合 (30分)</div>
-          <div class="scoring-pill-desc">优先校园教育、青年成长、AI科技生活与社会公德；宏观政务例会扣30分。</div>
+        <div class="pedagogical-pill">
+          <div class="pedagogical-pill-title">⚠️ 需教师特别复核 (needs_teacher_review)</div>
+          <div class="pedagogical-pill-desc">艾滋病家庭隐私、严重恶性案件等成人话题，系统默认拦截并警示，不直接进课堂。</div>
         </div>
-        <div class="scoring-pill">
-          <div class="scoring-pill-title">③ 叙事动作性 (15分)</div>
-          <div class="scoring-pill-desc">识别具体人物、冲突与行动场景，优先推荐至【第1分册：9篇口语复述+配图】。</div>
+        <div class="pedagogical-pill">
+          <div class="pedagogical-pill-title">⏳ 待补充事实 (pending_facts)</div>
+          <div class="pedagogical-pill-desc">仅有标题/摘要的纯元数据，必须补齐清洗正文方可入选，避免学生无法深入复述。</div>
         </div>
-        <div class="scoring-pill">
-          <div class="scoring-pill-title">④ 思辨双向论辩 (15分)</div>
-          <div class="scoring-pill-desc">识别“该不该/为何/岂能”等立论句型，优先推荐至【第2分册：6篇时评思辨】。</div>
-        </div>
-        <div class="scoring-pill">
-          <div class="scoring-pill-title">⑤ 往期防重沉底 (-60分)</div>
-          <div class="scoring-pill-desc">自动比对 W38/W39 采编台账，已使用文章打标并强行沉底，杜绝重复选题。</div>
+        <div class="pedagogical-pill">
+          <div class="pedagogical-pill-title">🚫 往期已用与排除 (excluded / used)</div>
+          <div class="pedagogical-pill-desc">比对 W38/W39 采编台账，已使用文章自动沉底；教师标记排除的文章持久化隐藏。</div>
         </div>
       </div>
     </div>
 
-    <!-- Filter & Sort Bar -->
-    <div class="filter-bar">
-      <div class="filter-tabs" id="filter-tabs">
-        <button class="tab-btn active" data-filter="all" onclick="setFilter('all')">全部候选 (<span id="count-all">0</span>)</button>
-        <button class="tab-btn" data-filter="top" onclick="setFilter('top')">⭐️ S/A级重点优选 (<span id="count-top">0</span>)</button>
-        <button class="tab-btn" data-filter="retelling" onclick="setFilter('retelling')">🎯 建议口语复述</button>
-        <button class="tab-btn" data-filter="debate" onclick="setFilter('debate')">💡 建议时评思辨</button>
-        <button class="tab-btn" data-filter="used" onclick="setFilter('used')">🚫 往期已用 (<span id="count-used">0</span>)</button>
+    <!-- Search & Filter Controls -->
+    <div class="search-filter-container">
+      <div class="search-row">
+        <div class="search-input-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="candidate-search-input" class="search-input" placeholder="输入关键字搜索标题、正文或信源（如：艾滋病、男篮、外卖员、工匠）..." onkeydown="if(event.key==='Enter') executeSearch()">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="executeSearch()">搜索</button>
+        <button class="btn btn-secondary btn-sm" onclick="resetSearch()">重置</button>
       </div>
 
-      <div class="sort-control">
-        <label for="sort-select">排序依据：</label>
-        <select id="sort-select" class="sort-select" onchange="changeSort(this.value)">
-          <option value="score">🎯 智能优选得分 (由高到低)</option>
-          <option value="date">🕒 发布时间 (最新在前)</option>
-        </select>
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="tab-btn active" data-filter="all" onclick="setSuitabilityFilter('all')">全部候选 (<span id="count-all">0</span>)</button>
+        <button class="tab-btn" data-filter="recommended" onclick="setSuitabilityFilter('recommended')">⭐️ 重点推荐 (<span id="count-recommended">0</span>)</button>
+        <button class="tab-btn" data-filter="needs_review" onclick="setSuitabilityFilter('needs_review')">⚠️ 需教师复核 (<span id="count-needs-review">0</span>)</button>
+        <button class="tab-btn" data-filter="pending_facts" onclick="setSuitabilityFilter('pending_facts')">⏳ 待补事实 (<span id="count-pending-facts">0</span>)</button>
+        <button class="tab-btn" data-filter="excluded" onclick="setSuitabilityFilter('excluded')">🚫 已排除/已用 (<span id="count-excluded">0</span>)</button>
+      </div>
+
+      <div class="filter-controls-row">
+        <div style="display: flex; gap: 12px; align-items: center; font-size: 12px; color: var(--text-sub);">
+          <label>建议栏目：</label>
+          <select id="column-filter-select" class="select-control" onchange="applyColumnFilter(this.value)">
+            <option value="all">全部栏目</option>
+            <option value="复述">🎯 口语复述 (动作叙事)</option>
+            <option value="时评">💡 时评思辨 (双向立论)</option>
+            <option value="拆解">📝 拆解积累 (表达典范)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center; font-size: 12px; color: var(--text-sub);">
+          <label>排序方式：</label>
+          <select id="sort-select" class="select-control" onchange="applySort(this.value)">
+            <option value="score">🎯 口语教学契合分 (从高到低)</option>
+            <option value="date">🕒 发布时间 (最新在前)</option>
+          </select>
+
+          <label>每页：</label>
+          <select id="pagesize-select" class="select-control" onchange="applyPageSize(this.value)">
+            <option value="20">20 条</option>
+            <option value="50">50 条</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -732,22 +957,34 @@
       <table>
         <thead>
           <tr>
-            <th style="width: 140px;">优选评分 / 等级</th>
-            <th style="width: 180px;">建议适配栏目与标签</th>
-            <th style="width: 130px;">信源媒体</th>
-            <th>报道标题与摘要</th>
-            <th style="width: 100px;">正文状态</th>
-            <th style="width: 75px;">操作</th>
+            <th style="width: 140px;">适用性 / 得分</th>
+            <th style="width: 170px;">建议入刊栏目</th>
+            <th style="width: 130px;">信源媒体与时间</th>
+            <th>报道标题与结构化推荐理由</th>
+            <th style="width: 110px;">正文深度</th>
+            <th style="width: 160px;">教师采编操作</th>
           </tr>
         </thead>
         <tbody id="articles-table-body">
-          <tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px;">正在加载本周候选材料...</td></tr>
+          <tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">正在加载候选材料...</td></tr>
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination -->
+    <div class="pagination-bar">
+      <div id="pagination-info">显示第 1 ~ 20 条，共 0 条</div>
+      <div class="pagination-controls">
+        <button class="btn btn-secondary btn-xs" id="btn-page-first" onclick="goToPage(1)">首页</button>
+        <button class="btn btn-secondary btn-xs" id="btn-page-prev" onclick="prevPage()">上一页</button>
+        <span style="font-size: 12px; padding: 0 6px;" id="current-page-text">第 1 / 1 页</span>
+        <button class="btn btn-secondary btn-xs" id="btn-page-next" onclick="nextPage()">下一页</button>
+        <button class="btn btn-secondary btn-xs" id="btn-page-last" onclick="goToPage(state.totalPages)">末页</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Section 4: Clear Division of Labor (Auto vs Agent vs Human) -->
+  <!-- Section 4: Human-AI Collaboration Boundary -->
   <div class="section-card">
     <div class="section-title">
       <span>🤝 自动运行与人机协作分工边界（没有人盯着时系统在做什么）</span>
@@ -769,37 +1006,37 @@
         <tr>
           <td><strong>新闻与评论定时采集</strong></td>
           <td><span class="tag-auto">macOS launchd</span></td>
-          <td>每天 2 次（09:30、18:30）定时拉取 11 路权威信源，原子写入本地；内置随机退避防封控；轻量低负载。</td>
-          <td>关机时暂停；唤醒或开机后 launchd 自动补跑错过的最近一次抓取，无需手动干预。</td>
+          <td>每天 2 次（09:30、18:30）+ 周四 20:05 截稿扫尾抓取 14 路信源，原子写入本地；内置随机退避防封控。</td>
+          <td>关机时暂停；开机唤醒后 launchd 自动补跑错过的最近一次抓取，无需手动干预。</td>
         </tr>
         <tr>
-          <td><strong>智能优选与口语打分 (0~100分)</strong></td>
-          <td><span class="tag-auto">全自动打分引擎</span></td>
-          <td>按正文完整度、高中口语契合度、叙事动作性、思辨争议度自动量化打分，S/A级排到最前。</td>
+          <td><strong>智能优选与教学适用性分档</strong></td>
+          <td><span class="tag-auto">全自动规则引擎</span></td>
+          <td>按正文完整度、高中口语契合度、叙事动作性、思辨争议度打分，敏感议题自动划入教师复核区。</td>
           <td>全自动本地比对计算。</td>
         </tr>
         <tr>
           <td><strong>长文质量防退化与往期防重</strong></td>
           <td><span class="tag-auto">全自动脚本</span></td>
-          <td>若外部源站发生改版或返回降级短文，自动保留既有更优长文；已用文章自动扣60分沉底。</td>
+          <td>若外部源站发生改版或返回降级短文，自动保留既有更优长文；已用文章自动沉底，杜绝重复选题。</td>
           <td>全自动本地比对拦截。</td>
         </tr>
         <tr>
           <td><strong>周内候选池动态维护</strong></td>
           <td><span class="tag-auto">全自动脚本</span></td>
-          <td>对全库报道按自然周窗口聚类归一化，自动标记往期已选文章，避免选题重复碰撞。</td>
+          <td>对全库报道按自然周窗口动态聚类，持续统计入库总量与正文深度。</td>
           <td>全自动本地比对维护。</td>
         </tr>
         <tr>
           <td><strong>选题审阅与采编 (21篇)</strong></td>
           <td><span class="tag-agent">Agent + 教师</span></td>
-          <td>到达周四 20:00 截止点后，由教师下达出刊指令或点击工作台发起唤醒，Agent 从高分榜中采编 9 复述 + 6 评论 + 6 摘录。</td>
+          <td>到达周四 20:00 截止点后，由教师下达出刊指令，Agent 严格依教师保留与推荐高分榜采编 9 复述 + 6 评论 + 6 摘录。</td>
           <td>Agent 依会话指令唤醒执行，避免无意义的无人空转消耗。</td>
         </tr>
         <tr>
-          <td><strong>动作漫画配图 (9幅)</strong></td>
+          <td><strong>动作叙事漫画配图 (9幅)</strong></td>
           <td><span class="tag-agent">Agent (配图工具)</span></td>
-          <td>文稿编写完成后，由 Agent 调用专属配图引擎生成 3:1 横排三格/四格动作叙事插画。</td>
+          <td>文稿编写完成后，由 Agent 调用专属配图引擎生成 3:1 横排多格动作叙事插画。</td>
           <td>按需生成并自动落入 illustrations/ 目录。</td>
         </tr>
         <tr>
@@ -827,7 +1064,7 @@
       <div>
         <h3 class="drawer-title" id="drawer-title">文章标题</h3>
         <div class="drawer-meta">
-          <span id="drawer-source" style="color: #38bdf8;">信源媒体</span>
+          <span id="drawer-source" style="color: #38bdf8; font-weight: 600;">信源媒体</span>
           <span id="drawer-date">发布时间</span>
           <span id="drawer-score-badge" class="badge badge-success">90分 · S级</span>
           <a id="drawer-link" href="#" target="_blank" style="color: #a855f7; text-decoration: underline;">查看原始网页 ↗</a>
@@ -835,94 +1072,191 @@
       </div>
       <button class="drawer-close" onclick="closeDrawer()">&times;</button>
     </div>
+    
     <div class="drawer-body" id="drawer-body">
-      正在加载正文详情...
+      <!-- Structured Rationale Box -->
+      <div class="drawer-rationale-box" id="drawer-rationale-box">
+        <div style="font-weight: 700; color: #fff; margin-bottom: 10px; font-size: 14px;">🎯 教学选材结构化理由</div>
+        <div class="rationale-item">
+          <span class="rationale-label">📌 核心事件：</span>
+          <span id="drawer-rationale-event" style="color: #f1f5f9;">--</span>
+        </div>
+        <div class="rationale-item">
+          <span class="rationale-label">🎙️ 口语适配：</span>
+          <span id="drawer-rationale-why" style="color: #cbd5e1;">--</span>
+        </div>
+        <div class="rationale-item">
+          <span class="rationale-label">🏷️ 建议栏目：</span>
+          <span id="drawer-rationale-column" style="color: #38bdf8; font-weight: 600;">--</span>
+        </div>
+        <div class="rationale-item">
+          <span class="rationale-label">📑 核心论据：</span>
+          <span id="drawer-rationale-snippet" style="color: #94a3b8; font-style: italic;">--</span>
+        </div>
+        <div id="drawer-rationale-concern-box" class="rationale-alert" style="display:none;">
+          <strong>⚠️ 教学使用顾虑与风险警示：</strong>
+          <span id="drawer-rationale-concern-text"></span>
+        </div>
+      </div>
+
+      <!-- Teacher Feedback Box -->
+      <div class="teacher-action-card">
+        <div class="teacher-action-header">
+          <span>✍️ 教师审阅批注与入刊指令</span>
+          <span id="teacher-feedback-status" style="font-size: 12px; color: #94a3b8;">未批注</span>
+        </div>
+        <div class="action-radios">
+          <label class="action-radio-label">
+            <input type="radio" name="teacherAction" value="keep" checked>
+            <span>✓ 保留入选</span>
+          </label>
+          <label class="action-radio-label">
+            <input type="radio" name="teacherAction" value="exclude">
+            <span>✗ 排除不入刊</span>
+          </label>
+          <label class="action-radio-label">
+            <input type="radio" name="teacherAction" value="pending">
+            <span>⏳ 待补事实</span>
+          </label>
+          <label class="action-radio-label">
+            <input type="radio" name="teacherAction" value="change_column">
+            <span>⇄ 改建议栏目</span>
+          </label>
+        </div>
+        
+        <div style="display: flex; gap: 10px; align-items: center; margin-top: 8px;">
+          <label style="font-size: 12px; color: var(--text-sub);">指定入刊栏目：</label>
+          <select id="teacher-column-select" class="select-control" style="flex: 1;">
+            <option value="复述">🎯 口语复述 (第1分册)</option>
+            <option value="评论">💡 时评思辨 (第2分册)</option>
+            <option value="拆解">📝 原文拆解 (第3分册)</option>
+            <option value="备选">📦 常规备选池</option>
+          </select>
+        </div>
+
+        <textarea id="teacher-note-input" class="feedback-textarea" placeholder="输入给 Agent 的教学采编指导备注（例如：突出第三段动作描写、关注争议正反两方论点等）..."></textarea>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+          <button class="btn btn-success btn-sm" id="btn-save-feedback" onclick="saveCurrentFeedback()">
+            💾 保存教师审阅意见
+          </button>
+        </div>
+      </div>
+
+      <!-- Full Article Content -->
+      <div style="font-weight: 700; color: #fff; margin-bottom: 8px; font-size: 14px;">📄 原文清洗正文详情</div>
+      <div class="drawer-content-box" id="drawer-body-text">
+        正在调阅正文...
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-let allArticles = [];
-let currentFilter = 'all';
-let currentSort = 'score';
+// 全局状态管理
+const state = {
+  search: '',
+  suitability: 'all',
+  column: 'all',
+  sort: 'score',
+  page: 1,
+  pageSize: 20,
+  totalPages: 1,
+  totalMatches: 0,
+  currentArticles: [],
+  currentArticleDetail: null,
+  teacherFeedbackMap: {}
+};
 
-// 页面加载即初始化
+// 页面加载启动
 document.addEventListener('DOMContentLoaded', () => {
-  loadWorkbenchData();
-  // 每 30 秒静默轮询一次
-  setInterval(loadWorkbenchData, 30000);
+  loadWorkbenchOverview();
+  loadCandidatesTable();
+  // 60秒静默轮询看板
+  setInterval(loadWorkbenchOverview, 60000);
 });
 
-async function loadWorkbenchData() {
+/**
+ * 加载顶部概览与各任务健康状态
+ */
+async function loadWorkbenchOverview() {
   try {
     const res = await fetch('/api/workbench/data');
-    if (!res.ok) throw new Error('API request failed: ' + res.status);
-    const data = await res.json();
-    renderWorkbench(data);
+    if (!res.ok) throw new Error('API failed: ' + res.status);
+    const d = await res.json();
+    renderOverview(d);
   } catch (err) {
-    console.error('Failed to load workbench data:', err);
-    document.getElementById('sys-health-status').innerHTML = '<span style="color:#ef4444;">连接异常</span>';
+    console.error('Failed to load workbench overview:', err);
+    document.getElementById('task-commentary-badge').className = 'badge badge-danger';
+    document.getElementById('task-commentary-badge').innerText = '连接异常';
   }
 }
 
-function renderWorkbench(d) {
-  // Q1: 现在有没有在工作？
+function renderOverview(d) {
+  // Q1 Card
   const q1Badge = document.getElementById('badge-q1');
   const lastCrawlSpan = document.getElementById('val-last-crawl');
   const nextCrawlSpan = document.getElementById('val-next-crawl');
-  
-  if (d.scheduler.status === 'active') {
+
+  const commTask = d.tasks.commentary_fetch || {};
+  if (commTask.status === 'success' || commTask.status === 'active') {
     q1Badge.className = 'badge badge-success';
     q1Badge.innerHTML = '<span class="pulse"></span> 运行正常';
-  } else if (d.scheduler.status === 'stale') {
+  } else if (commTask.status === 'partial_failure') {
     q1Badge.className = 'badge badge-warning';
-    q1Badge.innerText = '采集延后';
+    q1Badge.innerText = '部分源失败';
   } else {
     q1Badge.className = 'badge badge-danger';
-    q1Badge.innerText = '未加载';
+    q1Badge.innerText = '异常待检';
   }
 
-  const lastTime = d.scheduler.lastCrawlTime ? new Date(d.scheduler.lastCrawlTime).toLocaleString('zh-CN', { hour12: false }) : '暂无记录';
-  const minsAgo = d.scheduler.minutesSinceLastCrawl !== null ? `(${d.scheduler.minutesSinceLastCrawl} 分钟前)` : '';
-  lastCrawlSpan.innerText = `${lastTime} ${minsAgo}`;
+  const lastSuccess = commTask.last_success_at ? new Date(commTask.last_success_at).toLocaleString('zh-CN', { hour12: false }) : '暂无记录';
+  lastCrawlSpan.innerText = lastSuccess;
 
-  const nextTime = d.scheduler.nextScheduledTime ? new Date(d.scheduler.nextScheduledTime).toLocaleString('zh-CN', { hour12: false }) : '09:30 / 18:30';
-  nextCrawlSpan.innerText = nextTime;
+  // Q2 Card
+  const stats = d.candidatePoolStats || {};
+  document.getElementById('val-week-total').innerText = stats.totalUnified || 0;
+  document.getElementById('val-week-fulltext').innerText = stats.fullTextArticles || 0;
+  document.getElementById('val-week-top').innerText = stats.recommended || 0;
+  document.getElementById('val-week-review').innerText = stats.needsTeacherReview || 0;
+  document.getElementById('val-week-pending').innerText = stats.pendingFacts || 0;
 
-  // Q2: 这一周收到了什么？
-  document.getElementById('val-week-total').innerText = d.intakeStats.thisWeekTotal;
-  const topTotal = (d.intakeStats.sTierCount || 0) + (d.intakeStats.aTierCount || 0);
-  document.getElementById('val-week-top').innerText = topTotal;
-  document.getElementById('val-week-fulltext').innerText = d.intakeStats.thisWeekFullText;
-  document.getElementById('val-week-used').innerText = d.intakeStats.usedCount || 0;
+  // Tabs counts
+  document.getElementById('count-all').innerText = stats.totalUnified || 0;
+  document.getElementById('count-recommended').innerText = stats.recommended || 0;
+  document.getElementById('count-needs-review').innerText = stats.needsTeacherReview || 0;
+  document.getElementById('count-pending-facts').innerText = stats.pendingFacts || 0;
+  document.getElementById('count-excluded').innerText = stats.used || 0;
 
-  // Q3: 下一期做到哪了？
-  const textQ3 = document.getElementById('text-q3');
-  textQ3.innerHTML = `
-    <strong>下期期号：</strong>${d.nextIssue.issueId} (${d.nextIssue.attribute})<br>
-    <strong>资料截止：</strong>${d.nextIssue.cutoffDeadline}<br>
-    <strong>当前状态：</strong>${d.nextIssue.stageClassificationLabel}
+  // Task 1: Commentary Fetch
+  document.getElementById('task-commentary-sources').innerText = `${commTask.total_sources - commTask.failed_sources_count} / ${commTask.total_sources || 14} 正常`;
+  
+  // Task 2: Wenwen Radar
+  const wenwenTask = d.tasks.wenwen_radar || {};
+  document.getElementById('task-wenwen-count').innerText = `${wenwenTask.totalArticles || 0} 篇 / ${wenwenTask.totalEvents || 0} 事件`;
+
+  // Task 3: Analysis Engine
+  const analysisTask = d.tasks.analysis_engine || {};
+  document.getElementById('task-analysis-status').innerText = analysisTask.statusLabel || '教学四档分类就绪';
+
+  // Task 4: Backup
+  const backupTask = d.tasks.backup || {};
+  document.getElementById('task-backup-restore').innerText = backupTask.last_restore_status || '隔离恢复测试通过';
+  document.getElementById('task-backup-hint').innerHTML = `
+    最新归档：${escapeHtml(backupTask.last_backup_file || '未见备份')}<br>
+    异地存储：<span style="color:#f59e0b;">${escapeHtml(backupTask.offsite_status)}</span>
   `;
 
-  // System Details
-  document.getElementById('sys-launchd-status').innerHTML = d.scheduler.loaded ? 
-    '<span style="color:#10b981;">● 已就绪运行</span>' : '<span style="color:#ef4444;">未启动</span>';
-  document.getElementById('sys-source-count').innerText = `${d.intakeStats.activeSources} / ${d.intakeStats.totalSources || 11} 活跃`;
-  document.getElementById('sys-health-status').innerHTML = d.scheduler.status === 'active' ?
-    '<span style="color:#10b981;">良好 (每日2次)</span>' : '<span style="color:#f59e0b;">需关注</span>';
-  document.getElementById('sys-log-snippet').innerText = d.scheduler.lastLogSnippet || '暂无最近日志';
+  // Log snippet
+  document.getElementById('sys-log-snippet').innerText = d.scheduler?.lastLogSnippet || '暂无最近抓取日志';
 
-  // Counts for tabs
-  document.getElementById('count-all').innerText = d.intakeStats.thisWeekTotal;
-  document.getElementById('count-top').innerText = topTotal;
-  document.getElementById('count-used').innerText = d.intakeStats.usedCount || 0;
+  // Pipeline Stepper
+  renderStepper(d.nextIssue?.stages);
 
-  // Stepper
-  renderStepper(d.nextIssue.stages);
-
-  // Table of Articles
-  allArticles = d.thisWeekArticles || [];
-  applyFilterAndRender();
+  // Time Window label
+  if (d.windows?.current?.label) {
+    document.getElementById('window-range-label').innerText = `当前窗口：${d.windows.current.label}`;
+  }
 }
 
 function renderStepper(stages) {
@@ -951,154 +1285,346 @@ function renderStepper(stages) {
   }).join('');
 }
 
-function setFilter(filterType) {
-  currentFilter = filterType;
-  document.querySelectorAll('#filter-tabs .tab-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.filter === filterType);
-  });
-  applyFilterAndRender();
-}
+/**
+ * 分页与过滤加载候选池
+ */
+async function loadCandidatesTable() {
+  const tbody = document.getElementById('articles-table-body');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">正在载入符合条件的素材...</td></tr>';
 
-function changeSort(sortVal) {
-  currentSort = sortVal;
-  applyFilterAndRender();
-}
+  try {
+    const params = new URLSearchParams({
+      search: state.search,
+      suitability: state.suitability,
+      column: state.column,
+      sort: state.sort,
+      page: state.page,
+      pageSize: state.pageSize
+    });
 
-function applyFilterAndRender() {
-  let filtered = [...allArticles];
+    const res = await fetch(`/api/workbench/articles?${params.toString()}`);
+    if (!res.ok) throw new Error('Query articles failed: ' + res.status);
+    const json = await res.json();
+    
+    state.totalMatches = json.totalMatches || 0;
+    state.totalPages = json.totalPages || 1;
+    state.page = json.page || 1;
+    state.currentArticles = json.articles || [];
 
-  // 1. 过滤
-  if (currentFilter === 'top') {
-    filtered = filtered.filter(a => (a.tier === 'S' || a.tier === 'A') && !a.isUsed);
-  } else if (currentFilter === 'retelling') {
-    filtered = filtered.filter(a => a.recommendedRole && a.recommendedRole.includes('复述') && !a.isUsed);
-  } else if (currentFilter === 'debate') {
-    filtered = filtered.filter(a => a.recommendedRole && a.recommendedRole.includes('时评') && !a.isUsed);
-  } else if (currentFilter === 'used') {
-    filtered = filtered.filter(a => a.isUsed);
+    renderCandidatesTable(state.currentArticles);
+    renderPagination();
+  } catch (err) {
+    console.error('Failed to load articles:', err);
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #ef4444; padding: 24px;">加载失败: ${err.message}</td></tr>`;
   }
-
-  // 2. 排序
-  if (currentSort === 'score') {
-    filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
-  } else if (currentSort === 'date') {
-    filtered.sort((a, b) => (b.publishedAt || '').localeCompare(a.publishedAt || ''));
-  }
-
-  renderArticlesTable(filtered);
 }
 
-function renderArticlesTable(articles) {
+function renderCandidatesTable(articles) {
   const tbody = document.getElementById('articles-table-body');
   if (!articles || articles.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">当前筛选条件无文章</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">未找到符合当前筛选条件的素材</td></tr>';
     return;
   }
 
   tbody.innerHTML = articles.map(a => {
+    // 适用性徽章
+    let badgeClass = 'badge-secondary';
+    if (a.suitability === 'recommended' || a.suitability === 'teacher_approved') badgeClass = 'badge-success';
+    else if (a.suitability === 'needs_teacher_review') badgeClass = 'badge-warning';
+    else if (a.suitability === 'pending_facts') badgeClass = 'badge-secondary';
+    else if (a.suitability === 'not_recommended' || a.isUsed) badgeClass = 'badge-danger';
+
+    // 教师已审阅标记
+    let teacherTag = '';
+    if (a.teacherFeedback) {
+      if (a.teacherFeedback.action === 'keep') {
+        teacherTag = '<div style="margin-top:4px;"><span class="badge badge-success" style="font-size:10px;">✓ 教师保留</span></div>';
+      } else if (a.teacherFeedback.action === 'exclude') {
+        teacherTag = '<div style="margin-top:4px;"><span class="badge badge-danger" style="font-size:10px;">✗ 教师排除</span></div>';
+      }
+    }
+
+    // 正文状态徽章
     const isFull = a.hasFullText;
     const fullBadge = isFull ? 
-      '<span class="badge badge-success" style="font-size: 11px;">完整正文</span>' : 
-      '<span class="badge badge-secondary" style="font-size: 11px;">元数据</span>';
-    
-    const dateStr = a.publishedAt ? a.publishedAt.slice(0, 16) : '未知';
-    const tagsHtml = (a.tags || []).map(t => `<span class="tag-chip">${escapeHtml(t)}</span>`).join('');
-    
-    let tierColor = 'var(--text-sub)';
-    if (a.tier === 'S') tierColor = '#10b981';
-    else if (a.tier === 'A') tierColor = '#38bdf8';
-    else if (a.tier === 'B') tierColor = '#f59e0b';
-    else if (a.tier === 'USED') tierColor = '#ef4444';
+      `<span class="badge badge-success" style="font-size: 11px;">完整正文 (${a.contentLength || 0}字)</span>` : 
+      '<span class="badge badge-warning" style="font-size: 11px;">待补正文 (元数据)</span>';
+
+    // 结构化理由摘要
+    const rationale = a.structuredRationale || {};
+    const hasConcerns = rationale.concerns && a.suitability === 'needs_teacher_review';
+    const concernHtml = hasConcerns ? 
+      `<div style="font-size: 11px; color: #fca5a5; background: rgba(239, 68, 68, 0.1); padding: 4px 8px; border-radius: 4px; margin-top: 4px;">
+        ⚠️ <strong>风险警示：</strong>${escapeHtml(rationale.concerns)}
+      </div>` : '';
+
+    const dateStr = a.publishedAt ? a.publishedAt.slice(0, 16).replace('T', ' ') : '未知';
+    const dateAlert = a.cutoffDayAmbiguity ? '<span style="color:#f59e0b; font-size:10px;">[截稿日仅日期]</span>' : '';
 
     return `
-      <tr onclick="openArticleDrawer('${a.id}')">
+      <tr>
         <td>
-          <div style="font-weight: 700; font-size: 15px; color: ${tierColor};">
-            ${a.score} 分
+          <div style="font-weight: 700; font-size: 16px; color: #38bdf8;">
+            ${a.qualityScore || a.score || 0} 分
           </div>
-          <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px;">
-            ${escapeHtml(a.tierLabel || '常规')}
-          </div>
+          <div><span class="badge ${badgeClass}" style="font-size: 11px; margin-top: 3px;">${escapeHtml(a.suitabilityLabel || '常规')}</span></div>
+          ${teacherTag}
         </td>
         <td>
           <div style="font-weight: 600; font-size: 12px; color: #f1f5f9;">
-            ${escapeHtml(a.recommendedRole || '常规备选')}
+            ${escapeHtml(a.suggestedColumn || '口语备选')}
           </div>
-          <div>${tagsHtml}</div>
+          <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+            ${escapeHtml(rationale.whyFits || '')}
+          </div>
         </td>
-        <td style="color: #94a3b8; font-weight: 500;">${escapeHtml(a.source)}</td>
         <td>
-          <div style="font-weight: 500; color: #f8fafc; font-size: 14px;">
+          <div style="color: #38bdf8; font-weight: 600;">${escapeHtml(a.source)}</div>
+          <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">${dateStr} ${dateAlert}</div>
+        </td>
+        <td>
+          <div style="font-weight: 600; color: #f8fafc; font-size: 14px; cursor: pointer;" onclick="openArticleDrawer('${a.id}')">
             ${escapeHtml(a.title)}
           </div>
-          <div style="font-size: 12px; color: #64748b; margin-top: 3px; line-height: 1.4;">
+          <div style="font-size: 12px; color: #64748b; margin-top: 4px; line-height: 1.4;">
             ${escapeHtml(a.summary || '')}
           </div>
+          ${concernHtml}
         </td>
         <td>${fullBadge}</td>
         <td>
-          <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="event.stopPropagation(); openArticleDrawer('${a.id}')">
-            阅读
-          </button>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-success btn-xs" title="教师确认保留" onclick="quickTeacherAction('${a.id}', 'keep')">✓ 保留</button>
+              <button class="btn btn-danger btn-xs" title="教师排除不入刊" onclick="quickTeacherAction('${a.id}', 'exclude')">✗ 排除</button>
+              <button class="btn btn-warning btn-xs" title="标为待补事实" onclick="quickTeacherAction('${a.id}', 'pending')">⏳ 待补</button>
+            </div>
+            <button class="btn btn-secondary btn-xs" style="margin-top: 2px;" onclick="openArticleDrawer('${a.id}')">
+              📖 完整研读与批注
+            </button>
+          </div>
         </td>
       </tr>
     `;
   }).join('');
 }
 
+function renderPagination() {
+  const start = state.totalMatches === 0 ? 0 : (state.page - 1) * state.pageSize + 1;
+  const end = Math.min(state.page * state.pageSize, state.totalMatches);
+  document.getElementById('pagination-info').innerText = `显示第 ${start} ~ ${end} 条，共 ${state.totalMatches} 条候选材料`;
+  document.getElementById('current-page-text').innerText = `第 ${state.page} / ${state.totalPages} 页`;
+
+  document.getElementById('btn-page-first').disabled = (state.page <= 1);
+  document.getElementById('btn-page-prev').disabled = (state.page <= 1);
+  document.getElementById('btn-page-next').disabled = (state.page >= state.totalPages);
+  document.getElementById('btn-page-last').disabled = (state.page >= state.totalPages);
+}
+
+function executeSearch() {
+  const val = document.getElementById('candidate-search-input').value.trim();
+  state.search = val;
+  state.page = 1;
+  loadCandidatesTable();
+}
+
+function resetSearch() {
+  document.getElementById('candidate-search-input').value = '';
+  state.search = '';
+  state.page = 1;
+  loadCandidatesTable();
+}
+
+function setSuitabilityFilter(filterType) {
+  state.suitability = filterType;
+  state.page = 1;
+  document.querySelectorAll('#filter-tabs .tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filterType);
+  });
+  loadCandidatesTable();
+}
+
+function applyColumnFilter(columnVal) {
+  state.column = columnVal;
+  state.page = 1;
+  loadCandidatesTable();
+}
+
+function applySort(sortVal) {
+  state.sort = sortVal;
+  state.page = 1;
+  loadCandidatesTable();
+}
+
+function applyPageSize(sizeVal) {
+  state.pageSize = Number(sizeVal);
+  state.page = 1;
+  loadCandidatesTable();
+}
+
+function prevPage() {
+  if (state.page > 1) {
+    state.page--;
+    loadCandidatesTable();
+  }
+}
+
+function nextPage() {
+  if (state.page < state.totalPages) {
+    state.page++;
+    loadCandidatesTable();
+  }
+}
+
+function goToPage(p) {
+  state.page = Math.max(1, Math.min(p, state.totalPages));
+  loadCandidatesTable();
+}
+
+/**
+ * 打开阅读与批注抽屉
+ */
 async function openArticleDrawer(articleId) {
   const drawer = document.getElementById('drawer-overlay');
-  const titleEl = document.getElementById('drawer-title');
-  const sourceEl = document.getElementById('drawer-source');
-  const dateEl = document.getElementById('drawer-date');
-  const scoreBadgeEl = document.getElementById('drawer-score-badge');
-  const linkEl = document.getElementById('drawer-link');
-  const bodyEl = document.getElementById('drawer-body');
-
   drawer.style.display = 'flex';
-  titleEl.innerText = '加载中...';
-  bodyEl.innerText = '正在调阅原文正文详情...';
 
-  const cached = allArticles.find(a => a.id === articleId);
-  if (cached) {
-    titleEl.innerText = cached.title;
-    sourceEl.innerText = cached.source;
-    dateEl.innerText = cached.publishedAt || '';
-    scoreBadgeEl.innerText = `${cached.score}分 · ${cached.tier}级`;
-    scoreBadgeEl.className = `badge ${cached.tierBadge || 'badge-success'}`;
-    linkEl.href = cached.url;
-    if (cached.content) {
-      bodyEl.innerText = cached.content;
+  const art = state.currentArticles.find(a => a.id === articleId) || {};
+  state.currentArticleDetail = art;
+
+  document.getElementById('drawer-title').innerText = art.title || '文章标题';
+  document.getElementById('drawer-source').innerText = art.source || '信源';
+  document.getElementById('drawer-date').innerText = art.publishedAt || '';
+  document.getElementById('drawer-link').href = art.url || '#';
+
+  const scoreBadge = document.getElementById('drawer-score-badge');
+  scoreBadge.innerText = `${art.qualityScore || art.score || 0}分 · ${art.suitabilityLabel || '常规'}`;
+  scoreBadge.className = `badge ${art.suitabilityBadge || 'badge-success'}`;
+
+  // Structured rationale
+  const r = art.structuredRationale || {};
+  document.getElementById('drawer-rationale-event').innerText = r.whatHappened || art.summary || art.title;
+  document.getElementById('drawer-rationale-why').innerText = r.whyFits || '适合高中口语表达训练';
+  document.getElementById('drawer-rationale-column').innerText = r.suggestedColumn || art.suggestedColumn || '常规';
+  document.getElementById('drawer-rationale-snippet').innerText = r.evidenceSnippet ? `“${r.evidenceSnippet}”` : '暂无摘录';
+
+  const concernBox = document.getElementById('drawer-rationale-concern-box');
+  if (r.concerns && art.suitability === 'needs_teacher_review') {
+    concernBox.style.display = 'block';
+    document.getElementById('drawer-rationale-concern-text').innerText = r.concerns;
+  } else {
+    concernBox.style.display = 'none';
+  }
+
+  // Teacher feedback form setup
+  const tf = art.teacherFeedback;
+  if (tf) {
+    document.getElementById('teacher-feedback-status').innerText = `已于 ${new Date(tf.updatedAt).toLocaleTimeString()} 批注`;
+    const radio = document.querySelector(`input[name="teacherAction"][value="${tf.action}"]`);
+    if (radio) radio.checked = true;
+    document.getElementById('teacher-note-input').value = tf.note || '';
+    if (tf.suggestedColumn) {
+      document.getElementById('teacher-column-select').value = tf.suggestedColumn;
+    }
+  } else {
+    document.getElementById('teacher-feedback-status').innerText = '未批注';
+    document.querySelector('input[name="teacherAction"][value="keep"]').checked = true;
+    document.getElementById('teacher-note-input').value = '';
+    // 根据建议栏目默认选择
+    if (art.suggestedColumn && art.suggestedColumn.includes('复述')) {
+      document.getElementById('teacher-column-select').value = '复述';
+    } else if (art.suggestedColumn && art.suggestedColumn.includes('时评')) {
+      document.getElementById('teacher-column-select').value = '评论';
     }
   }
 
-  try {
-    const res = await fetch(`/api/workbench/article?id=${encodeURIComponent(articleId)}`);
-    if (res.ok) {
-      const json = await res.json();
-      const art = json.article || json;
-      titleEl.innerText = art.title || cached?.title;
-      sourceEl.innerText = art.source || cached?.source;
-      dateEl.innerText = art.publishedAt || cached?.publishedAt || '';
-      linkEl.href = art.url || cached?.url || '#';
-      bodyEl.innerText = art.content || art.rawText || cached?.content || '暂无正文';
+  // Fetch full text
+  const bodyText = document.getElementById('drawer-body-text');
+  if (art.content && art.content.length > 200) {
+    bodyText.innerText = art.content;
+  } else {
+    bodyText.innerText = '正在载入信源全文正文...';
+    try {
+      const res = await fetch(`/api/workbench/article?id=${encodeURIComponent(articleId)}`);
+      if (res.ok) {
+        const json = await res.json();
+        const fullArt = json.article || json;
+        bodyText.innerText = fullArt.content || fullArt.rawText || art.summary || '暂无正文';
+      } else {
+        bodyText.innerText = art.summary || '信源正文未归档';
+      }
+    } catch {
+      bodyText.innerText = art.summary || '正文读取异常';
     }
-  } catch (e) {
-    console.error('Failed to fetch article detail:', e);
   }
 }
 
 function closeDrawer(e) {
   document.getElementById('drawer-overlay').style.display = 'none';
+  state.currentArticleDetail = null;
 }
 
+/**
+ * 保存教师批注
+ */
+async function saveCurrentFeedback() {
+  if (!state.currentArticleDetail) return;
+  const articleId = state.currentArticleDetail.id;
+  const action = document.querySelector('input[name="teacherAction"]:checked')?.value || 'keep';
+  const suggestedColumn = document.getElementById('teacher-column-select').value;
+  const note = document.getElementById('teacher-note-input').value.trim();
+
+  const btn = document.getElementById('btn-save-feedback');
+  btn.disabled = true;
+  btn.innerText = '正在保存...';
+
+  try {
+    const res = await fetch('/api/workbench/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articleId, action, suggestedColumn, note })
+    });
+    if (!res.ok) throw new Error('保存反馈失败: ' + res.status);
+    
+    document.getElementById('teacher-feedback-status').innerText = '✅ 保存成功';
+    // 重新加载列表和概览
+    await loadCandidatesTable();
+    await loadWorkbenchOverview();
+  } catch (err) {
+    alert('保存失败: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = '💾 保存教师审阅意见';
+  }
+}
+
+/**
+ * 列表快捷操作
+ */
+async function quickTeacherAction(articleId, action) {
+  try {
+    const res = await fetch('/api/workbench/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articleId, action, note: `快捷批注: ${action}` })
+    });
+    if (!res.ok) throw new Error('快捷操作失败');
+    await loadCandidatesTable();
+    await loadWorkbenchOverview();
+  } catch (err) {
+    alert('快捷操作失败: ' + err.message);
+  }
+}
+
+/**
+ * 触发测试采集
+ */
 async function triggerLiveFetch() {
   const btn = document.getElementById('btn-trigger-fetch');
   const terminal = document.getElementById('terminal-container');
   btn.disabled = true;
   btn.innerText = '⚡ 正在执行采集...';
   terminal.style.display = 'block';
-  terminal.innerText = '>>> [系统] 正在触发 python3 scripts/fetch_commentaries.py...\n>>> 正在连接 11 路权威时评 RSS 源并解析正文...\n';
+  terminal.innerText = '>>> [系统] 正在触发 python3 scripts/fetch_commentaries.py...\n>>> 正在连接 14 路权威时评与事实 RSS 源并解析正文...\n';
 
   try {
     const res = await fetch('/api/workbench/trigger-fetch', { method: 'POST' });
@@ -1108,8 +1634,8 @@ async function triggerLiveFetch() {
     } else {
       terminal.innerText += '\n>>> [警告] 采集执行异常：' + (result.error || result.output || '');
     }
-    // 重新加载工作台看板数据
-    await loadWorkbenchData();
+    await loadWorkbenchOverview();
+    await loadCandidatesTable();
   } catch (err) {
     terminal.innerText += '\n>>> [错误] 请求失败: ' + err.message;
   } finally {

@@ -14,7 +14,7 @@ import { XMLParser } from 'fast-xml-parser';
 import { mountWenwen } from './wenwen/routes.js';
 import { startWenwenScheduler } from './wenwen/scheduler.js';
 import { isReadOnlyMode, isOfflineMode } from './config.js';
-import { getWorkbenchData, getArticleDetail } from './workbench_api.js';
+import { getWorkbenchData, getArticleDetail, queryCandidates, getTeacherFeedback, saveTeacherFeedback } from './workbench_api.js';
 import { exec } from 'node:child_process';
 
 const PORT = Number(process.env.PORT || 3000);
@@ -406,6 +406,61 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ ok: true, article: art }));
       return;
+    }
+    if (url.pathname === '/api/workbench/articles') {
+      const search = url.searchParams.get('search') || '';
+      const suitability = url.searchParams.get('suitability') || 'all';
+      const column = url.searchParams.get('column') || 'all';
+      const source = url.searchParams.get('source') || 'all';
+      const sort = url.searchParams.get('sort') || 'score';
+      const page = Number(url.searchParams.get('page') || 1);
+      const pageSize = Number(url.searchParams.get('pageSize') || 20);
+
+      const result = await queryCandidates({
+        search,
+        suitability,
+        column,
+        source,
+        sort,
+        page,
+        pageSize,
+      });
+
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache' });
+      res.end(JSON.stringify({ ok: true, ...result }));
+      return;
+    }
+    if (url.pathname === '/api/workbench/feedback') {
+      if (req.method === 'GET') {
+        const feedback = getTeacherFeedback();
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache' });
+        res.end(JSON.stringify({ ok: true, feedback }));
+        return;
+      }
+      if (req.method === 'POST') {
+        if (isReadOnlyMode()) {
+          res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: false, error: '只读模式已启用，无法修改教师反馈' }));
+          return;
+        }
+        let body = '';
+        for await (const chunk of req) body += chunk;
+        try {
+          const payload = JSON.parse(body);
+          if (!payload.articleId) {
+            res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify({ ok: false, error: '缺少 articleId' }));
+            return;
+          }
+          const saved = saveTeacherFeedback(payload.articleId, payload);
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: true, saved }));
+        } catch (err) {
+          res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: false, error: '无效的 JSON: ' + err.message }));
+        }
+        return;
+      }
     }
     if (url.pathname.startsWith('/issues/')) {
       const relPath = decodeURIComponent(url.pathname.replace(/^\/issues\//, ''));

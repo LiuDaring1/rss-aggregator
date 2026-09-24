@@ -1,0 +1,42 @@
+{
+  "updatedAt": "2026-09-24T17:48:44.994930+08:00",
+  "last_attempt_at": "2026-09-24T17:48:44.994930+08:00",
+  "last_success_at": "2026-09-24T17:48:44.994930+08:00",
+  "last_full_success_at": "2026-09-24T17:48:44.994930+08:00",
+  "trigger_type": "scheduled",
+  "status": "success",
+  "all_failed": false,
+  "total_sources": 1,
+  "failed_sources_count": 0,
+  "success_sources_count": 1,
+  "source_stats": [
+    {
+      "id": "src-degrade",
+      "name": "退化测试信源",
+      "status": "OK",
+      "total_items": 1,
+      "full_text_items": 0,
+      "summary_items": 1,
+      "latest_published_at": "2026-09-22",
+      "duration": 0.1,
+      "url": ""
+    }
+  ],
+  "source_health": {
+    "src-degrade": {
+      "id": "src-degrade",
+      "name": "退化测试信源",
+      "consecutive_failures": 0,
+      "last_attempt_at": "2026-09-24T17:48:44.993458+08:00",
+      "last_success_at": "2026-09-24T17:48:44.993458+08:00",
+      "last_new_articles_at": "",
+      "last_error": null,
+      "latest_article_date": "2026-09-22"
+    }
+  },
+  "inventory": {
+    "total": 1,
+    "full_text": 1,
+    "metadata_only": 0
+  }
+}

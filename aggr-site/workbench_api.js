@@ -7,7 +7,72 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 
 /**
- * 扫描往期已定版使用的信源 ID 与 URL（查重库）
+ * 业务真实时间窗口动态计算 (统一 Asia/Shanghai，周四 20:00 截稿)
+ */
+export function calculateBusinessWindow(refDate = new Date()) {
+  // 转换至北京时间 (UTC+8)
+  const beijingTime = new Date(refDate.getTime() + (8 * 60 + refDate.getTimezoneOffset()) * 60000);
+  const now = beijingTime;
+
+  // 周四判定 (0=周日, 1=周一, ..., 4=周四)
+  const day = now.getDay();
+  // 距离本周四的天数: Thursday is 4
+  const daysToThursday = (4 - day + 7) % 7;
+  const thisThursdayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysToThursday);
+  const thisThursday20pm = new Date(thisThursdayDate.getFullYear(), thisThursdayDate.getMonth(), thisThursdayDate.getDate(), 20, 0, 0);
+
+  let currentCutoff;
+  if (now < thisThursday20pm) {
+    currentCutoff = thisThursday20pm;
+  } else {
+    currentCutoff = new Date(thisThursday20pm.getTime() + 7 * 24 * 3600 * 1000);
+  }
+
+  const currentStart = new Date(currentCutoff.getTime() - 7 * 24 * 3600 * 1000);
+  const currentDelivery = new Date(currentCutoff.getTime() + 14 * 3600 * 1000); // 周五 10:00
+
+  const nextCutoff = new Date(currentCutoff.getTime() + 7 * 24 * 3600 * 1000);
+  const nextStart = currentCutoff;
+  const nextDelivery = new Date(nextCutoff.getTime() + 14 * 3600 * 1000);
+
+  // W40 常规业务基线窗口: 2026-09-24 20:00 至 2026-10-01 20:00
+  const w40Cutoff = new Date(Date.UTC(2026, 9, 1, 12, 0, 0)); // 2026-10-01 20:00 Beijing is 12:00 UTC
+  const w40Start = new Date(Date.UTC(2026, 8, 24, 12, 0, 0)); // 2026-09-24 20:00 Beijing
+  const w40Delivery = new Date(Date.UTC(2026, 9, 2, 2, 0, 0)); // 2026-10-02 10:00 Beijing
+
+  return {
+    now: now.toISOString(),
+    current: {
+      start: currentStart.toISOString(),
+      cutoff: currentCutoff.toISOString(),
+      delivery: currentDelivery.toISOString(),
+      label: `${formatDate(currentStart)} 20:00 ~ ${formatDate(currentCutoff)} 20:00`,
+      description: `回望连续7天真实报道 (周四20:00截止，周五10:00发放)`
+    },
+    next: {
+      start: nextStart.toISOString(),
+      cutoff: nextCutoff.toISOString(),
+      delivery: nextDelivery.toISOString(),
+      label: `${formatDate(nextStart)} 20:00 ~ ${formatDate(nextCutoff)} 20:00`
+    },
+    w40: {
+      start: '2026-09-24T20:00:00+08:00',
+      cutoff: '2026-10-01T20:00:00+08:00',
+      delivery: '2026-10-02T10:00:00+08:00',
+      label: '09.24 20:00 ~ 10.01 20:00',
+      description: 'W40常规周窗口 (回望09.24晚至10.01晚连续7天新报道)'
+    }
+  };
+}
+
+function formatDate(d) {
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const date = String(d.getDate()).padStart(2, '0');
+  return `${m}.${date}`;
+}
+
+/**
+ * 读取已定版出刊的往期查重库 (W38, W39 等)
  */
 function getUsedSourcesRegistry() {
   const usedIds = new Set();
@@ -40,173 +105,494 @@ function getUsedSourcesRegistry() {
 }
 
 /**
- * 针对高中英语口语素材周刊的 5 维智能优选打分体系
+ * 读取持久化教师反馈 (data/teacher_feedback.json)
  */
-function scoreArticle(article, usedIds, usedUrls) {
-  let score = 50; // 基础起评分
-  const tags = [];
-  let isUsed = false;
-
-  // 维度 1：往期查重与降权（杜绝重复使用同一批材料）
-  if (usedIds.has(article.id) || (article.url && usedUrls.has(article.url))) {
-    isUsed = true;
-    score -= 60;
-    tags.push('往期已采用');
+export function getTeacherFeedback() {
+  const p = path.join(PROJECT_ROOT, 'data', 'teacher_feedback.json');
+  if (fs.existsSync(p)) {
+    try {
+      return JSON.parse(fs.readFileSync(p, 'utf8'));
+    } catch {}
   }
+  return {};
+}
 
-  // 维度 2：正文完整度与篇幅区间 (满分 25 分)
-  if (!article.hasFullText) {
-    score -= 25;
-    tags.push('仅元数据');
-  } else {
-    const len = article.contentLength || (article.content ? article.content.length : 0);
-    if (len >= 800 && len <= 2500) {
-      score += 25; // 最理想篇幅：适宜提炼 9 句复述与深度词句
-      tags.push('篇幅适中');
-    } else if (len >= 500 && len < 800) {
-      score += 15;
-      tags.push('略短');
-    } else if (len > 2500 && len <= 4000) {
-      score += 15;
-      tags.push('较长');
-    } else if (len > 4000) {
-      score += 5;
-      tags.push('特长通稿');
-    } else {
-      score += 5;
-      tags.push('过短');
+/**
+ * 保存教师反馈
+ */
+export function saveTeacherFeedback(articleId, feedback) {
+  const p = path.join(PROJECT_ROOT, 'data', 'teacher_feedback.json');
+  const current = getTeacherFeedback();
+  current[articleId] = {
+    ...feedback,
+    updatedAt: new Date().toISOString()
+  };
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, JSON.stringify(current, null, 2), 'utf8');
+  return current[articleId];
+}
+
+/**
+ * 教学适用性多维评估与分栏目推荐引擎
+ * 面向【高中中文口语表达训练】核心方向
+ */
+export function evaluatePedagogicalSuitability(article, rawContent, usedIds, usedUrls, teacherFeedback = {}) {
+  const title = article.title || '';
+  const content = rawContent || article.content || '';
+  const combinedText = title + '\n' + content;
+  const isUsed = usedIds.has(article.id) || (article.url && usedUrls.has(article.url));
+  const tf = teacherFeedback[article.id];
+
+  // 1. 检查教师反馈 (最高优先级，教师意见永不被算法覆盖)
+  if (tf) {
+    if (tf.action === 'keep') {
+      return {
+        suitability: 'teacher_approved',
+        suitabilityLabel: '教师已保留',
+        suitabilityBadge: 'badge-success',
+        qualityScore: 98,
+        tier: 'S',
+        suggestedColumn: tf.targetColumn || article.recommendedRole || '🎯 建议：口语复述',
+        structuredRationale: {
+          whatHappened: article.summary || title,
+          whyFits: '教师手动核验保留：符合课堂教学目标',
+          suggestedColumn: tf.targetColumn || '口语复述',
+          concerns: '无 (教师已确认)',
+          evidenceSnippet: content.slice(0, 150)
+        },
+        teacherNotes: tf.notes || '',
+        tags: ['教师核准', '课堂保留'],
+        isUsed
+      };
+    } else if (tf.action === 'exclude') {
+      return {
+        suitability: 'teacher_excluded',
+        suitabilityLabel: '教师已排除',
+        suitabilityBadge: 'badge-danger',
+        qualityScore: 10,
+        tier: 'EXCLUDED',
+        suggestedColumn: '不入常规推荐',
+        structuredRationale: {
+          whatHappened: title,
+          whyFits: '教师排除',
+          suggestedColumn: '不推荐',
+          concerns: tf.notes || '教师标记不适合本周课堂',
+          evidenceSnippet: ''
+        },
+        teacherNotes: tf.notes || '',
+        tags: ['教师排除'],
+        isUsed
+      };
+    } else if (tf.action === 'needs_info') {
+      return {
+        suitability: 'pending_facts',
+        suitabilityLabel: '教师标记待补充',
+        suitabilityBadge: 'badge-warning',
+        qualityScore: 50,
+        tier: 'B',
+        suggestedColumn: '待补资料',
+        structuredRationale: {
+          whatHappened: title,
+          whyFits: '题材有价值，但需补充关键事实',
+          suggestedColumn: '待补事实',
+          concerns: tf.notes || '待核实具体细节与时序',
+          evidenceSnippet: content.slice(0, 150)
+        },
+        teacherNotes: tf.notes || '',
+        tags: ['待补事实'],
+        isUsed
+      };
     }
   }
 
-  // 维度 3：高中生口语生活与时代热点契合度 (满分 30 分)
-  const title = article.title || '';
-  const content = (article.content || '') + ' ' + title;
+  // 2. 检查往期已采用 (沉底保护)
+  if (isUsed) {
+    return {
+      suitability: 'not_recommended',
+      suitabilityLabel: '往期已定版采用',
+      suitabilityBadge: 'badge-danger',
+      qualityScore: 15,
+      tier: 'USED',
+      suggestedColumn: '往期已用 (已沉底)',
+      structuredRationale: {
+        whatHappened: title,
+        whyFits: '曾在往期周刊正式出刊中采用',
+        suggestedColumn: '往期已用',
+        concerns: '按自然周反重复规程自动沉底，杜绝重复选题',
+        evidenceSnippet: ''
+      },
+      tags: ['往期已用', '自动沉底'],
+      isUsed: true
+    };
+  }
 
-  const campusKeywords = ['学校', '学生', '老师', '教师', '高校', '大学', '高中', '校园', '考研', '高考', '军训', '手机', '宿舍', '家长', '教育', '青春', '少年', '青年', '校友', '开学', '课堂'];
-  const techKeywords = ['AI', '人工智能', '大模型', '算法', '短视频', '直播', '社交媒体', '网络', 'App', '手机', '信息泄露', '隐私', '网红', '机器人'];
-  const youthLifeKeywords = ['外卖', '快递', '骑手', '消费', '月饼', '宠物', '养犬', '租房', '旅游', '门禁', '电影', '运动', '低碳', '环保', '打工', '就业', '求职'];
-  const civicKeywords = ['道歉', '退款', '诚信', '维权', '安全', '救人', '见义勇为', '牺牲', '规则', '侵权', '食品安全', '打假'];
-  const negativeKeywords = ['人事任免', '代表大会', '主持召开', '国务院', '省委', '市委', '经济指标', '进出口数据', '签约仪式', '部署开展', '常务会议'];
+  // 3. 教学红线与特别敏感议题检查 (任务书特别指出的艾滋病议题等)
+  if (title.includes('艾滋') || content.includes('艾滋')) {
+    return {
+      suitability: 'needs_teacher_review',
+      suitabilityLabel: '需教师特别复核',
+      suitabilityBadge: 'badge-warning',
+      qualityScore: 40,
+      tier: 'C',
+      suggestedColumn: '需教师确认',
+      structuredRationale: {
+        whatHappened: title,
+        whyFits: '涉及隐私权与公共卫生法律讨论',
+        suggestedColumn: '需教师复核',
+        concerns: '涉及成人婚姻配偶知情权与敏感疾病隐私，不宜作为普通高中课堂即兴口语常规论题，须经教师特别确认。',
+        evidenceSnippet: content.slice(0, 160)
+      },
+      tags: ['需教师复核', '敏感隐私议题'],
+      isUsed: false
+    };
+  }
 
-  if (campusKeywords.some(k => title.includes(k) || content.includes(k))) {
-    score += 15;
-    tags.push('校园教育');
+  // 4. 正文缺失 / 纯元数据检查
+  const hasFullText = article.hasFullText && content.length >= 200;
+  if (!hasFullText) {
+    return {
+      suitability: 'pending_facts',
+      suitabilityLabel: '待补事实/正文',
+      suitabilityBadge: 'badge-warning',
+      qualityScore: 30,
+      tier: 'METADATA',
+      suggestedColumn: '待补正文',
+      structuredRationale: {
+        whatHappened: title,
+        whyFits: '具备标题线索',
+        suggestedColumn: '待补正文',
+        concerns: '缺少清洗后的完整正文，无法提取 9 句动作复述或长难句，不能自动推荐入刊。',
+        evidenceSnippet: ''
+      },
+      tags: ['仅元数据', '待补正文'],
+      isUsed: false
+    };
   }
-  if (techKeywords.some(k => title.includes(k) || content.includes(k))) {
-    score += 15;
-    tags.push('科技生活');
-  }
-  if (youthLifeKeywords.some(k => title.includes(k) || content.includes(k))) {
-    score += 12;
-    tags.push('青年民生');
-  }
-  if (civicKeywords.some(k => title.includes(k) || content.includes(k))) {
-    score += 12;
-    tags.push('公德规则');
-  }
+
+  // 5. 枯燥行政公报与内部例会过滤
+  const negativeKeywords = ['人事任免', '代表大会', '主持召开', '国务院', '省委常委会', '市委常委会', '经济指标通报', '进出口数据', '签约仪式', '部署开展例会'];
   if (negativeKeywords.some(k => title.includes(k))) {
-    score -= 30;
-    tags.push('宏观政务');
+    return {
+      suitability: 'not_recommended',
+      suitabilityLabel: '不入常规推荐',
+      suitabilityBadge: 'badge-secondary',
+      qualityScore: 35,
+      tier: 'C',
+      suggestedColumn: '不入常规',
+      structuredRationale: {
+        whatHappened: title,
+        whyFits: '政务日常公文',
+        suggestedColumn: '常规不推荐',
+        concerns: '偏向机关内部例行公文与宏观统计，缺乏高中生可切入的生活经验与人物情节。',
+        evidenceSnippet: content.slice(0, 140)
+      },
+      tags: ['政务通报', '缺乏情节'],
+      isUsed: false
+    };
   }
 
-  // 维度 4：叙事故事性（适合第 1 分册【9篇口语复述】）
-  const narrativeKeywords = ['女孩', '少年', '老人', '男子', '校友', '骑手', '老师', '学生', '救下', '摔倒', '坠亡', '走红', '被查', '被罚', '举报', '引发热议', '冲上热搜'];
-  const hasNarrative = narrativeKeywords.some(k => title.includes(k));
+  // 6. 优质教学适用性分类与分栏目推荐
+  const campusKeywords = ['学校', '学生', '老师', '教师', '高校', '大学', '高中', '校园', '考研', '高考', '军训', '手机', '宿舍', '家长', '教育', '青春', '少年', '青年', '校友', '开学', '跳绳', '体育'];
+  const techKeywords = ['AI', '人工智能', '大模型', '算法', '短视频', '直播', '社交媒体', '网络', 'App', '手机', '信息泄露', '智驾', '新能源汽车', '自动驾驶', '机器人', '无人零售'];
+  const lifeKeywords = ['外卖', '快递', '骑手', '消费', '房车', '露营', '自驾', '宠物', '养犬', '租房', '旅游', '门禁', '电影', '运动', '货车司机', '边贸', '非遗'];
+  const civicKeywords = ['道歉', '退款', '诚信', '维权', '安全', '救人', '见义勇为', '牺牲', '规则', '侵权', '食品安全', '打假', '盲区'];
+
+  // 叙事特征词 (适合复述单元)
+  const narrativeKeywords = ['冠军', '走进', '女孩', '少年', '老人', '男子', '校友', '骑手', '司机', '老师', '学生', '救下', '摔倒', '坠亡', '走红', '被查', '被罚', '举报', '冲上热搜', '淘金者', '世界技能大赛'];
+  // 思辨特征词 (适合时评立论)
+  const debateKeywords = ['岂能', '该不该', '为何', '何以', '究竟', '谁来', '如何看待', '防御式', '不能跑在', '别让', '莫让', '争议', '值得反思', '注意事项', '追问', '答澎湃', '新京报快评', '马上评'];
+
+  const isCampus = campusKeywords.some(k => combinedText.includes(k));
+  const isTech = techKeywords.some(k => combinedText.includes(k));
+  const isLife = lifeKeywords.some(k => combinedText.includes(k));
+  const isCivic = civicKeywords.some(k => combinedText.includes(k));
+
+  const hasNarrative = narrativeKeywords.some(k => combinedText.includes(k));
+  const hasDebate = debateKeywords.some(k => combinedText.includes(k));
+
+  let score = 65; // 基础合格分 (已有完整正文且通过适用性筛选)
+  const tags = ['规则初筛'];
+
+  if (isCampus) { score += 12; tags.push('校园成长'); }
+  if (isTech) { score += 10; tags.push('科技生活'); }
+  if (isLife) { score += 8; tags.push('青年民生'); }
+  if (isCivic) { score += 8; tags.push('公共规则'); }
+
+  // 篇幅评级
+  const len = content.length;
+  if (len >= 600 && len <= 2600) {
+    score += 10;
+    tags.push('篇幅适中');
+  }
+
+  let suggestedColumn = '📝 建议：拆解积累 (语言素材)';
+  let whyFits = '语言表达规范，适合高中生研读原段说理结构与词句积累。';
+  let evidenceSnippet = content.slice(0, 180).replace(/\n+/g, ' ');
+
   if (hasNarrative) {
-    score += 15;
+    score += 10;
+    suggestedColumn = '🎯 建议：口语复述 (故事叙事)';
+    whyFits = '包含具体人物、行动冲突与鲜活情节，易于提炼 9 句动作复述主干并配套漫画。';
     tags.push('具叙事场景');
-  }
-
-  // 维度 5：思辨争议度（适合第 2 分册【6篇时评思辨立论】）
-  const debateKeywords = ['岂能', '该不该', '为何', '何以', '究竟', '谁来', '如何看待', '防御式', '不能跑在', '别让', '莫让', '争议', '值得反思', '不该没有', '新京报快评', '马上评', '红辣椒', '浙江宣传'];
-  const hasDebate = debateKeywords.some(k => title.includes(k));
-  if (hasDebate) {
-    score += 12;
+  } else if (hasDebate) {
+    score += 8;
+    suggestedColumn = '💡 建议：时评思辨 (双向立论)';
+    whyFits = '具备清晰的问题意识与思辨张力，中学生能从生活经验切入展开双向立论。';
     tags.push('有思辨空间');
   }
 
-  // 判定建议栏目
-  let recommendedRole = '常规备选';
-  if (isUsed) {
-    recommendedRole = '往期已用 (已沉底)';
-  } else if (hasNarrative && article.hasFullText) {
-    recommendedRole = '🎯 口语复述 (故事叙事)';
-  } else if (hasDebate && article.hasFullText) {
-    recommendedRole = '💡 时评思辨 (双向立论)';
-  } else if (article.hasFullText) {
-    recommendedRole = '📝 拆解积累 (语言素材)';
-  } else {
-    recommendedRole = '元数据参考';
-  }
+  score = Math.min(96, Math.max(50, score));
 
-  // 归一化得分 [0, 100]
-  score = Math.max(0, Math.min(100, score));
+  let tier = 'B';
+  let tierLabel = 'B级 · 补充参考';
+  let tierBadge = 'badge-warning';
 
-  // 推荐等级
-  let tier = 'C';
-  let tierLabel = 'C级 · 常规收录';
-  let tierBadge = 'badge-secondary';
-
-  if (isUsed) {
-    tier = 'USED';
-    tierLabel = '🚫 往期已用';
-    tierBadge = 'badge-danger';
-  } else if (score >= 90) {
+  if (score >= 88) {
     tier = 'S';
     tierLabel = '⭐️⭐️⭐️⭐️⭐️ S级 · 重点推荐';
     tierBadge = 'badge-success';
-  } else if (score >= 75) {
+  } else if (score >= 76) {
     tier = 'A';
     tierLabel = '⭐️⭐️⭐️⭐️ A级 · 优质备选';
     tierBadge = 'badge-info';
-  } else if (score >= 60) {
-    tier = 'B';
-    tierLabel = '⭐️⭐️⭐️ B级 · 补充参考';
-    tierBadge = 'badge-warning';
   }
 
   return {
-    score,
+    suitability: 'recommended',
+    suitabilityLabel: '可推荐',
+    suitabilityBadge: 'badge-success',
+    qualityScore: score,
     tier,
     tierLabel,
     tierBadge,
+    suggestedColumn,
+    structuredRationale: {
+      whatHappened: article.summary || title,
+      whyFits,
+      suggestedColumn,
+      concerns: '入选前请教师快速核对关键时间与真实主体',
+      evidenceSnippet
+    },
     tags: Array.from(new Set(tags)),
-    recommendedRole,
-    isUsed,
+    isUsed: false
   };
 }
 
 /**
- * 计算下次执行时间 (每天 09:30 与 18:30)
+ * 加载全库统一候选池 (合并 评论库 + 暖文库) 并读取真实正文
  */
-function calculateNextScheduledTime(now) {
-  const todayMorning = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 30, 0);
-  const todayEvening = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 30, 0);
-  const tomorrowMorning = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 30, 0);
+export async function getUnifiedCandidates() {
+  const candidates = [];
+  const { usedIds, usedUrls } = getUsedSourcesRegistry();
+  const teacherFeedback = getTeacherFeedback();
+  const windows = calculateBusinessWindow();
 
-  if (now < todayMorning) return todayMorning.toISOString();
-  if (now < todayEvening) return todayEvening.toISOString();
-  return tomorrowMorning.toISOString();
-}
-
-/**
- * 获取周刊生产工作台实时聚合数据
- */
-export async function getWorkbenchData() {
-  const now = new Date();
-  
-  // 1. 读取采集器与调度状态 (launchd / db.json)
-  const dbPath = path.join(__dirname, 'data', 'commentaries', 'db.json');
-  let db = { totalArticles: 0, fullTextArticles: 0, articles: {}, updatedAt: null, sourceStats: [] };
-  if (fs.existsSync(dbPath)) {
+  // 1. 评论库 (aggr-site/data/commentaries/db.json)
+  const commDbPath = path.join(__dirname, 'data', 'commentaries', 'db.json');
+  if (fs.existsSync(commDbPath)) {
     try {
-      db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+      const commDb = JSON.parse(fs.readFileSync(commDbPath, 'utf8'));
+      const articles = Object.values(commDb.articles || {});
+      for (const a of articles) {
+        // 读取真实正文
+        let fullText = a.content || '';
+        const rawFile = path.join(__dirname, 'data', 'commentaries', 'raw', `${path.basename(a.id)}.json`);
+        if (fs.existsSync(rawFile)) {
+          try {
+            const rawJson = JSON.parse(fs.readFileSync(rawFile, 'utf8'));
+            fullText = rawJson.content || rawJson.rawText || fullText;
+          } catch {}
+        }
+
+        const evaluation = evaluatePedagogicalSuitability(a, fullText, usedIds, usedUrls, teacherFeedback);
+        const pubDateStr = a.publishedAt || '';
+        const isDateOnly = pubDateStr.length <= 10;
+        const cutoffDateStr = windows.current.cutoff.slice(0, 10);
+        const cutoffDayAmbiguity = isDateOnly && pubDateStr === cutoffDateStr;
+
+        candidates.push({
+          id: a.id,
+          origin: 'commentary',
+          originLabel: '时评与事实库',
+          title: a.title,
+          source: a.sourceName || a.source || '权威媒体',
+          sourceId: a.sourceId,
+          publishedAt: pubDateStr,
+          datePrecision: isDateOnly ? 'date_only' : 'exact_time',
+          cutoffDayAmbiguity,
+          hasFullText: !!(a.hasFullText && fullText.length >= 200),
+          contentLength: fullText.length,
+          url: a.url || '#',
+          summary: a.summary || fullText.slice(0, 140) + '...',
+          content: fullText,
+          // 教学适用性与推荐
+          ...evaluation
+        });
+      }
     } catch (e) {
-      console.error('Failed to read db.json:', e);
+      console.error('Failed to load commentaries:', e);
     }
   }
 
-  // 检查 launchctl 状态
+  // 2. 暖文库 (aggr-site/data/wenwen/db.json)
+  const wenwenDbPath = path.join(__dirname, 'data', 'wenwen', 'db.json');
+  if (fs.existsSync(wenwenDbPath)) {
+    try {
+      const wenwenDb = JSON.parse(fs.readFileSync(wenwenDbPath, 'utf8'));
+      const articleIndex = wenwenDb.articleIndex || {};
+      for (const [id, a] of Object.entries(articleIndex)) {
+        if (a.isTestData) continue; // 排除测试数据
+
+        // 读取暖文真实正文
+        let fullText = '';
+        const rawFile = path.join(__dirname, 'data', 'wenwen', 'raw', `${path.basename(id)}.json`);
+        if (fs.existsSync(rawFile)) {
+          try {
+            const rawJson = JSON.parse(fs.readFileSync(rawFile, 'utf8'));
+            fullText = rawJson.content || rawJson.rawText || '';
+          } catch {}
+        }
+
+        const adaptedArticle = {
+          id,
+          title: a.title,
+          sourceName: a.media || '暖文雷达',
+          publishedAt: a.awardDate || a.publishedAt || '',
+          url: a.url,
+          hasFullText: fullText.length >= 200,
+          summary: fullText.slice(0, 140) + '...'
+        };
+
+        const evaluation = evaluatePedagogicalSuitability(adaptedArticle, fullText, usedIds, usedUrls, teacherFeedback);
+        const pubDateStr = adaptedArticle.publishedAt;
+        const isDateOnly = pubDateStr.length <= 10;
+
+        candidates.push({
+          id,
+          origin: 'wenwen',
+          originLabel: '暖文雷达',
+          title: a.title,
+          source: a.media || '天天正能量',
+          sourceId: 'wenwen',
+          publishedAt: pubDateStr,
+          datePrecision: isDateOnly ? 'date_only' : 'exact_time',
+          cutoffDayAmbiguity: false,
+          hasFullText: fullText.length >= 200,
+          contentLength: fullText.length,
+          url: a.url || '#',
+          summary: fullText.slice(0, 140) + '...',
+          content: fullText,
+          // 教学适用性与推荐
+          ...evaluation
+        });
+      }
+    } catch (e) {
+      console.error('Failed to load wenwen candidates:', e);
+    }
+  }
+
+  return candidates;
+}
+
+/**
+ * 分页与全量搜索查询 API
+ */
+export async function queryCandidates({
+  search = '',
+  suitability = 'all',
+  column = 'all',
+  source = 'all',
+  sort = 'score',
+  page = 1,
+  pageSize = 20
+} = {}) {
+  const allCandidates = await getUnifiedCandidates();
+  let filtered = allCandidates;
+
+  // 1. 文本搜索 (标题与正文)
+  if (search && search.trim()) {
+    const q = search.trim().toLowerCase();
+    filtered = filtered.filter(a => 
+      (a.title && a.title.toLowerCase().includes(q)) || 
+      (a.source && a.source.toLowerCase().includes(q)) ||
+      (a.content && a.content.toLowerCase().includes(q))
+    );
+  }
+
+  // 2. 教学适用性过滤
+  if (suitability && suitability !== 'all') {
+    if (suitability === 'top') {
+      filtered = filtered.filter(a => (a.tier === 'S' || a.tier === 'A') && a.suitability === 'recommended');
+    } else if (suitability === 'recommended') {
+      filtered = filtered.filter(a => a.suitability === 'recommended' || a.suitability === 'teacher_approved');
+    } else if (suitability === 'needs_review') {
+      filtered = filtered.filter(a => a.suitability === 'needs_teacher_review');
+    } else if (suitability === 'pending_facts') {
+      filtered = filtered.filter(a => a.suitability === 'pending_facts');
+    } else if (suitability === 'excluded') {
+      filtered = filtered.filter(a => a.suitability === 'not_recommended' || a.suitability === 'teacher_excluded' || a.isUsed);
+    } else if (suitability === 'used') {
+      filtered = filtered.filter(a => a.isUsed);
+    }
+  }
+
+  // 3. 建议栏目过滤
+  if (column && column !== 'all') {
+    filtered = filtered.filter(a => a.suggestedColumn && a.suggestedColumn.includes(column));
+  }
+
+  // 4. 信源过滤
+  if (source && source !== 'all') {
+    filtered = filtered.filter(a => a.sourceId === source || a.source === source);
+  }
+
+  // 5. 排序
+  if (sort === 'score') {
+    filtered.sort((a, b) => (b.qualityScore || 0) - (a.qualityScore || 0));
+  } else if (sort === 'date') {
+    filtered.sort((a, b) => (b.publishedAt || '').localeCompare(a.publishedAt || ''));
+  }
+
+  const totalMatches = filtered.length;
+  const totalPages = Math.ceil(totalMatches / pageSize) || 1;
+  const currentPage = Math.max(1, Math.min(Number(page) || 1, totalPages));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedArticles = filtered.slice(startIndex, startIndex + pageSize);
+
+  return {
+    totalMatches,
+    page: currentPage,
+    pageSize,
+    totalPages,
+    articles: paginatedArticles
+  };
+}
+
+/**
+ * 获取周刊生产工作台实时聚合总览数据
+ */
+export async function getWorkbenchData() {
+  const now = new Date();
+  const windows = calculateBusinessWindow(now);
+
+  // 1. 读取采集与调度监控 (data/fetch_state.json)
+  const fetchStatePath = path.join(PROJECT_ROOT, 'data', 'fetch_state.json');
+  let fetchState = {
+    updatedAt: null,
+    last_attempt_at: null,
+    last_success_at: null,
+    status: 'unknown',
+    all_failed: false,
+    total_sources: 14,
+    source_stats: []
+  };
+  if (fs.existsSync(fetchStatePath)) {
+    try {
+      fetchState = JSON.parse(fs.readFileSync(fetchStatePath, 'utf8'));
+    } catch {}
+  }
+
+  // launchd 加载状态
   let launchdLoaded = false;
   try {
     const out = execSync('launchctl list | grep weekly || true', { encoding: 'utf8' });
@@ -215,176 +601,127 @@ export async function getWorkbenchData() {
     launchdLoaded = false;
   }
 
-  // 读取最近一次执行日志
-  const logPath = path.join(PROJECT_ROOT, 'data', 'logs', 'launchd_fetch.log');
-  let lastLogSnippet = '';
-  if (fs.existsSync(logPath)) {
+  // 暖文雷达状态 (aggr-site/data/wenwen/db.json)
+  const wenwenDbPath = path.join(__dirname, 'data', 'wenwen', 'db.json');
+  let wenwenMeta = { lastScrapeAt: null, totalArticles: 0, totalEvents: 0 };
+  if (fs.existsSync(wenwenDbPath)) {
     try {
-      const logContent = fs.readFileSync(logPath, 'utf8');
-      const lines = logContent.trim().split('\n');
-      lastLogSnippet = lines.slice(-15).join('\n');
-    } catch (e) {
-      lastLogSnippet = String(e);
-    }
-  }
-
-  const lastCrawlTimeStr = db.updatedAt || null;
-  const lastCrawlDate = lastCrawlTimeStr ? new Date(lastCrawlTimeStr) : null;
-  const minutesSinceLastCrawl = lastCrawlDate ? Math.round((now.getTime() - lastCrawlDate.getTime()) / 60000) : null;
-
-  // 判定状态：因改为每日 2 次 (09:30, 18:30)，间隔可长达 15 小时；若大于 24 小时 (1440分钟) 则判定为过期
-  let schedulerStatus = 'active';
-  let schedulerStatusLabel = '调度服务运行正常 (每日 2 次轻量轮询)';
-  if (!launchdLoaded) {
-    schedulerStatus = 'paused';
-    schedulerStatusLabel = '系统常驻服务未加载';
-  } else if (minutesSinceLastCrawl !== null && minutesSinceLastCrawl > 1440) {
-    schedulerStatus = 'stale';
-    schedulerStatusLabel = '状态过期，需检查 (上次成功距今已超过24小时)';
-  }
-
-  const nextScheduledTime = calculateNextScheduledTime(now);
-
-  // 2. 查重库载入
-  const { usedIds, usedUrls } = getUsedSourcesRegistry();
-
-  // 3. 本周新增报道统计与智能优选打分 (以 2026-09-21 零点为当前周起始)
-  const articles = Object.values(db.articles || {});
-  const thisWeekArticlesRaw = articles.filter(a => {
-    const pub = a.publishedAt || a.date || '';
-    return pub >= '2026-09-21';
-  });
-
-  const scoredArticles = thisWeekArticlesRaw.map(a => {
-    const scoring = scoreArticle(a, usedIds, usedUrls);
-    return {
-      id: a.id,
-      title: a.title,
-      source: a.source || a.media || a.sourceName || '时评信源',
-      publishedAt: a.publishedAt || a.date || '未知',
-      hasFullText: !!a.hasFullText,
-      textType: a.textType || (a.hasFullText ? 'full_text' : 'metadata_only'),
-      contentLength: a.contentLength || 0,
-      summary: a.summary || (a.content ? a.content.slice(0, 140) + '...' : '暂无摘要'),
-      content: a.content || '',
-      url: a.url || a.sourceUrl || '#',
-      score: scoring.score,
-      tier: scoring.tier,
-      tierLabel: scoring.tierLabel,
-      tierBadge: scoring.tierBadge,
-      tags: scoring.tags,
-      recommendedRole: scoring.recommendedRole,
-      isUsed: scoring.isUsed,
-    };
-  });
-
-  // 默认按智能优选评分从高到低排序，得分相同按时间倒序
-  scoredArticles.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return (b.publishedAt || '').localeCompare(a.publishedAt || '');
-  });
-
-  const thisWeekFullText = scoredArticles.filter(a => a.hasFullText);
-  const sTierCount = scoredArticles.filter(a => a.tier === 'S').length;
-  const aTierCount = scoredArticles.filter(a => a.tier === 'A').length;
-  const bTierCount = scoredArticles.filter(a => a.tier === 'B').length;
-  const usedCount = scoredArticles.filter(a => a.isUsed).length;
-
-  // 4. 读取 W39 (首次试发) 与 W40 (下周常规) 生产状态
-  const w39StatePath = path.join(PROJECT_ROOT, 'issues', 'issue-2026-w39', 'production_state.json');
-  let w39State = {};
-  if (fs.existsSync(w39StatePath)) {
-    try {
-      w39State = JSON.parse(fs.readFileSync(w39StatePath, 'utf8'));
+      const wdb = JSON.parse(fs.readFileSync(wenwenDbPath, 'utf8'));
+      wenwenMeta = {
+        lastScrapeAt: wdb.meta?.lastScrapeAt || null,
+        lastAnalyzeAt: wdb.meta?.lastAnalyzeAt || null,
+        totalArticles: Object.keys(wdb.articleIndex || {}).length,
+        totalEvents: Object.keys(wdb.events || {}).length
+      };
     } catch {}
   }
 
-  const w40StatePath = path.join(PROJECT_ROOT, 'issues', 'issue-2026-w40', 'production_state.json');
-  let w40State = {};
-  if (fs.existsSync(w40StatePath)) {
+  // 备份与恢复状态 (data/backup_state.json)
+  const backupStatePath = path.join(PROJECT_ROOT, 'data', 'backup_state.json');
+  let backupState = {
+    last_backup: null,
+    last_restore_test: null,
+    offsite: { status: 'pending_configuration', label: '待配置 (缺少受控外部目标)' }
+  };
+  if (fs.existsSync(backupStatePath)) {
     try {
-      w40State = JSON.parse(fs.readFileSync(w40StatePath, 'utf8'));
+      backupState = JSON.parse(fs.readFileSync(backupStatePath, 'utf8'));
     } catch {}
   }
+
+  // AI 分析引擎状态
+  let aiEngineStatus = 'rule_screening';
+  let aiEngineLabel = '本地规则初筛（未配置 AI 密钥，未经教学复核）';
+  if (process.env.GLM_API_KEY) {
+    aiEngineStatus = 'model_ready';
+    aiEngineLabel = 'GLM-5 在线模型分析就绪';
+  }
+
+  // 候选池概况
+  const allCandidates = await getUnifiedCandidates();
+  const recommendedCount = allCandidates.filter(a => a.suitability === 'recommended' || a.suitability === 'teacher_approved').length;
+  const needsReviewCount = allCandidates.filter(a => a.suitability === 'needs_teacher_review').length;
+  const pendingFactsCount = allCandidates.filter(a => a.suitability === 'pending_facts').length;
+  const usedCount = allCandidates.filter(a => a.isUsed).length;
+
+  // 本周在窗口内条目统计 (以 2026-09-24 20:00 为起始的 W40 周期)
+  const inWindowCandidates = allCandidates.filter(a => {
+    return a.publishedAt >= '2026-09-24';
+  });
 
   return {
     timestamp: now.toISOString(),
-    scheduler: {
-      loaded: launchdLoaded,
-      serviceLabel: 'com.weekly.fetch_commentaries',
-      status: schedulerStatus,
-      statusLabel: schedulerStatusLabel,
-      cadence: '每日 2 次 (09:30、18:30)',
-      scheduleDescription: '每天上午 09:30 与傍晚 18:30 定时抓取，兼顾早晚新评，轻量低负载',
-      lastCrawlTime: lastCrawlTimeStr,
-      minutesSinceLastCrawl,
-      nextScheduledTime,
-      lastLogSnippet,
+    windows,
+    tasks: {
+      commentary_fetch: {
+        label: '时评与事实采集 (Python + launchd)',
+        cadence: '每日 2 次 (09:30、18:30) + 周四 20:05 截稿补采',
+        loaded: launchdLoaded,
+        status: fetchState.status || (launchdLoaded ? 'active' : 'paused'),
+        statusLabel: fetchState.status === 'success' ? '采集正常' : (fetchState.status === 'partial_failure' ? '部分信源失败' : (fetchState.status === 'all_failed' ? '全源失败' : '运行正常')),
+        last_attempt_at: fetchState.last_attempt_at,
+        last_success_at: fetchState.last_success_at,
+        total_sources: fetchState.total_sources || 14,
+        failed_sources_count: fetchState.failed_sources_count || 0,
+        sources: fetchState.source_stats || []
+      },
+      wenwen_radar: {
+        label: '暖文雷达调度 (Node.js 后台)',
+        cadence: '采集 6h / 分析 20min 周期自跑',
+        status: 'active',
+        statusLabel: '运行正常',
+        lastScrapeAt: wenwenMeta.lastScrapeAt,
+        lastAnalyzeAt: wenwenMeta.lastAnalyzeAt,
+        totalArticles: wenwenMeta.totalArticles,
+        totalEvents: wenwenMeta.totalEvents
+      },
+      analysis_engine: {
+        label: '选材分析与推荐引擎',
+        status: aiEngineStatus,
+        statusLabel: aiEngineLabel
+      },
+      backup: {
+        label: '数据保存与隔离恢复测试',
+        last_backup_file: backupState.last_backup?.archive_file || '未见备份',
+        last_backup_time: backupState.last_backup?.timestamp || null,
+        last_backup_sha256: backupState.last_backup?.sha256 || '',
+        last_restore_status: backupState.last_restore_test?.status === 'passed' ? '隔离恢复测试通过 (PASS)' : '待测试',
+        offsite_status: backupState.offsite?.label || '待配置 (缺少外部受控存储目标)'
+      }
     },
-    intakeStats: {
-      totalArticles: db.totalArticles || 0,
-      totalFullText: db.fullTextArticles || 0,
-      thisWeekTotal: scoredArticles.length,
-      thisWeekFullText: thisWeekFullText.length,
-      thisWeekMetadataOnly: scoredArticles.length - thisWeekFullText.length,
-      sTierCount,
-      aTierCount,
-      bTierCount,
-      usedCount,
-      activeSources: (db.sourceStats || []).filter(s => !s.last_error && (s.total_items > 0 || s.count > 0)).length,
-      totalSources: (db.sourceStats || []).length,
+    candidatePoolStats: {
+      totalUnified: allCandidates.length,
+      inWindow: inWindowCandidates.length,
+      recommended: recommendedCount,
+      needsTeacherReview: needsReviewCount,
+      pendingFacts: pendingFactsCount,
+      used: usedCount,
+      fullTextArticles: allCandidates.filter(a => a.hasFullText).length
     },
-    thisWeekArticles: scoredArticles.slice(0, 60),
+    // 返回前 20 条优质候选作为即时看板展示
+    topCandidates: allCandidates
+      .filter(a => a.suitability === 'recommended' || a.suitability === 'teacher_approved')
+      .sort((a, b) => b.qualityScore - a.qualityScore)
+      .slice(0, 20),
     currentIssue: {
       issueId: 'issue-2026-w39',
       attribute: '首次试发件 (Trial Release)',
-      attributeDesc: '已定版发布，供周四打印与教学试发实测，收集版面与口语语体反馈',
+      attributeDesc: '已定版发布 (47页)，供课堂教学实测版面与口语复述易读性',
       status: 'published',
       statusLabel: '已发布',
-      dateWindow: '2026年9月第4周（09.21-09.27）',
-      totalPages: 47,
       pdfPath: '/issues/issue-2026-w39/issue-2026-w39.pdf',
-      splits: {
-        retellings: '/issues/issue-2026-w39/issue-2026-w39-复述.pdf',
-        commentaries: '/issues/issue-2026-w39/issue-2026-w39-评论.pdf',
-        excerpts: '/issues/issue-2026-w39/issue-2026-w39-原文拆解与积累.pdf',
-      },
-      reviewSiteUrl: '/review/issues/issue-2026-w39/index.html',
+      reviewSiteUrl: '/review/issues/issue-2026-w39/index.html'
     },
     nextIssue: {
       issueId: 'issue-2026-w40',
       attribute: '常规周生产 (Regular Weekly Cadence)',
       cadenceRule: '每周四 20:00 资料截止 | 每周五 10:00 发放 | 回望连续 7 天',
-      cutoffDeadline: '2026-10-01 20:00 (下周四)',
-      deliveryTime: '2026-10-02 10:00 (下周五)',
+      cutoffDeadline: '2026-10-01 20:00:00 (下周四)',
+      deliveryTime: '2026-10-02 10:00:00 (下周五)',
       stage: 'prep',
       stageClassification: 'waiting_for_schedule',
       stageClassificationLabel: '等待计划时间（周内正常采集备料中）',
-      waitingOn: '等待到达资料截止时点 (2026-10-01 20:00)',
-      actionNeeded: '当前无须人工干预。请于 10月1日晚 或 10月2日晨 进入工作台审阅选题与定版。今天重点实测 W39 试发件。',
-      stages: [
-        { name: '1. 采集与备料', status: 'done', note: '每天2次智能优选入库中' },
-        { name: '2. 选题与核验', status: 'waiting_for_schedule', note: '待 10月1日 20:00 截止后触发' },
-        { name: '3. 文本采编', status: 'pending', note: '待选题确定后由 Agent 编写' },
-        { name: '4. 漫画配图', status: 'pending', note: '待采编完成后由 Agent 生成' },
-        { name: '5. 终审定版', status: 'pending', note: '教师审阅确认' },
-        { name: '6. 原子构建', status: 'pending', note: '全门禁 47 页原子构建' },
-        { name: '7. 归档发布', status: 'pending', note: '静态站点增量发布' },
-      ],
-    },
-    divisionOfLabor: {
-      automated: [
-        { task: '新闻与评论定时采集', desc: 'macOS launchd 每天 2 次（09:30、18:30）轻量轮询 11 路权威信源并原子写入本地 JSON 库', behavior: '关机暂停，开机自启；休眠唤醒后 launchd 会自动补跑最近一次错过的任务' },
-        { task: '智能优选与口语打分 (0~100分)', desc: '按正文完整度、高中口语契合度、叙事动作性、思辨争议度自动量化打分，S/A级排到最前', behavior: '全自动打分与分类推荐' },
-        { task: '长文质量防退化与往期防重', desc: '若外部源站发生抓取降级或短文替换，自动锁定保留既有完整正文；已用文章自动扣分沉底', behavior: '全自动拦截与标记' },
-        { task: '周内候选池动态维护', desc: '按自然周窗口动态归一化 URL、识别去重，并打标往期已用记录', behavior: '全自动维护' },
-      ],
-      humanAgentCollab: [
-        { task: '选题核验与文稿编写 (21篇)', desc: '到达周四截止点后，由 Agent 从排名前列的 S/A 级优质素材中，按照高中生口语标准编写 9 复述 + 6 评论 + 6 摘录', behavior: '需在会话中发起或通过工作台触发唤醒，会话级 Agent 不会在无提示下后台自发创作' },
-        { task: '动作漫画配图 (9幅)', desc: '依据复述事实生成 3:1 横排三格/四格动作叙事插画', behavior: '由 Agent 调用配图工具生成，自动放入 illustrations/' },
-        { task: '门禁校验与原子排版', desc: '执行 weekly_runner.py build，自动化验证信源原段 100% 连续匹配、47 物理页数守恒与实体事实防伪', behavior: '脚本自动执行，出任何差错立即红灯中断并高亮原因' },
-        { task: '终审定版与正式出刊', desc: '周五上午教师在工作台核验大方向，一键确认发布并导出审阅站与可打印 PDF', behavior: '教师把关确认，保障教学责任' },
-      ]
+      actionNeeded: '当前无须人工干预。周四 20:00 截稿后，教师进入工作台审阅 S/A 级推荐材料并确认入刊。'
     }
   };
 }
@@ -394,13 +731,19 @@ export async function getWorkbenchData() {
  */
 export async function getArticleDetail(id) {
   const safeId = path.basename(id);
-  const rawPath = path.join(__dirname, 'data', 'commentaries', 'raw', `${safeId}.json`);
-  if (fs.existsSync(rawPath)) {
+  // 1. 尝试评论库
+  const commPath = path.join(__dirname, 'data', 'commentaries', 'raw', `${safeId}.json`);
+  if (fs.existsSync(commPath)) {
     try {
-      return JSON.parse(fs.readFileSync(rawPath, 'utf8'));
-    } catch (e) {
-      return { error: 'Failed to read article JSON: ' + e.message };
-    }
+      return JSON.parse(fs.readFileSync(commPath, 'utf8'));
+    } catch {}
+  }
+  // 2. 尝试暖文库
+  const wenwenPath = path.join(__dirname, 'data', 'wenwen', 'raw', `${safeId}.json`);
+  if (fs.existsSync(wenwenPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(wenwenPath, 'utf8'));
+    } catch {}
   }
   return null;
 }

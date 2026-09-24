@@ -331,17 +331,19 @@ class ProcessLock:
 def run_fetch_cycle(
     sources_file: str = SOURCES_FILE,
     output_dir: str = DEFAULT_OUTPUT_DIR,
-    index_file: str = DEFAULT_INDEX_FILE
+    index_file: str = DEFAULT_INDEX_FILE,
+    trigger_type: str = "scheduled"
 ) -> Dict[str, Any]:
     """执行一次完整的信源抓取与原子更新周期 (带单实例锁与正文防退化保护)"""
     lock_path = index_file + ".lock"
     with ProcessLock(lock_path):
-        return _run_fetch_cycle_core(sources_file, output_dir, index_file)
+        return _run_fetch_cycle_core(sources_file, output_dir, index_file, trigger_type=trigger_type)
 
 def _run_fetch_cycle_core(
     sources_file: str = SOURCES_FILE,
     output_dir: str = DEFAULT_OUTPUT_DIR,
-    index_file: str = DEFAULT_INDEX_FILE
+    index_file: str = DEFAULT_INDEX_FILE,
+    trigger_type: str = "scheduled"
 ) -> Dict[str, Any]:
     os.makedirs(output_dir, exist_ok=True)
     alt_dir = os.path.join(ROOT_DIR, "data", "raw", "commentaries")
@@ -552,6 +554,52 @@ def _run_fetch_cycle_core(
     failed_sources = [s for s in all_source_stats if s["status"] == "FAILED"]
     all_failed = (len(failed_sources) == len(enabled_sources)) and (len(enabled_sources) > 0)
 
+    # 5. 持久化记录统一结构化的采集调度状态 data/fetch_state.json
+    state_file = os.path.join(ROOT_DIR, "data", "fetch_state.json")
+    prev_state = {}
+    if os.path.exists(state_file):
+        try:
+            with open(state_file, "r", encoding="utf-8") as sf:
+                prev_state = json.load(sf)
+        except Exception:
+            pass
+
+    # 关键业务判定：全源失败时绝对不得更新 last_success_at
+    last_success_at = prev_state.get("last_success_at")
+    if not all_failed:
+        last_success_at = now_iso
+
+    last_full_success_at = prev_state.get("last_full_success_at")
+    if len(failed_sources) == 0 and len(enabled_sources) > 0:
+        last_full_success_at = now_iso
+
+    fetch_status = "all_failed" if all_failed else ("partial_failure" if len(failed_sources) > 0 else "success")
+    fetch_state = {
+        "updatedAt": now_iso,
+        "last_attempt_at": now_iso,
+        "last_success_at": last_success_at,
+        "last_full_success_at": last_full_success_at,
+        "trigger_type": trigger_type,
+        "status": fetch_status,
+        "all_failed": all_failed,
+        "total_sources": len(enabled_sources),
+        "failed_sources_count": len(failed_sources),
+        "success_sources_count": len(enabled_sources) - len(failed_sources),
+        "source_stats": all_source_stats,
+        "source_health": existing_health,
+        "inventory": {
+            "total": db_data["totalArticles"],
+            "full_text": db_data["fullTextArticles"],
+            "metadata_only": db_data["totalArticles"] - db_data["fullTextArticles"]
+        }
+    }
+    atomic_save_json(state_file, fetch_state)
+    alt_state_file = os.path.join(os.path.dirname(index_file), "fetch_state.json")
+    try:
+        atomic_save_json(alt_state_file, fetch_state)
+    except Exception:
+        pass
+
     summary = {
         "timestamp": now_iso,
         "last_new_articles_at": db_data.get("lastNewArticlesAt"),
@@ -566,7 +614,8 @@ def _run_fetch_cycle_core(
         "source_stats": all_source_stats,
         "source_health": existing_health,
         "degraded_events": db_data.get("degradedEvents", []),
-        "all_failed": all_failed
+        "all_failed": all_failed,
+        "fetch_state": fetch_state
     }
     return summary
 
@@ -594,13 +643,14 @@ def main():
     parser.add_argument("--index-file", default=DEFAULT_INDEX_FILE, help="累积索引 db.json 路径")
     parser.add_argument("--daemon", action="store_true", help="常驻调度模式")
     parser.add_argument("--interval", type=int, default=3600, help="常驻调度模式下的抓取间隔 (秒)")
+    parser.add_argument("--trigger-type", default="scheduled", choices=["scheduled", "manual_test", "cutoff_sweep", "startup_catchup"], help="触发源类型")
     args = parser.parse_args()
 
     if args.daemon:
         print(f"🔄 启动评论持久化常驻调度器 (间隔: {args.interval} 秒)...")
         while True:
             try:
-                res = run_fetch_cycle(args.sources, args.output_dir, args.index_file)
+                res = run_fetch_cycle(args.sources, args.output_dir, args.index_file, trigger_type=args.trigger_type)
                 print_source_status_table(res)
                 if res.get("all_failed"):
                     print("⚠️ 警告: 本轮采集所有核心源均失败，等待下次重试...", file=sys.stderr)
@@ -609,7 +659,7 @@ def main():
             time.sleep(args.interval)
     else:
         try:
-            res = run_fetch_cycle(args.sources, args.output_dir, args.index_file)
+            res = run_fetch_cycle(args.sources, args.output_dir, args.index_file, trigger_type=args.trigger_type)
             print_source_status_table(res)
             if res.get("all_failed"):
                 print("❌ [严重错误] 所有启用信源全部抓取失败，终止运行！", file=sys.stderr)

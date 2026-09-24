@@ -13,17 +13,28 @@
     <string>/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project</string>
     <key>StartCalendarInterval</key>
     <array>
+        <!-- 每日上午 09:30 定时采集早评 -->
         <dict>
             <key>Hour</key>
             <integer>9</integer>
             <key>Minute</key>
             <integer>30</integer>
         </dict>
+        <!-- 每日傍晚 18:30 定时采集日间全量深度评论 -->
         <dict>
             <key>Hour</key>
             <integer>18</integer>
             <key>Minute</key>
             <integer>30</integer>
+        </dict>
+        <!-- 每周四 20:05 截稿点专属补采轮 (Weekday: 4 为周四) -->
+        <dict>
+            <key>Weekday</key>
+            <integer>4</integer>
+            <key>Hour</key>
+            <integer>20</integer>
+            <key>Minute</key>
+            <integer>5</integer>
         </dict>
     </array>
     <key>RunAtLoad</key>
