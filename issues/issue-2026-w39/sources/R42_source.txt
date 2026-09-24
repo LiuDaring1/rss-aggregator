@@ -1,13 +1,15 @@
 【来源原件档案与采编依据】
 信源标识：comm-rednet-qingjiao-dcfc085f54
 报道标题：3000万招NPC，谁来给“百万年薪”兜底？
-发布媒体：红辣椒·青椒融评
+发布媒体：红辣椒·青椒融评 (首发) / 今日科学·科学时评 (转载镜像)
 撰稿作者：刘文熙
-发布日期：2026-09-22
+首发日期：2026-09-22
 抓取链路：Feed (http://127.0.0.1:1200/rednet/channel/33216) -> 原始重定向页 (https://hlj.rednet.cn/nograb/646043/66/16305660.html)
-最终链接：https://hlj.rednet.cn/content/646853/56/14298712.html
+原始链接：https://hlj.rednet.cn/content/646853/56/14298712.html
+可验证公开镜像：http://www.scitoday.cn/zhuanlan/info.aspx?id=43993 (今日科学《科学时评》2026/9/23 14:23:05 署名红网刘文熙，HTTP 200 在线可查)
 首次采集：2026-09-23T12:28:05.577745+08:00 (接口重定向未解析出正文，记录为 metadata_only)
-补录核验：2026-09-23T18:05:00+08:00 (通过主流报道快照镜像回读完成长文补全)
+补录核验：2026-09-23T18:05:00+08:00 (通过报道快照镜像回读完成长文补全)
+外部独立认证：2026-09-24 已通过公开在线镜像 (scitoday.cn) 独立拉取正文并比对，正文7个自然段1280字，哈希 def7d8285e15d0e1ccfb9f12d788e9613fb27ee22f14134a89e4cb16dfa3b764 100%逐字一致
 本地原件：aggr-site/data/commentaries/raw/comm-rednet-qingjiao-dcfc085f54.json
 版本库镜像快照：issues/issue-2026-w39/sources/R42_raw_snapshot.json (已纳入Git跟踪供外部独立核查)
 正文范围：评论正文共 7 自然段，1280 汉字 (不含栏目导航与作者介绍)

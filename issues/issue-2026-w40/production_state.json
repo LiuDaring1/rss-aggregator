@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "issue_id": "issue-2026-w40",
+  "time_window": "2026-09-21 ~ 2026-09-24",
+  "created_at": "2026-09-24T12:37:02.866361+08:00",
+  "last_updated_at": "2026-09-24T12:37:02.867922+08:00",
+  "current_stage": "candidates_selected",
+  "target_quota": {
+    "retellings": 9,
+    "commentaries": 6,
+    "excerpts": 6,
+    "total_pages": 47
+  },
+  "target_units": {
+    "retellings": [],
+    "commentaries": [],
+    "excerpts": []
+  },
+  "unit_freeze_status": {},
+  "stages": {
+    "prep": {
+      "status": "done",
+      "updated_at": "2026-09-24T12:37:02.867494+08:00",
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": "信源采集与备料初始化完成"
+    },
+    "candidates_selected": {
+      "status": "in_progress",
+      "updated_at": "2026-09-24T12:37:02.867901+08:00",
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": "等待 Agent/教师核验选题"
+    },
+    "drafting": {
+      "status": "pending",
+      "updated_at": null,
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": ""
+    },
+    "comics": {
+      "status": "pending",
+      "updated_at": null,
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": ""
+    },
+    "review": {
+      "status": "pending",
+      "updated_at": null,
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": ""
+    },
+    "build": {
+      "status": "pending",
+      "updated_at": null,
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": ""
+    },
+    "published": {
+      "status": "pending",
+      "updated_at": null,
+      "completed_items": [],
+      "pending_items": [],
+      "failed_items": [],
+      "notes": ""
+    }
+  },
+  "artifacts": {}
+}
