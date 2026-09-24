@@ -14,12 +14,15 @@ import { XMLParser } from 'fast-xml-parser';
 import { mountWenwen } from './wenwen/routes.js';
 import { startWenwenScheduler } from './wenwen/scheduler.js';
 import { isReadOnlyMode, isOfflineMode } from './config.js';
+import { getWorkbenchData, getArticleDetail } from './workbench_api.js';
+import { exec } from 'node:child_process';
 
 const PORT = Number(process.env.PORT || 3000);
 const CACHE_TTL = Number(process.env.CACHE_TTL || 5 * 60 * 1000); // 源抓取缓存 5 分钟
 const FETCH_TIMEOUT = Number(process.env.FETCH_TIMEOUT || 60000); // 单源抓取超时 60 秒（含详情页抓取）
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = path.resolve(ROOT, '..');
 const PUBLIC_DIR = path.join(ROOT, 'public');
 
 /** 每次请求时读取 sources.json，改配置即时生效，无需重启 */
@@ -327,6 +330,9 @@ const MIME = {
   '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.pdf': 'application/pdf',
   '.ico': 'image/x-icon',
 };
 
@@ -357,6 +363,91 @@ const server = http.createServer(async (req, res) => {
   try {
     if (url.pathname.startsWith('/wenwen/')) {
       await mountWenwen(req, res, url);
+      return;
+    }
+    if (url.pathname === '/workbench' || url.pathname === '/workbench/') {
+      res.writeHead(302, { Location: '/workbench.html' });
+      res.end();
+      return;
+    }
+    if (url.pathname === '/api/workbench/data') {
+      const data = await getWorkbenchData();
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache' });
+      res.end(JSON.stringify(data));
+      return;
+    }
+    if (url.pathname === '/api/workbench/trigger-fetch') {
+      const pythonExec = '/opt/miniconda3/bin/python3';
+      const scriptPath = path.join(PROJECT_ROOT, 'scripts', 'fetch_commentaries.py');
+      exec(`${pythonExec} "${scriptPath}"`, { cwd: PROJECT_ROOT, timeout: 60000 }, async (err, stdout, stderr) => {
+        if (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: false, error: String(err), stderr }));
+          return;
+        }
+        const data = await getWorkbenchData();
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ ok: true, output: stdout, data }));
+      });
+      return;
+    }
+    if (url.pathname === '/api/workbench/article') {
+      const id = url.searchParams.get('id');
+      if (!id) {
+        res.writeHead(400).end('Missing id parameter');
+        return;
+      }
+      const art = await getArticleDetail(id);
+      if (!art) {
+        res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ ok: false, error: '文章不存在或尚未入库' }));
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: true, article: art }));
+      return;
+    }
+    if (url.pathname.startsWith('/issues/')) {
+      const relPath = decodeURIComponent(url.pathname.replace(/^\/issues\//, ''));
+      const full = path.normalize(path.join(PROJECT_ROOT, 'issues', relPath));
+      if (!full.startsWith(path.join(PROJECT_ROOT, 'issues'))) {
+        res.writeHead(403).end('Forbidden');
+        return;
+      }
+      try {
+        const info = await stat(full);
+        if (!info.isFile()) throw new Error('not file');
+        const data = await readFile(full);
+        res.writeHead(200, {
+          'Content-Type': MIME[path.extname(full).toLowerCase()] || 'application/octet-stream',
+          'Cache-Control': 'no-cache',
+        });
+        res.end(data);
+      } catch {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('404 Issue File Not Found');
+      }
+      return;
+    }
+    if (url.pathname.startsWith('/review/')) {
+      const relPath = decodeURIComponent(url.pathname.replace(/^\/review\//, '')) || 'index.html';
+      const full = path.normalize(path.join(PROJECT_ROOT, 'review-public', relPath));
+      if (!full.startsWith(path.join(PROJECT_ROOT, 'review-public'))) {
+        res.writeHead(403).end('Forbidden');
+        return;
+      }
+      try {
+        let target = full;
+        const info = await stat(target);
+        if (info.isDirectory()) target = path.join(target, 'index.html');
+        const data = await readFile(target);
+        res.writeHead(200, {
+          'Content-Type': MIME[path.extname(target).toLowerCase()] || 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache',
+        });
+        res.end(data);
+      } catch {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('404 Review File Not Found');
+      }
       return;
     }
     if (url.pathname === '/api/items') {
