@@ -5,6 +5,15 @@
   "created_at": "2026-09-24T12:37:02.866361+08:00",
   "last_updated_at": "2026-09-24T12:37:02.867922+08:00",
   "current_stage": "candidates_selected",
+  "release_type": "常规周生产 (Regular Weekly Cadence)",
+  "cadence_policy": {
+    "cutoff_day_time": "周四 20:00 (Asia/Shanghai)",
+    "publication_day_time": "周五 10:00 (Asia/Shanghai)",
+    "retrospective_window_days": 7,
+    "scheduled_cutoff": "2026-09-24T20:00:00+08:00",
+    "scheduled_delivery": "2026-09-25T10:00:00+08:00"
+  },
+  "cadence_notes": "周内持续采集、核查和备稿，不提前锁定未结束的资料窗口，不通过更换期号重复使用同一批材料来模拟连续生产",
   "target_quota": {
     "retellings": 9,
     "commentaries": 6,

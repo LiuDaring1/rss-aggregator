@@ -5,6 +5,8 @@
   "created_at": "2026-09-23T13:45:00.273796+08:00",
   "last_updated_at": "2026-09-23T18:30:43.198188+08:00",
   "current_stage": "published",
+  "release_type": "首次试发 (Trial Release)",
+  "trial_release_note": "首次试发样本单独记录，已按标准闭环交付，供周四打印与教学试发实测，后续按周推进",
   "target_quota": {
     "retellings": 9,
     "commentaries": 6,

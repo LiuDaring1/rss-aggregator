@@ -178,14 +178,19 @@ def cmd_status(args):
     print("=" * 70)
     print(f" 📰 口语素材周刊｜生产调度控制台 (Weekly Production Dashboard)")
     print("=" * 70)
+    print("⏰ 业务运行规程: 每周四 20:00 资料截止 | 每周五 10:00 发放 | 回望连续 7 天")
     print(f"🎯 当前期刊: {issue_id}")
+    state = load_production_state(issue_id)
+    if issue_id == "issue-2026-w39":
+        print("🏷️ 期刊属性: 首次试发件 (已定版发布，供教学打印与课堂实测反馈)")
+    elif state and state.get("release_type"):
+        print(f"🏷️ 期刊属性: {state.get('release_type')}")
     
     # 1. 检查期刊基本文件
     yaml_path = os.path.join(issue_dir, "issue.yaml")
     prep_path = os.path.join(issue_dir, "manifest_prep.json")
     scan_path = os.path.join(issue_dir, "candidates_scan.json")
     
-    state = load_production_state(issue_id)
     time_window = (state.get("time_window") if state else "未定义") or "未定义"
     unit_stats = "复述 9 篇，评论 6 篇，原文摘录 6 篇 (规划配额)" if state else "未配置"
     if os.path.exists(yaml_path):
@@ -283,7 +288,7 @@ def cmd_status(args):
     elif state and state.get("stages", {}).get("build", {}).get("status") == "done":
         print(f"   👉 步骤 4: 构建已完成并通过全门禁，执行 `python3 scripts/weekly_runner.py publish --issue {issue_id}` 导出审阅站并归档发布。")
     elif not os.path.exists(prep_path):
-        print(f"   👉 步骤 2: Agent/教师依据 `issues/{issue_id}/candidates_scan.json` 选题，核定 9+6+6 篇目并生成 `manifest_prep.json` 与 `issue.yaml`。")
+        print(f"   👉 步骤 2: 当前处于周内持续采集备料期。到达资料截止点（周四 20:00）后，依据 `issues/{issue_id}/candidates_scan.json` 选题并生成 `manifest_prep.json` 与 `issue.yaml`。")
     else:
         print(f"   👉 步骤 3: 请 Agent 依据 `issues/{issue_id}/manifest_prep.json` 采编文稿与生成配图。")
         print(f"   👉 采编完成后，执行 `python3 scripts/weekly_runner.py build --issue {issue_id}` 进行原子构建。")
