@@ -1,1 +1,14 @@
-{}
+{
+  "comm-thepaper-mashangping-4f84a2eb4c": {
+    "articleId": "comm-thepaper-mashangping-4f84a2eb4c",
+    "action": "exclude",
+    "note": "快捷批注: exclude",
+    "updatedAt": "2026-09-24T10:19:23.552Z"
+  },
+  "comm-rednet-qingjiao-41bc41678b": {
+    "articleId": "comm-rednet-qingjiao-41bc41678b",
+    "action": "exclude",
+    "note": "快捷批注: exclude",
+    "updatedAt": "2026-09-24T10:19:26.236Z"
+  }
+}

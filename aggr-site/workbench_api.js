@@ -887,10 +887,10 @@ export async function getWorkbenchData() {
 
   // AI 分析引擎状态与免责声明
   let aiEngineStatus = 'rule_screening';
-  let aiEngineLabel = '本地规则初筛（未配置 AI 密钥，未经教学复核）';
+  let aiEngineLabel = '本地规则自动化初筛（内置口语标准，无需配置外部密钥）';
   if (process.env.GLM_API_KEY) {
     aiEngineStatus = 'model_ready';
-    aiEngineLabel = 'GLM-5 在线模型分析就绪';
+    aiEngineLabel = '外部模型扩展分析就绪';
   }
 
   // 候选池动态统计 (严格区隔在窗口内与历史备用)

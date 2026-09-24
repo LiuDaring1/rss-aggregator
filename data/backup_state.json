@@ -1,15 +1,15 @@
 {
-  "updatedAt": "2026-09-24T18:17:20.930847",
+  "updatedAt": "2026-09-24T18:23:20.645585",
   "last_backup": {
-    "timestamp": "2026-09-24T18:17:20.930847",
-    "archive_file": "weekly_data_backup_20260924_181720.tar.gz",
-    "archive_path": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/backups/weekly_data_backup_20260924_181720.tar.gz",
-    "sha256": "90e195e57aa69f0d10912e5186c624f8ecc8faa1b155f82c29e2bda6fe6f0fd4",
-    "size_bytes": 596749,
+    "timestamp": "2026-09-24T18:23:20.645585",
+    "archive_file": "weekly_data_backup_20260924_182320.tar.gz",
+    "archive_path": "/var/folders/y6/zl0dpg5s3kv8387_y5y02qb00000gn/T/tmpk85zzqoc/backups/weekly_data_backup_20260924_182320.tar.gz",
+    "sha256": "66285a76fa48de343379fe4de3507085dc1ba97b08610526bdc61bd7509d6e70",
+    "size_bytes": 596841,
     "stats": {
       "commentaries_articles": 366,
       "wenwen_articles": 286,
-      "teacher_feedback_count": 0,
+      "teacher_feedback_count": 2,
       "issues_backed_up": [
         "issue-2026-w40",
         "issue-2026-w39",
@@ -27,10 +27,10 @@
     "offsite_note": "待配置 (缺少受控外部存储目标或异地网络凭证，暂保留本地与快照隔离)"
   },
   "last_restore_test": {
-    "timestamp": "2026-09-24T18:17:20.930847",
+    "timestamp": "2026-09-24T18:23:20.645585",
     "status": "passed",
-    "archive": "weekly_data_backup_20260924_181720.tar.gz",
-    "sha256": "90e195e57aa69f0d10912e5186c624f8ecc8faa1b155f82c29e2bda6fe6f0fd4"
+    "archive": "weekly_data_backup_20260924_182320.tar.gz",
+    "sha256": "66285a76fa48de343379fe4de3507085dc1ba97b08610526bdc61bd7509d6e70"
   },
   "offsite": {
     "status": "pending_configuration",
