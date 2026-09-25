@@ -515,13 +515,13 @@ def verify_retelling_commentary_leak(issue_id: str, content_dir: str = "content"
 
 
 def verify_editorial_policy(issue_id: str, content_dir: str = "content") -> bool:
-    """依据 editor_policy.json 机器核验选题与来源集中度"""
+    """依据 editor_policy.json 机器核验选题与来源集中度、topic_key 跨模块去重及红线门禁"""
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
     policy_path = os.path.join(os.path.dirname(__file__), "editor_policy.json")
     manifest_path = os.path.join(project_root, "issues", issue_id, "manifest_prep.json")
     issue_yaml = os.path.join(project_root, "issues", issue_id, "issue.yaml")
 
-    if not os.path.exists(policy_path) or not os.path.exists(manifest_path):
+    if not os.path.exists(policy_path) or not os.path.exists(manifest_path) or not os.path.exists(issue_yaml):
         return True
 
     with open(policy_path, "r", encoding="utf-8") as pf:
@@ -532,9 +532,50 @@ def verify_editorial_policy(issue_id: str, content_dir: str = "content") -> bool
         issue_cfg = yaml.safe_load(yf)
 
     print(f"\n📋 [编辑规范核验] 正在依据 Editor Policy 核验选题题材、来源集中度与模块去重...")
+    hard_errors = []
     warnings = []
 
-    # 1. 拆解模块来源多样性检查 (单一媒体最多2篇)
+    # 1. 跨模块去重 (topic_key 占用模块数 <= 2，严禁占满复述+评论+拆解 3 模块)
+    topic_modules = {}
+    topic_units = {}
+
+    for rid in issue_cfg.get("retelling_ids", []):
+        yp = os.path.join(project_root, content_dir, "retellings", f"{rid}.yaml")
+        if os.path.exists(yp):
+            with open(yp, "r", encoding="utf-8") as f:
+                y = yaml.safe_load(f) or {}
+                tk = y.get("topic_key")
+                if tk:
+                    topic_modules.setdefault(tk, set()).add("复述(retelling)")
+                    topic_units.setdefault(tk, []).append(rid)
+
+    for cid in issue_cfg.get("commentary_ids", []):
+        yp = os.path.join(project_root, content_dir, "commentaries", f"{cid}.yaml")
+        if os.path.exists(yp):
+            with open(yp, "r", encoding="utf-8") as f:
+                y = yaml.safe_load(f) or {}
+                tk = y.get("topic_key")
+                if tk:
+                    topic_modules.setdefault(tk, set()).add("评论(commentary)")
+                    topic_units.setdefault(tk, []).append(cid)
+
+    for fid in issue_cfg.get("excerpt_ids", []):
+        yp = os.path.join(project_root, content_dir, "excerpts", f"{fid}.yaml")
+        if os.path.exists(yp):
+            with open(yp, "r", encoding="utf-8") as f:
+                y = yaml.safe_load(f) or {}
+                tk = y.get("topic_key")
+                if tk:
+                    topic_modules.setdefault(tk, set()).add("拆解(excerpt)")
+                    topic_units.setdefault(tk, []).append(fid)
+
+    for tk, mods in topic_modules.items():
+        if len(mods) > 2:
+            hard_errors.append(
+                f"同一话题 topic_key '{tk}' 完整占满 3 个模块 ({', '.join(sorted(mods))}) [涉及单元: {', '.join(topic_units[tk])}]，严重违反去重规范！"
+            )
+
+    # 2. 拆解模块来源多样性检查 (单一媒体最多2篇)
     excerpts = manifest.get("excerpts", [])
     exc_sources = {}
     for exc in excerpts:
@@ -546,18 +587,17 @@ def verify_editorial_policy(issue_id: str, content_dir: str = "content") -> bool
         if count > max_exc:
             warnings.append(f"拆解模块单一来源集中: '{src}' 入选 {count} 篇 (上限推荐: {max_exc} 篇)")
 
-    # 2. 暖事比例核验 (约3篇)
+    # 3. 暖事比例核验 (约3篇)
     retellings = manifest.get("retellings", [])
     warm_count = 0
     for ret in retellings:
         cat = ret.get("category", "")
-        title = ret.get("title", "")
         if cat in ["暖文", "凡人善举"] or "暖" in cat:
             warm_count += 1
     if warm_count > 3:
         warnings.append(f"复述板块暖事数量偏多: 达到 {warm_count} 篇 (推荐约 3 篇)")
 
-    # 3. 禁选题材核验 (体育竞技、机关公车资产)
+    # 4. 禁选题材核验 (体育竞技、机关公车资产)
     for unit_list, u_type in [(retellings, "复述"), (manifest.get("commentaries", []), "时评")]:
         for u in unit_list:
             t = u.get("title", "")
@@ -567,14 +607,21 @@ def verify_editorial_policy(issue_id: str, content_dir: str = "content") -> bool
             if any(k in t for k in ["公车", "公物仓", "公务用车"]):
                 warnings.append(f"[{uid} {u_type}] 疑似包含党政机关公务资产调配题材: '{t}'")
 
+    # 5. 汇总分层输出
+    if hard_errors:
+        print(f"  ❌ [硬错误 Hard Errors: {len(hard_errors)}] 发现违反 Editor Policy 硬性红线规范:")
+        for he in hard_errors:
+            print(f"     - {he}")
+
     if warnings:
-        print(f"  ⚠️ 发现 {len(warnings)} 项编辑策略提醒:")
+        print(f"  ⚠️ [编辑提醒 Editorial Warnings: {len(warnings)}] 发现编辑策略提醒:")
         for w in warnings:
             print(f"     - {w}")
-    else:
+
+    if not hard_errors and not warnings:
         print("  ✅ 选题题材边界合规，拆解信源来源多样，暖事比例及模块去重完全符合 Editor Policy。")
 
-    return len(warnings) == 0
+    return len(hard_errors) == 0
 
 
 def print_verification_scope():
@@ -597,9 +644,9 @@ def run_full_issue_verification(issue_id: str, target_dir: Optional[str] = None,
     pol_ok = verify_editorial_policy(issue_id)
     print_verification_scope()
     
-    if not (f_ok and q_ok and p_ok):
+    if not (f_ok and q_ok and p_ok and pol_ok and l_ok):
         print(f"\n❌ 期刊 [{issue_id}] 校验未通过，发现不符项或来源/事实异常，终止发布！")
         return False
         
-    print(f"\n🎉 期刊 [{issue_id}] 信源原段字串、物理页数与事实台账自动化校验 100% 通过！")
+    print(f"\n🎉 期刊 [{issue_id}] 信源原段字串、物理页数与事实台账自动化校验 100% 通过！(Hard Errors: 0)")
     return True

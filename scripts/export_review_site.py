@@ -756,7 +756,8 @@ def generate_index_html(manifest: Dict[str, Any],
         <p>高质感报刊排版 · 真实插画接入 · 离线全量同源交付标准</p>
       </div>
       <div class="build-meta">
-        <div>版本提交：<code>{git_info['short_commit']}</code> ({git_info['branch']})</div>
+        <div>内容基线：<code>0e35a9e</code> | 教师返修：<code>2fcfc6d</code></div>
+        <div>当前版本：<code>{git_info['short_commit']}</code> ({git_info['branch']})</div>
         <div>快照生成：{now_str}</div>
       </div>
     </div>

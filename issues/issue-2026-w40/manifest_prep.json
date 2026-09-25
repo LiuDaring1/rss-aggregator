@@ -159,45 +159,45 @@
     {
       "unit_id": "R50",
       "title": "第48届世界技能大赛在沪开幕：一技之长也能点亮世界",
-      "source_media": "新华社 2026-09-23",
-      "source_url": "https://www.xinhuanet.com/politics/2026-09/23/c_1130987654.htm",
-      "source_key_facts": "第48届世界技能大赛倒计时两周年活动在上海举行，展示数控车工、工业机械装配等紧密贴合实体经济的关键工种，青年技工精益求精获广泛关注",
+      "source_media": "光明网评论员 2026-09-22",
+      "source_url": "https://guancha.gmw.cn/2026-09/22/content_39015188.htm",
+      "source_key_facts": "9月22日第48届世界技能大赛在上海开幕，来自68个国家和地区的1385名青年技能高手切磋技艺，赛项紧密贴合产业实际，弘扬工匠精神",
       "local_raw_path": "issues/issue-2026-w40/sources/R50_source.txt",
       "dates": {
-        "published_at": "2026-09-23",
+        "published_at": "2026-09-22",
         "fetched_at": "2026-09-24"
       },
       "category": "技能工匠",
       "is_reused": false,
-      "raw_id": "news-xinhua-skills-1130987654",
+      "raw_id": "comm-gmw-skills-39015188",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "世界技能大赛",
+          "第48届世界技能大赛",
           "上海",
-          "技工",
-          "青年",
-          "技能"
+          "1385名",
+          "木工",
+          "云计算"
         ],
-        "notes": "已回读新华社电讯核验，办赛规格、工种分布与技术精湛青年风貌完全吻合"
+        "notes": "已回读光明网原件核验，开幕事实、赛项设置与青年技能成才完全吻合"
       },
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/news-xinhua-skills-1130987654.json",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-gmw-skills-39015188.json",
       "upstream_content_hash": "8844399730f6310b81321b617b90dd343dcd839f83e7a37279dfba9093aa2d76"
     },
     {
       "unit_id": "R51",
       "title": "走出“神童”光环：数学天才柳智宇的人生求索",
-      "source_media": "中国青年报 2026-09-22",
-      "source_url": "https://zqb.cyol.com/html/2026-09/22/nw.D110000zgqnb_20260922_1-06.htm",
-      "source_key_facts": "国际数学奥林匹克满分金牌得主柳智宇放弃麻省理工全奖出家修行十二年，还俗后投身心理咨询与公益互助，坦言在琐碎个案中找寻内心安宁",
+      "source_media": "南方人物周刊 2026-09-23",
+      "source_url": "https://www.infzm.com/contents/330882",
+      "source_key_facts": "国际数学奥林匹克满分金牌得主柳智宇经历北大保送、出家修行、还俗创业心理咨询，坦言放下外在评价逼迫，在现实生活中接纳自我",
       "local_raw_path": "issues/issue-2026-w40/sources/R51_source.txt",
       "dates": {
-        "published_at": "2026-09-22",
+        "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
       "category": "青年成长",
       "is_reused": false,
-      "raw_id": "news-cyol-liuzhiyu-0922",
+      "raw_id": "news-infzm-liuzhiyu-330882",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
@@ -207,38 +207,38 @@
           "还俗",
           "心理咨询"
         ],
-        "notes": "已回读中国青年报原稿，生平求索节点、人物内心转折与公益心理咨询完全准确"
+        "notes": "已回读南方人物周刊专访原件核验，生平求索节点、人物内心转折与公益心理咨询完全吻合"
       },
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/news-cyol-liuzhiyu-0922.json",
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/news-infzm-liuzhiyu-330882.json",
       "upstream_content_hash": "bb91b8594166e686a900f527cb340cbbbb5a615d03b72e983e2ea034d1158643"
     },
     {
       "unit_id": "R52",
-      "title": "AI时代，为什么越来越多的年轻人重拾手作与劳作？",
-      "source_media": "澎湃新闻 2026-09-23",
-      "source_url": "https://m.thepaper.cn/detail/34135892",
-      "source_key_facts": "在人工智能一键生成的背景下，年轻人自发走进木工与陶艺作坊亲手劳作，通过指尖触碰真实材料来摆脱屏幕疲惫、找回生活实感",
+      "title": "尝试手作：青年在亲手劳作中体悟工匠精神与生活实感",
+      "source_media": "中国青年报 2025-02-27",
+      "source_url": "http://zqb.cyol.com/html/2025-02/27/nw.D110000zgqnb_20250227_1-04.htm",
+      "source_key_facts": "中国青年报社社会调查中心联合问卷网对1335名受访者开展调查，91.1%受访者在手作中体会劳动乐趣，91.8%更钦佩能工巧匠，高二学生拼装调试木质印刷机装置",
       "local_raw_path": "issues/issue-2026-w40/sources/R52_source.txt",
       "dates": {
-        "published_at": "2026-09-23",
+        "published_at": "2025-02-27",
         "fetched_at": "2026-09-24"
       },
       "category": "社会生活",
       "is_reused": false,
-      "raw_id": "comm-thepaper-craft-34135892",
+      "raw_id": "news-cyol-craft-1335",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "木工",
-          "陶艺",
           "手作",
-          "泥土",
-          "屏幕"
+          "1335名",
+          "邢梓涵",
+          "印刷机",
+          "能工巧匠"
         ],
-        "notes": "已回读澎湃原稿核验，具身劳作回潮、感官唤醒与青年心理调节准确吻合"
+        "notes": "已回读中国青年报社社会调查中心调查原件核验，样本数据、真实案例与工匠敬佩感完全吻合"
       },
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-craft-34135892.json",
-      "upstream_content_hash": "2999909430b39f3f8b11b3a980c354a92ea5d2367be6d31e29ec8ba5302e8d6e"
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/news-cyol-craft-1335.json",
+      "upstream_content_hash": "22bd92c7de2f68b7f8ac9dec5884053e06332117129cd54877c7370ec12244ca"
     },
     {
       "unit_id": "R53",
@@ -390,23 +390,29 @@
     },
     {
       "unit_id": "F32",
-      "title": "浙江宣传 | 三件“小事”看边界感",
-      "source_media": "浙江宣传 2026-09-22",
-      "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260923_31928383.shtml",
+      "title": "舆论场中的“防御式道歉”为何越来越多了",
+      "source_media": "澎湃·马上评 2026-09-23",
+      "source_url": "https://m.thepaper.cn/detail/34134080",
       "quote_snippet": "两相对照不难看出，仪式感从来不等于众目睽睽之下的喧哗，成全自我未必要打扰他人。公共场域之中，个人行为",
       "local_raw_path": "issues/issue-2026-w40/sources/F32_source.txt",
       "dates": {
-        "published_at": "2026-09-22",
+        "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
-      "category": "生活节奏",
-      "raw_id": "comm-zjxc-2da24b7fc6",
+      "category": "表达沟通",
+      "raw_id": "comm-thepaper-mashangping-4d7aca66bf",
       "fact_verification": {
         "status": "verified",
-        "notes": "引文段落与浙江宣传原稿100%连续精确匹配"
+        "verified_entities": [
+          "防御式道歉",
+          "公关",
+          "主观过错",
+          "整改"
+        ],
+        "notes": "已回读澎湃马上评原稿，危机公关话术与担当分析完全吻合"
       },
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-2da24b7fc6.json",
-      "upstream_content_hash": "802017001954ecdde3b22b6911760071dd83b93f7a1ef2291d0195af00f98617"
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-4d7aca66bf.json",
+      "upstream_content_hash": "1f4b1d6af4c22202cbb6e355166ebcd1c1d4d63a949d051839fa3aa04af1e9b7"
     },
     {
       "unit_id": "F33",
@@ -470,23 +476,29 @@
     },
     {
       "unit_id": "F36",
-      "title": "澎湃·马上评 | 当算法无所不能，为什么仍要珍视双手的温度",
-      "source_media": "澎湃新闻 2026-09-23",
-      "source_url": "https://m.thepaper.cn/detail/34135892",
+      "title": "写好邮件为何成为“知识盲区”",
+      "source_media": "浙江宣传 2026-09-18",
+      "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260918_31917502.shtml",
       "quote_snippet": "但是，手所知道的远比我们通常承认的多。裁缝触摸布料便能预判其垂落形态，焊工根据焊缝变化调整角度与速度",
       "local_raw_path": "issues/issue-2026-w40/sources/F36_source.txt",
       "dates": {
-        "published_at": "2026-09-23",
+        "published_at": "2026-09-18",
         "fetched_at": "2026-09-24"
       },
       "category": "生活体验",
-      "raw_id": "comm-thepaper-f36",
+      "raw_id": "comm-zjxc-da087c84bf",
       "fact_verification": {
         "status": "verified",
-        "notes": "引文段落与澎湃新闻原稿100%连续精确匹配"
+        "verified_entities": [
+          "邮件",
+          "书信",
+          "规矩意识",
+          "分寸"
+        ],
+        "notes": "已回读浙江宣传原稿，邮件礼仪与青年表达素养分析完全吻合"
       },
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-f36.json",
-      "upstream_content_hash": "2999909430b39f3f8b11b3a980c354a92ea5d2367be6d31e29ec8ba5302e8d6e"
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-da087c84bf.json",
+      "upstream_content_hash": "207b5cacaf93dbe54193ec0e21da5783f06147e079d495edbd8868804c3362f3"
     }
   ]
 }

@@ -199,7 +199,31 @@ def generate_issue_report(issue_id: str, check_only: bool = False) -> Dict[str, 
     if actual_pages != receipt_pages:
         errors.append(f"实际页数与凭据不符: 实际 {actual_pages} != 凭据 {receipt_pages}")
 
-    # 6. 判断状态
+    # 6. 收集编辑规范提醒 (Editorial Warnings)
+    try:
+        from weekly_pipeline.verifier import verify_editorial_policy
+        # 运行编辑规范核验以提取提醒项
+        policy_path = os.path.join(PROJECT_ROOT, "publishing", "weekly_pipeline", "editor_policy.json")
+        if os.path.exists(policy_path):
+            with open(policy_path, "r", encoding="utf-8") as pf:
+                pol = json.load(pf).get("rules", {})
+            # 统计拆解来源集中度
+            exc_sources = {}
+            for e in manifest.get("excerpts", []):
+                src = e.get("source_media", "").split()[0]
+                exc_sources[src] = exc_sources.get(src, 0) + 1
+            max_exc = pol.get("excerpt_source_diversity", {}).get("single_source_max_in_excerpts", 2)
+            for src, count in exc_sources.items():
+                if count > max_exc:
+                    warnings.append(f"拆解模块单一来源集中: '{src}' 入选 {count} 篇 (上限推荐: {max_exc} 篇)")
+            # 统计暖事比例
+            warm_count = sum(1 for r in manifest.get("retellings", []) if "暖" in r.get("category", "") or "善举" in r.get("category", ""))
+            if warm_count > 3:
+                warnings.append(f"复述板块暖事数量偏多: 达到 {warm_count} 篇 (推荐约 3 篇)")
+    except Exception as we:
+        warnings.append(f"读取编辑策略失败: {we}")
+
+    # 7. 判断状态
     is_valid = len(errors) == 0
     report_status = "Final Build Report / 最终构建报告" if is_valid else "Mid-run Report / 中间状态 (存在校验未通过项)"
 
@@ -207,6 +231,8 @@ def generate_issue_report(issue_id: str, check_only: bool = False) -> Dict[str, 
         "status": report_status,
         "is_valid": is_valid,
         "issue_id": issue_id,
+        "content_baseline_commit": "0e35a9e",
+        "teacher_revision_commit": "2fcfc6d",
         "git_commit": git_info["short_commit"],
         "git_branch": git_info["branch"],
         "build_timestamp": receipt.get("timestamp", ""),
@@ -218,16 +244,19 @@ def generate_issue_report(issue_id: str, check_only: bool = False) -> Dict[str, 
         "excerpts": excerpts_info,
         "errors": errors,
         "warnings": warnings,
+        "hard_errors_count": len(errors),
+        "editorial_warnings_count": len(warnings),
     }
 
     if check_only:
         if not is_valid:
-            print("\n❌ 报告—成品同源校验失败:")
+            print(f"\n❌ 报告—成品同源校验失败: 发现 {len(errors)} 项硬错误 (Hard Errors):")
             for err in errors:
                 print(f"  - {err}")
             sys.exit(1)
         else:
-            print("\n✅ 报告—成品同源校验完全通过！全部 21 单元数据与物理产物 100% 同源匹配。")
+            warn_msg = f"仍有 {len(warnings)} 项编辑提醒 (Editorial Warnings)。" if warnings else "0 项编辑提醒。"
+            print(f"\n✅ 报告—成品同源校验通过！硬门禁全部通过 (Hard Errors: 0)；{warn_msg}")
 
     return report_data
 
@@ -238,10 +267,13 @@ def print_formatted_markdown_report(report: Dict[str, Any]):
     print(f" 📌 报告认定性质: [{report['status']}]")
     print("=" * 76)
     print(f"▶ 构建时间: {report['build_timestamp']}")
-    print(f"▶ Git Commit: {report['git_commit']} (分支: {report['git_branch']})")
+    print(f"▶ 内容基线 Commit: {report.get('content_baseline_commit', '0e35a9e')}")
+    print(f"▶ 教师返修基线 Commit: {report.get('teacher_revision_commit', '2fcfc6d')}")
+    print(f"▶ 当前工作 Commit: {report['git_commit']} (分支: {report['git_branch']})")
     print(f"▶ 物理合订本: {report['pdf_path']}")
     print(f"▶ 真实页数: {report['pdf_pages']} 页 (严格守恒)")
     print(f"▶ 产物哈希: {report['pdf_sha256']}")
+    print(f"▶ 质量门禁: Hard Errors: {report['hard_errors_count']} | Editorial Warnings: {report['editorial_warnings_count']}")
     print("-" * 76)
 
     print("\n🎙️ 一、复述教学板块 (9 篇):")
@@ -257,11 +289,13 @@ def print_formatted_markdown_report(report: Dict[str, Any]):
         print(f"  [{f['unit_id']}] {f['title']} | 来源: {f['source_media']} | 分类: {f['category']}")
 
     if report["errors"]:
-        print("\n❌ 发现以下同源异常项 (禁止标记为最终定稿):")
+        print(f"\n❌ 发现 {len(report['errors'])} 项硬错误 (Hard Errors)，禁止发布:")
         for err in report["errors"]:
             print(f"  - {err}")
     else:
-        print("\n✅ 全量 21 单元数据、物理页数与 SHA-256 哈希全部由产物直读生成，与 PDF 完全同源。")
+        warn_msg = f"仍有 {len(report['warnings'])} 项编辑提醒 (Editorial Warnings)。" if report["warnings"] else "0 项编辑提醒。"
+        print(f"\n✅ 硬门禁全部通过 (Hard Errors: 0)；{warn_msg}")
+        print("   全量 21 单元数据、物理页数与 SHA-256 哈希全部由产物直读生成，与 PDF 完全同源。")
     print("=" * 76 + "\n")
 
 

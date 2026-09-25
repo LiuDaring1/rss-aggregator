@@ -90,6 +90,7 @@ class RetellingUnit(BaseModel):
     illustration_brief: Optional[str] = Field(None, description="插画需求描述")
     illustration_path: Optional[str] = Field(None, description="插画相对路径，如 illustrations/ILL-R27.png")
     illustration_status: Optional[str] = Field("pending", description="插画状态: confirmed / pending / skipped")
+    topic_key: Optional[str] = Field(None, description="话题归属标识，用于跨模块去重校验")
 
 
 # ==============================================================================
@@ -176,6 +177,7 @@ class CommentaryUnit(BaseModel):
     speech: SpeechBlock = Field(..., description="第3页口语范本（双主体段）")
     teaching: TeachingBlock = Field(..., description="第3页拆解与教学指导")
     legacy_unreviewed: bool = Field(False, description="标记是否为旧版未经多观点重构的过渡稿")
+    topic_key: Optional[str] = Field(None, description="话题归属标识，用于跨模块去重校验")
 
     def get_spoken_paragraphs(self) -> List[str]:
         """返回规范化拼装的口语范本各段文本（开头总论、主体段落包含分论点、结尾独立收束）"""
@@ -227,6 +229,7 @@ class ExcerptUnit(BaseModel):
     demo_title: str = Field(..., description="示范小标题，如 示范｜谈……，可以这样说")
     demo_text: str = Field(..., description="一段已经说成的口语表达示范")
     demo_is_hypothetical: bool = Field(False, description="该示范是否为教学假设案例（尊重真实案例）")
+    topic_key: Optional[str] = Field(None, description="话题归属标识，用于跨模块去重校验")
 
 
 # ==============================================================================
