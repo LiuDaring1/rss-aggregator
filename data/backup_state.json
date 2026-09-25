@@ -1,13 +1,13 @@
 {
-  "updatedAt": "2026-09-24T18:23:20.645585",
+  "updatedAt": "2026-09-24T23:53:16.397810",
   "last_backup": {
-    "timestamp": "2026-09-24T18:23:20.645585",
-    "archive_file": "weekly_data_backup_20260924_182320.tar.gz",
-    "archive_path": "/var/folders/y6/zl0dpg5s3kv8387_y5y02qb00000gn/T/tmpk85zzqoc/backups/weekly_data_backup_20260924_182320.tar.gz",
-    "sha256": "66285a76fa48de343379fe4de3507085dc1ba97b08610526bdc61bd7509d6e70",
-    "size_bytes": 596841,
+    "timestamp": "2026-09-24T23:53:16.397810",
+    "archive_file": "weekly_data_backup_20260924_235316.tar.gz",
+    "archive_path": "/var/folders/y6/zl0dpg5s3kv8387_y5y02qb00000gn/T/tmpcstb9cqx/backups/weekly_data_backup_20260924_235316.tar.gz",
+    "sha256": "1060377bbe19f6f9136570719d02dab27b653774813d1c564e555bbb53f90190",
+    "size_bytes": 674700,
     "stats": {
-      "commentaries_articles": 366,
+      "commentaries_articles": 443,
       "wenwen_articles": 286,
       "teacher_feedback_count": 2,
       "issues_backed_up": [
@@ -27,10 +27,10 @@
     "offsite_note": "待配置 (缺少受控外部存储目标或异地网络凭证，暂保留本地与快照隔离)"
   },
   "last_restore_test": {
-    "timestamp": "2026-09-24T18:23:20.645585",
+    "timestamp": "2026-09-24T23:53:16.397810",
     "status": "passed",
-    "archive": "weekly_data_backup_20260924_182320.tar.gz",
-    "sha256": "66285a76fa48de343379fe4de3507085dc1ba97b08610526bdc61bd7509d6e70"
+    "archive": "weekly_data_backup_20260924_235316.tar.gz",
+    "sha256": "1060377bbe19f6f9136570719d02dab27b653774813d1c564e555bbb53f90190"
   },
   "offsite": {
     "status": "pending_configuration",

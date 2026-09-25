@@ -130,6 +130,10 @@ def build_review_site(issue_id: Optional[str] = None, output_dir: Optional[str] 
             for f in os.listdir(pd):
                 if f.lower().endswith(".png"):
                     safe_copy_file(os.path.join(pd, f), os.path.join(target_pages_dir, f))
+                    m_page = re.search(r"_p(\d+)\.png$", f, re.IGNORECASE)
+                    if m_page:
+                        p_num = int(m_page.group(1))
+                        safe_copy_file(os.path.join(pd, f), os.path.join(target_pages_dir, f"page_{p_num:02d}.png"))
             break
 
     # 3. 拷贝插图资产

@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
   "issue_id": "issue-2026-w40",
-  "time_window": "2026-09-21 ~ 2026-09-24",
+  "time_window": "2026-09-28 ~ 2026-10-04",
   "created_at": "2026-09-24T12:37:02.866361+08:00",
-  "last_updated_at": "2026-09-24T12:37:02.867922+08:00",
-  "current_stage": "candidates_selected",
+  "last_updated_at": "2026-09-24T23:53:01.726488+08:00",
+  "current_stage": "published",
   "release_type": "常规周生产 (Regular Weekly Cadence)",
   "cadence_policy": {
     "cutoff_day_time": "周四 20:00 (Asia/Shanghai)",
@@ -29,60 +29,65 @@
   "stages": {
     "prep": {
       "status": "done",
-      "updated_at": "2026-09-24T12:37:02.867494+08:00",
+      "updated_at": "2026-09-24T23:35:29.820368+08:00",
       "completed_items": [],
       "pending_items": [],
       "failed_items": [],
       "notes": "信源采集与备料初始化完成"
     },
     "candidates_selected": {
-      "status": "in_progress",
-      "updated_at": "2026-09-24T12:37:02.867901+08:00",
+      "status": "done",
+      "updated_at": "2026-09-24T23:40:09.088586+08:00",
       "completed_items": [],
       "pending_items": [],
       "failed_items": [],
-      "notes": "等待 Agent/教师核验选题"
+      "notes": "选题与采编台账确立，21单元100%绑定真实上游信源"
     },
     "drafting": {
-      "status": "pending",
-      "updated_at": null,
+      "status": "done",
+      "updated_at": "2026-09-24T23:43:05.747480+08:00",
       "completed_items": [],
       "pending_items": [],
       "failed_items": [],
-      "notes": ""
+      "notes": "21篇教学单元采编完成 (复述9篇、时评6篇、拆解6篇)"
     },
     "comics": {
-      "status": "pending",
-      "updated_at": null,
+      "status": "done",
+      "updated_at": "2026-09-24T23:46:47.575912+08:00",
       "completed_items": [],
       "pending_items": [],
       "failed_items": [],
-      "notes": ""
+      "notes": "9幅1818x532标准横向三格叙事漫画全部生成完毕"
     },
     "review": {
-      "status": "pending",
-      "updated_at": null,
+      "status": "done",
+      "updated_at": "2026-09-24T23:46:47.577256+08:00",
       "completed_items": [],
       "pending_items": [],
       "failed_items": [],
-      "notes": ""
+      "notes": "采编文稿、实体事实与引文连续性全部通过自检"
     },
     "build": {
-      "status": "pending",
-      "updated_at": null,
+      "status": "done",
+      "updated_at": "2026-09-24T23:52:09.178442+08:00",
       "completed_items": [],
       "pending_items": [],
       "failed_items": [],
-      "notes": ""
+      "notes": "原子构建与全门禁验证通过"
     },
     "published": {
-      "status": "pending",
-      "updated_at": null,
+      "status": "done",
+      "updated_at": "2026-09-24T23:53:01.726183+08:00",
       "completed_items": [],
       "pending_items": [],
       "failed_items": [],
-      "notes": ""
+      "notes": "多期静态站本地导出归档完成"
     }
   },
-  "artifacts": {}
+  "artifacts": {
+    "pdf": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w40/issue-2026-w40.pdf",
+    "html": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w40/issue-2026-w40.html",
+    "md": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w40/issue-2026-w40.md",
+    "build_receipt": "/Users/baiyanglin/Desktop/口语素材周刊_Antigravity/project/dist/issue-2026-w40/build_receipt.json"
+  }
 }
