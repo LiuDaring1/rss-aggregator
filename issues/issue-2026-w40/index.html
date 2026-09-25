@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>口语素材周刊 · 静态只读审阅镜像 (issue-2026-w40)</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #16a34a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 4rem;
+    }
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+    .header-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .brand h1 { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+    .brand p { font-size: 0.82rem; color: var(--text-muted); }
+    .build-meta { font-size: 0.8rem; color: var(--text-muted); text-align: right; }
+    .build-meta code { background: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; color: #334155; }
+
+    .archive-bar {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+    }
+    .archive-title { font-weight: 700; color: #334155; }
+    .archive-btn {
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      text-decoration: none;
+      color: #1e293b;
+      background: #ffffff;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .archive-btn:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+      color: var(--primary);
+    }
+    .archive-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 2rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #1e293b;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      margin-bottom: 1.5rem;
+    }
+
+    /* 成果横幅 */
+    .banner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 2rem;
+    }
+    @media (max-width: 860px) {
+      .banner-grid { grid-template-columns: 1fr; }
+    }
+    .meta-box { border-right: 1px solid var(--border); padding-right: 1.5rem; }
+    @media (max-width: 860px) { .meta-box { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; } }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    .badge-blue { background: #eff6ff; color: #1d4ed8; }
+    .badge-purple { background: #faf5ff; color: #7e22ce; }
+    .badge-orange { background: #fff7ed; color: #c2410c; }
+    .badge-green { background: #f0fdf4; color: #15803d; }
+    .badge-gray { background: #f1f5f9; color: #475569; }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    @media (max-width: 600px) { .download-grid { grid-template-columns: 1fr; } }
+    .dl-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--text);
+      background: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    .dl-btn:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+      color: var(--primary);
+    }
+    .dl-btn.primary {
+      grid-column: span 2;
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    @media (max-width: 600px) { .dl-btn.primary { grid-column: span 1; } }
+    .dl-btn.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    /* 单元明细 */
+    .units-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+    @media (max-width: 860px) { .units-grid { grid-template-columns: 1fr; } }
+    .unit-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .unit-ids { display: flex; gap: 0.4rem; align-items: center; }
+    .source-tag { font-size: 0.8rem; color: var(--text-muted); }
+    .unit-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.6rem; line-height: 1.4; }
+    .retell-summary { font-size: 0.88rem; color: #334155; margin-bottom: 0.8rem; line-height: 1.6; }
+    .pair-commentary {
+      background: #f8fafc;
+      border-left: 3px solid var(--primary);
+      padding: 0.75rem 1rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+    }
+    .demo-box {
+      background: #fffbeb;
+      border-left: 3px solid #f59e0b;
+      padding: 0.75rem 1rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+    }
+    .sec-label { font-weight: 700; color: #1e293b; margin-bottom: 0.3rem; font-size: 0.82rem; }
+    .sample-claim { color: #475569; line-height: 1.5; }
+
+    /* 快照展架 */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 900px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .gallery-grid { grid-template-columns: 1fr; } }
+    .page-thumb {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #ffffff;
+      text-align: center;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .page-thumb:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      border-color: var(--primary);
+    }
+    .page-thumb a { text-decoration: none; color: inherit; display: block; }
+    .page-thumb img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-caption {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #334155;
+      background: #fafafa;
+    }
+
+    /* 表格 */
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th { background: #f8fafc; padding: 0.75rem 1rem; font-weight: 600; color: #334155; border-bottom: 1px solid var(--border); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: #0f172a; }
+    tr:last-child td { border-bottom: none; }
+    .status-pill { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+    .status-ok { background: #dcfce7; color: #15803d; }
+    .status-sel { background: #dbeafe; color: #1e40af; }
+    .status-standby { background: #f1f5f9; color: #475569; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-wrap">
+      <div class="brand">
+        <h1>口语素材周刊 · 只读审阅镜像</h1>
+        <p>高质感报刊排版 · 真实插画接入 · 离线全量同源交付标准</p>
+      </div>
+      <div class="build-meta">
+        <div>版本提交：<code>dd3f89a</code> (antigravity-dev)</div>
+        <div>快照生成：2026-09-25 11:19:11 (UTC+8)</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <div class="archive-bar"><span class="archive-title">📚 往期周刊归档：</span><a class="archive-btn active" href="#">issue-2026-w40</a><a class="archive-btn" href="../issue-2026-w39/index.html">issue-2026-w39</a><a class="archive-btn" href="../issue-2026-w38/index.html">issue-2026-w38</a></div>
+
+    <!-- 本期成果与直接查阅 -->
+    <div class="card">
+      <div class="banner-grid">
+        <div class="meta-box">
+          <span class="badge badge-blue">正式发行版 · 现行生效</span>
+          <h2 style="font-size: 1.35rem; margin: 0.6rem 0 0.4rem;">口语素材周刊 · 2026年第40周</h2>
+          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+            时段：2026年9月第5周（09.28-10.04）<br>
+            物理页数：<strong>严格 94 页</strong>（9篇复述21页 + 6篇评论18页 + 6篇拆解6页 + 封面/目录 2页）<br>
+            门禁核验：原文连续精准匹配 100% · 纯文本无裸 HTML 标签 · 94页印张精确吻合
+          </p>
+          <div style="font-size: 0.82rem; background: #f1f5f9; padding: 0.75rem; border-radius: 6px; color: #334155;">
+            <strong>📌 镜像说明：</strong> 本站点为只读脱敏包，剔除了任何内部爬虫接口、学生练习数据与本地绝对路径，Reviewer 可在移动端或离线浏览器直接查阅。
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: #334155;">📄 同源交付文件直接打开与下载：</h3>
+          <div class="download-grid">
+            <a class="dl-btn primary" href="issue-2026-w40.pdf" target="_blank">
+              <span>📖 整刊印刷合订本 (94 页完整 PDF)</span>
+              <span>下载/打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issue-2026-w40-复述.pdf" target="_blank">
+              <span>🗣️ 复述教学分册 (21 页)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issue-2026-w40-评论.pdf" target="_blank">
+              <span>🎙️ 口语评论分册 (18 页)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issue-2026-w40-原文拆解与积累.pdf" target="_blank">
+              <span>📝 原文拆解分册 (6 页)</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issue-2026-w40.md" target="_blank">
+              <span>📃 学生端 Markdown 纯文本</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="issue-2026-w40.html" target="_blank">
+              <span>🌐 印刷版 HTML 渲染原件</span>
+              <span>打开 ↗</span>
+            </a>
+            <a class="dl-btn" href="manifest_prep.json" target="_blank">
+              <span>📋 采编台账清单 (manifest_prep.json)</span>
+              <span>查看 ↗</span>
+            </a>
+            <a class="dl-btn" href="sources_status.json" target="_blank">
+              <span>📡 上游雷达与选材状态 (sources_status.json)</span>
+              <span>查看 ↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 采编单元明细 -->
+    <div class="section-title">🔍 采编单元与真实证据链（本期入选 · 9篇复述 + 6篇评论）</div>
+    <div class="units-grid">
+      
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R45</span>
+              <span class="badge badge-purple">暖文</span>
+              <span class="badge badge-green">🎨 插图: ILL-R45 (confirmed)</span>
+            </div>
+            <span class="source-tag">山西晚报 / 阿里公益天天正能量 2026-09-22</span>
+          </div>
+          <h3 class="unit-title">3年上千次救援！山西盂县超市老板自掏几十万做公益</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>在山西盂县，38岁的小超市老板张慧军还有另一个身份——红十字星曜救援服务中心队长。9月17日晚，一位78岁的老人进山捡核桃走失，张慧军放下超市账本，带着队员连夜在密林搜寻了20多个小时，终于把老人安全救出。三年来，他和队伍自掏腰包无偿完成了上千次救援，张慧军个人自费就达五六十万。9月22日，他荣获天天正能量奖励。这份凡人善举让我们看到，只要心怀热忱，普通的杂货铺也能成为照亮大山的温暖灯塔。</p>
+          
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R46</span>
+              <span class="badge badge-purple">正向社会生活</span>
+              <span class="badge badge-green">🎨 插图: ILL-R46 (confirmed)</span>
+            </div>
+            <span class="source-tag">大连晚报 / 新闻大连 / 阿里公益天天正能量 2026-09-22</span>
+          </div>
+          <h3 class="unit-title">奖励5000元！大连“黄鞋侠”，终于找到你了！</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>9月19日，大连枫叶职业技术学院的大三学生沈道任在望鱼山遇到惊险一幕：一名环卫工人大叔失足悬在陡峭崖壁上，命悬一线。千钧一发之际，沈道任攀上悬崖，蹬着岩石用双手死死拉住绳索，在众人帮助下成功把大叔救了上来。救人后他默默离开回校上课，网友凭借视频里他脚上的一双醒目黄鞋，全网接力寻找，亲切称他为“黄鞋侠”。9月22日，他荣获天天正能量颁发的5000元奖金。危难时刻敢于出手，事了拂衣不居功，这位00后大学生用行动诠释了新时代青年的勇敢与担当。</p>
+          
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R47</span>
+              <span class="badge badge-purple">正向社会生活</span>
+              <span class="badge badge-green">🎨 插图: ILL-R47 (confirmed)</span>
+            </div>
+            <span class="source-tag">新京报·快评 2026-09-24</span>
+          </div>
+          <h3 class="unit-title">游本昌去世：蒲扇轻收，以戏渡人</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>9月24日，93岁高龄的中国国家话剧院表演艺术家游本昌因病去世。回望他的一生，他在舞台上跑了整整30年龙套，直到52岁才凭借《济公》红遍全国。80岁那年，他变卖房产创办剧团排演话剧；90岁高龄时，他在电视剧《繁花》中塑造了深入人心的“爷叔”，甚至在拍摄摔伤骨折后仍坚持登台。游本昌先生一生没有追名逐利，而是用漫长的等待与坚守证明了：只要心怀敬畏、择一事终一生，人生任何时候都能绽放出最绚烂的繁花。</p>
+          
+            <div class="pair-commentary">
+              <div class="sec-label">🎙️ 同题评论 · C31 《走出速成狂躁与名利场，在漫长岁月里守住专注与敬畏》</div>
+              <p class="sample-claim"><strong>立论核心：</strong>回望表演艺术家游本昌先生的一生，最震撼人心的不是大器晚成的光环，而是那份穿越岁月的纯粹与敬畏。在急功近利的时代，我们比任何时候都更需要这种耐住寂寞、择一事终一生的精神定力。</p>
+            </div>
+            
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R48</span>
+              <span class="badge badge-purple">社会热点</span>
+              <span class="badge badge-green">🎨 插图: ILL-R48 (confirmed)</span>
+            </div>
+            <span class="source-tag">新京报·快评 2026-09-24</span>
+          </div>
+          <h3 class="unit-title">凭火车票打折，北京这波操作打出了文旅好牌</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>一张用过的火车票能干什么？在北京，它现在能当打折优惠券使！今年中秋前夕，北京市重点站区管委会统筹“八站两场”，推出了创新的“票根经济”。旅客拿着进出京火车票，就能在周边商圈享受餐饮、住宿和景区的真金白银优惠；候车大厅里还摆起了非遗剪纸、传出了悠扬的民乐。原本大家去火车站只顾着行色匆匆赶路，如今却能在抵京第一站感受浓浓的文化温度。这一招巧思，不仅盘活了客流消费，更让城市服务展现出了满满的暖意。</p>
+          
+            <div class="pair-commentary">
+              <div class="sec-label">🎙️ 同题评论 · C32 《跳出“过客思维”，从一张票根看城市公共空间的温度与服务重构》</div>
+              <p class="sample-claim"><strong>立论核心：</strong>北京火车站推出“票根经济”、把非遗民乐搬进候车厅的做法，看似是一项小小的惠民巧思，实则是城市公共治理理念的深刻飞跃。跳出冷冰冰的“过客思维”，把交通枢纽打造成有温度的文化客厅，照见的是一座现代城市的格局与温情。</p>
+            </div>
+            
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R49</span>
+              <span class="badge badge-purple">社会热点</span>
+              <span class="badge badge-green">🎨 插图: ILL-R49 (confirmed)</span>
+            </div>
+            <span class="source-tag">澎湃·马上评 2026-09-23</span>
+          </div>
+          <h3 class="unit-title">“China Haul”火了：中国制造，正在被世界开箱</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>最近在海外社交平台上，“China Haul”——也就是“中国购物开箱”彻底火了！在江苏昆山的大渔湾，美国音乐经纪人詹姆斯兴奋地向镜头展示刚买的无人机、云台和收音麦，称赞中国设备性价比极高，同行都在互相种草。以前外国朋友来中国主要是逛故宫看长城，现在很多人专门带大号空行李箱来中国“反向海淘”。这种热潮背后，是中国制造撕掉了过去低端代工的旧标签，用硬核的科技、极致的设计和亲民的价格赢得了世界消费者的真心喜爱。被世界开箱的，不仅是中国商品，更是中国开放自信的底气。</p>
+          
+            <div class="pair-commentary">
+              <div class="sec-label">🎙️ 同题评论 · C33 《从“贴牌代工”到“全球开箱”，中国制造的硬核底气与文化自信》</div>
+              <p class="sample-claim"><strong>立论核心：</strong>海外社交平台上“China Haul”开箱热潮的走红，不仅仅是几款数码产品的火爆出海，更是中国制造从“贴牌代工”向“全球创领”的历史性跨越。当世界开始自发开箱中国商品，我们看到的是科技自立自强的硬核底气，更是平视世界的从容与自信。</p>
+            </div>
+            
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R50</span>
+              <span class="badge badge-purple">正向社会生活</span>
+              <span class="badge badge-green">🎨 插图: ILL-R50 (confirmed)</span>
+            </div>
+            <span class="source-tag">澎湃·精选头条 2026-09-24</span>
+          </div>
+          <h3 class="unit-title">黄金一代会老去，土壤不会——西班牙足球的“冠军生产线”</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>在2026年世界杯上，平均年龄只有24.5岁的西班牙队再次夺冠，19岁的亚马尔和库巴西大放光彩。很多人感叹西班牙又迎来了黄金一代，但青训总监却说：“黄金一代会老去，能够不断长出冠军的，只能是土壤。”在西班牙，真正的差距从来不是出了某个天才球星，而是遍布社区的几万名持证教练，以及几十年如一日全国统一的传控打法与竞赛机制。这支青年军的诞生告诉我们：靠天才灵光一现难以长青，唯有脚踏实地厚植青训土壤、遵循长期主义规律，才能打造出源源不竭的“冠军生产线”。</p>
+          
+            <div class="pair-commentary">
+              <div class="sec-label">🎙️ 同题评论 · C34 《破除“天才神话”，在肥沃土壤与成熟体系中孕育长青力量》</div>
+              <p class="sample-claim"><strong>立论核心：</strong>西班牙青年军再度夺得世界杯的奇迹，彻底击碎了唯天才论的迷思。青训总监说得好：“黄金一代终会老去，能不断长出冠军的只有土壤。”在人才竞争日益激烈的今天，我们需要走出对个别天才的盲目寄托，在科学完备的体系与厚重肥沃的土壤中，寻找基业长青的永恒答案。</p>
+            </div>
+            
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R51</span>
+              <span class="badge badge-purple">社会热点</span>
+              <span class="badge badge-green">🎨 插图: ILL-R51 (confirmed)</span>
+            </div>
+            <span class="source-tag">新京报·快评 2026-09-20</span>
+          </div>
+          <h3 class="unit-title">省城闲置公车乡镇“上岗”，这个改革作业可以抄</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>在不少地方，常能看到“省城大院公车闲置停放，偏远乡镇干部下乡没车用”的尴尬现象。近日，山东启动了一场聪明的公车改革：建立全省“公物仓”，首批把省城闲置的20台公车直接跨层级调拨给偏远乡镇，用来保障农技服务和应急值守。过去公车按部门私有确权，谁也借不动谁；如今打破壁垒建起周转仓，不花一分财政新钱，就让沉睡的公车在田间地头重新跑了起来。把省机关的排场缩减下来，把基层实干的保障托举上去，这样务实的紧日子，才真正过到了百姓心坎里。</p>
+          
+            <div class="pair-commentary">
+              <div class="sec-label">🎙️ 同题评论 · C35 《盘活存量胜过盲目投入：用制度创新破解资源错配，把好钢用在刀刃上》</div>
+              <p class="sample-claim"><strong>立论核心：</strong>山东把省城机关闲置的20台公车调拨给偏远乡镇的做法，为我们生动展示了什么是真正的“过紧日子”。盘活存量胜过盲目投入，打破部门壁垒换来的是基层治理效能的倍增，这项实打实的改革作业，值得所有地方认真学习。</p>
+            </div>
+            
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R52</span>
+              <span class="badge badge-purple">社会热点</span>
+              <span class="badge badge-green">🎨 插图: ILL-R52 (confirmed)</span>
+            </div>
+            <span class="source-tag">澎湃·马上评 2026-09-23</span>
+          </div>
+          <h3 class="unit-title">AI时代，人为什么仍要珍视自己的手？</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>在人工智能无所不能的今天，敲几下键盘就能生成文章、作画写歌，我们的双手似乎快要退化成只用来滑屏幕的工具。然而澎湃评论提醒我们：在AI时代，人依然要珍视自己的手。人类的智慧和语言，本就是从双手抓握工具、抚摸世界开始诞生的。指尖触摸泥土的温度、握笔书写的停顿、亲手组装一件器具的踏实感，是算法永远算不出来的生命体验。如果为了偷懒把所有亲身实践都“外包”给AI，我们终将变成悬空的过客。享受科技便利的同时，别忘了用双手去耕耘生活，因为亲手创造的真实感知，才是我们作为人最宝贵的尊严。</p>
+          
+            <div class="pair-commentary">
+              <div class="sec-label">🎙️ 同题评论 · C36 《当算法无所不能，我们为什么仍要珍视“亲手劳作”的具身温度？》</div>
+              <p class="sample-claim"><strong>立论核心：</strong>当AI只需敲敲键盘就能秒出万字长文、生成华丽图像的今天，澎湃评论提出的追问振聋发聩：在AI时代，人为什么仍要珍视自己的手？双手不仅是劳动的工具，更是心智的起点；唯有守住亲手创造的温度，我们才不会沦为数字洪流中悬空的过客。</p>
+            </div>
+            
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <div class="unit-ids">
+              <span class="badge badge-blue">复述 R53</span>
+              <span class="badge badge-purple">正向社会生活</span>
+              <span class="badge badge-green">🎨 插图: ILL-R53 (confirmed)</span>
+            </div>
+            <span class="source-tag">新京报·快评 2026-09-21</span>
+          </div>
+          <h3 class="unit-title">不挖秦始皇陵，看懂2000多年前的“请勿打扰”</h3>
+          <p class="retell-summary"><strong>事实梗概：</strong>很多人好奇：科技这么发达，为什么我们至今不去发掘秦始皇陵？其实，不挖恰恰是对两千年前文明最大的敬畏。秦陵名誉院长吴永琪常说：地下的文物非常脆弱，我们要对天地和祖宗心怀敬畏，能不打扰就不去打扰。科学检测也证实，陵墓上方土壤汞含量比周围高出70多倍，说明地下确实封存着庞大的水银系统。一旦贸然打开，密闭低氧的环境被打破，珍贵的文物瞬间就会化为乌有。不挖不是无能为力，而是现代文明面对古老历史时的一种深情克制。真正的保护不是占有与窥探，而是让历史在安宁中守住它的尊严。</p>
+          
+        </div>
+        
+    </div>
+
+    <div class="section-title">📝 原文拆解与语言积累（本期独立入选 · 6篇深度时评精选）</div>
+    <div class="units-grid">
+      
+        <div class="unit-card">
+          <div class="card-header">
+            <span class="badge badge-orange">拆解积累 F31</span>
+            <span class="source-tag">浙江宣传 · 2026-09-24</span>
+          </div>
+          <h3 class="unit-title">舞剧《花木兰》出海与跨文化艺术叙事</h3>
+          <p class="retell-summary"><strong>情境背景：</strong>原创舞剧《花木兰》在纽约等海外巡演引发轰动，全剧无一句台词，纯以身体语汇和女性视角诠释孝忠爱主题，展现中华文化出海的独特艺术感染力。</p>
+          <div class="demo-box">
+            <div class="sec-label">💡 示范｜谈“文化出海与故事表达”，可以这样说</div>
+            <p class="sample-claim">中华文化走出国门，关键在于找到人类共通的情感密码。舞剧《花木兰》之所以在海外引发强烈共鸣，正在于它放下了台词的藩篱，用融合武术与舞蹈的肢体语汇打破文化壁垒，更用立体的女性视角超越了单一的英雄符号。当我们在人类共通的情感底色上讲述中国故事，传统文化便能化作穿越国界的永恒诗篇。</p>
+          </div>
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <span class="badge badge-orange">拆解积累 F32</span>
+            <span class="source-tag">浙江宣传 · 2026-09-22</span>
+          </div>
+          <h3 class="unit-title">公共空间越界与社会边界感重塑</h3>
+          <p class="retell-summary"><strong>情境背景：</strong>从演唱会起立求婚挡人视线到公共场所高声喧哗，一系列看似无恶意的越界行为频发，引发全社会关于公私边界感与文明公德的深层思考。</p>
+          <div class="demo-box">
+            <div class="sec-label">💡 示范｜谈“公共空间的交往边界”，可以这样说</div>
+            <p class="sample-claim">自由的边界是他人的自由，浪漫的尽头不能是对公共秩序的冒犯。在演唱会或高铁车厢里，许多人自认为只是在随性抒发情感，却忽视了这种个体的放纵正悄悄掠夺着周围人的清静。公共文明的成熟，在于我们懂得在举手投足间留有一份对陌生人的体恤与克制。唯有守好公私边界，公共生活才不会沦为相互提防的角力场。</p>
+          </div>
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <span class="badge badge-orange">拆解积累 F33</span>
+            <span class="source-tag">浙江宣传 · 2026-09-23</span>
+          </div>
+          <h3 class="unit-title">数字贸易博览会与具象化人工智能</h3>
+          <p class="retell-summary"><strong>情境背景：</strong>第五届数贸会设立Token专区并展示无人驾驶、载人机甲与脑机接口等前沿科技，标志着人工智能从抽象概念全面迈入可触达、可感知的具象现实。</p>
+          <div class="demo-box">
+            <div class="sec-label">💡 示范｜谈“前沿科技与现实落地”，可以这样说</div>
+            <p class="sample-claim">科技真正的伟力，从来不在于停留在论文里的精密公式，而在于化作春风细雨走进人间烟火。从数贸会上取消方向盘的无人车，到能用意念抓取物品的脑机接口，人工智能正在剥去神秘的外衣，变成可感可触的生活日常。当数字贸易把前沿算力转化为提升人类福祉的实在工具，未来的图景才真正有了温度与依托。</p>
+          </div>
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <span class="badge badge-orange">拆解积累 F34</span>
+            <span class="source-tag">浙江宣传 · 2026-09-21</span>
+          </div>
+          <h3 class="unit-title">在算法时代守住“手搓第一稿”的笔力</h3>
+          <p class="retell-summary"><strong>情境背景：</strong>在AI数秒生成文章的信息时代，许多人逐渐依赖现成模板而提笔忘字、思维卡壳，浙江宣传撰文呼吁青年必须守住亲手写作、独立思考的底层能力。</p>
+          <div class="demo-box">
+            <div class="sec-label">💡 示范｜谈“算法时代的亲笔写作”，可以这样说</div>
+            <p class="sample-claim">在AI几秒钟就能生成万字长文的今天，我们为什么还要坚持亲笔写作？因为写作从来不仅是词句堆砌，而是思维自我梳理的必经之路。大模型可以帮我们润色词藻，却无法代替我们去痛苦地推演逻辑、捕捉生活的感动。守住“手搓第一稿”的底气，就是在算法狂欢中守住人类独立思考的主权。</p>
+          </div>
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <span class="badge badge-orange">拆解积累 F35</span>
+            <span class="source-tag">新京报·快评 · 2026-09-21</span>
+          </div>
+          <h3 class="unit-title">秦始皇陵的考古留白与敬畏之心</h3>
+          <p class="retell-summary"><strong>情境背景：</strong>新京报快评深度剖析中国考古界对秦始皇陵不主动发掘的科学原则，从脆弱地下生态保护到土壤汞测量实证，论述现代文明对历史遗产的审慎敬畏。</p>
+          <div class="demo-box">
+            <div class="sec-label">💡 示范｜谈“文物保护与文明敬畏”，可以这样说</div>
+            <p class="sample-claim">面对两千多年前的秦陵地宫，不去盲目开掘，恰恰是当代中国考古最伟大的文明自觉。真正的保护，有时不是占有与窥探，而是克制与留白。地宫深处的文物在那片密闭低氧的环境中沉睡，是历史给予我们的庄严托付。当我们选择“不去打扰”，这种克制本身，正是现代科学对历史与生命最崇高的敬意。</p>
+          </div>
+        </div>
+        
+        <div class="unit-card">
+          <div class="card-header">
+            <span class="badge badge-orange">拆解积累 F36</span>
+            <span class="source-tag">澎湃·马上评 · 2026-09-20</span>
+          </div>
+          <h3 class="unit-title">“湾区升明月”的文化向心力与民心相通</h3>
+          <p class="retell-summary"><strong>情境背景：</strong>“湾区升明月”大湾区电影音乐晚会三度落户澳门，通过汇聚两岸四地艺术家与征集本土原创作品，以动人旋律搭建血脉相连、民心相通的文化桥梁。</p>
+          <div class="demo-box">
+            <div class="sec-label">💡 示范｜谈“文化认同与同胞血脉”，可以这样说</div>
+            <p class="sample-claim">一轮明月照两岸，千曲琴韵连四海。“湾区升明月”的动人之处，不仅在于璀璨的舞台与流淌的旋律，更在于它用艺术的纽带将同胞的骨肉亲情紧紧相连。当来自海峡两岸的青年音乐家同台合唱，当普通居民创作的本土歌曲响彻银河，我们听到的不仅是悠扬的音符，更是一个民族血浓于水的深情呼应。</p>
+          </div>
+        </div>
+        
+    </div>
+
+    <!-- 逐页快照展架 -->
+    <div class="section-title">🖼️ 全本 94 页实页高精度快照（排版、导图与 9 组四格连环画视觉复核）</div>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+      重点复核：<strong>第 4、6、8、10、12、14、16、18、20 页</strong>（9 组看图复述思维导图与 ILL-R27~R35 纯无字叙事连环画）及 <strong>口语评论范本页</strong>（双主体段首句粗体、0 裸露 &lt;b&gt; 标签）。
+    </p>
+    <div class="gallery-grid">
+      
+        <div class="page-thumb">
+          <a href="pages/page_01.png" target="_blank" title="点击查看第 1 页高精度大图">
+            <img src="pages/page_01.png" alt="第 1 页" loading="lazy">
+            <div class="page-caption">第 1 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_02.png" target="_blank" title="点击查看第 2 页高精度大图">
+            <img src="pages/page_02.png" alt="第 2 页" loading="lazy">
+            <div class="page-caption">第 2 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_03.png" target="_blank" title="点击查看第 3 页高精度大图">
+            <img src="pages/page_03.png" alt="第 3 页" loading="lazy">
+            <div class="page-caption">第 3 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_04.png" target="_blank" title="点击查看第 4 页高精度大图">
+            <img src="pages/page_04.png" alt="第 4 页" loading="lazy">
+            <div class="page-caption">第 4 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_05.png" target="_blank" title="点击查看第 5 页高精度大图">
+            <img src="pages/page_05.png" alt="第 5 页" loading="lazy">
+            <div class="page-caption">第 5 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_06.png" target="_blank" title="点击查看第 6 页高精度大图">
+            <img src="pages/page_06.png" alt="第 6 页" loading="lazy">
+            <div class="page-caption">第 6 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_07.png" target="_blank" title="点击查看第 7 页高精度大图">
+            <img src="pages/page_07.png" alt="第 7 页" loading="lazy">
+            <div class="page-caption">第 7 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_08.png" target="_blank" title="点击查看第 8 页高精度大图">
+            <img src="pages/page_08.png" alt="第 8 页" loading="lazy">
+            <div class="page-caption">第 8 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_09.png" target="_blank" title="点击查看第 9 页高精度大图">
+            <img src="pages/page_09.png" alt="第 9 页" loading="lazy">
+            <div class="page-caption">第 9 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_10.png" target="_blank" title="点击查看第 10 页高精度大图">
+            <img src="pages/page_10.png" alt="第 10 页" loading="lazy">
+            <div class="page-caption">第 10 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_11.png" target="_blank" title="点击查看第 11 页高精度大图">
+            <img src="pages/page_11.png" alt="第 11 页" loading="lazy">
+            <div class="page-caption">第 11 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_12.png" target="_blank" title="点击查看第 12 页高精度大图">
+            <img src="pages/page_12.png" alt="第 12 页" loading="lazy">
+            <div class="page-caption">第 12 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_13.png" target="_blank" title="点击查看第 13 页高精度大图">
+            <img src="pages/page_13.png" alt="第 13 页" loading="lazy">
+            <div class="page-caption">第 13 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_14.png" target="_blank" title="点击查看第 14 页高精度大图">
+            <img src="pages/page_14.png" alt="第 14 页" loading="lazy">
+            <div class="page-caption">第 14 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_15.png" target="_blank" title="点击查看第 15 页高精度大图">
+            <img src="pages/page_15.png" alt="第 15 页" loading="lazy">
+            <div class="page-caption">第 15 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_16.png" target="_blank" title="点击查看第 16 页高精度大图">
+            <img src="pages/page_16.png" alt="第 16 页" loading="lazy">
+            <div class="page-caption">第 16 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_17.png" target="_blank" title="点击查看第 17 页高精度大图">
+            <img src="pages/page_17.png" alt="第 17 页" loading="lazy">
+            <div class="page-caption">第 17 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_18.png" target="_blank" title="点击查看第 18 页高精度大图">
+            <img src="pages/page_18.png" alt="第 18 页" loading="lazy">
+            <div class="page-caption">第 18 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_19.png" target="_blank" title="点击查看第 19 页高精度大图">
+            <img src="pages/page_19.png" alt="第 19 页" loading="lazy">
+            <div class="page-caption">第 19 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_20.png" target="_blank" title="点击查看第 20 页高精度大图">
+            <img src="pages/page_20.png" alt="第 20 页" loading="lazy">
+            <div class="page-caption">第 20 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_21.png" target="_blank" title="点击查看第 21 页高精度大图">
+            <img src="pages/page_21.png" alt="第 21 页" loading="lazy">
+            <div class="page-caption">第 21 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_22.png" target="_blank" title="点击查看第 22 页高精度大图">
+            <img src="pages/page_22.png" alt="第 22 页" loading="lazy">
+            <div class="page-caption">第 22 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_23.png" target="_blank" title="点击查看第 23 页高精度大图">
+            <img src="pages/page_23.png" alt="第 23 页" loading="lazy">
+            <div class="page-caption">第 23 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_24.png" target="_blank" title="点击查看第 24 页高精度大图">
+            <img src="pages/page_24.png" alt="第 24 页" loading="lazy">
+            <div class="page-caption">第 24 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_25.png" target="_blank" title="点击查看第 25 页高精度大图">
+            <img src="pages/page_25.png" alt="第 25 页" loading="lazy">
+            <div class="page-caption">第 25 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_26.png" target="_blank" title="点击查看第 26 页高精度大图">
+            <img src="pages/page_26.png" alt="第 26 页" loading="lazy">
+            <div class="page-caption">第 26 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_27.png" target="_blank" title="点击查看第 27 页高精度大图">
+            <img src="pages/page_27.png" alt="第 27 页" loading="lazy">
+            <div class="page-caption">第 27 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_28.png" target="_blank" title="点击查看第 28 页高精度大图">
+            <img src="pages/page_28.png" alt="第 28 页" loading="lazy">
+            <div class="page-caption">第 28 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_29.png" target="_blank" title="点击查看第 29 页高精度大图">
+            <img src="pages/page_29.png" alt="第 29 页" loading="lazy">
+            <div class="page-caption">第 29 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_30.png" target="_blank" title="点击查看第 30 页高精度大图">
+            <img src="pages/page_30.png" alt="第 30 页" loading="lazy">
+            <div class="page-caption">第 30 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_31.png" target="_blank" title="点击查看第 31 页高精度大图">
+            <img src="pages/page_31.png" alt="第 31 页" loading="lazy">
+            <div class="page-caption">第 31 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_32.png" target="_blank" title="点击查看第 32 页高精度大图">
+            <img src="pages/page_32.png" alt="第 32 页" loading="lazy">
+            <div class="page-caption">第 32 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_33.png" target="_blank" title="点击查看第 33 页高精度大图">
+            <img src="pages/page_33.png" alt="第 33 页" loading="lazy">
+            <div class="page-caption">第 33 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_34.png" target="_blank" title="点击查看第 34 页高精度大图">
+            <img src="pages/page_34.png" alt="第 34 页" loading="lazy">
+            <div class="page-caption">第 34 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_35.png" target="_blank" title="点击查看第 35 页高精度大图">
+            <img src="pages/page_35.png" alt="第 35 页" loading="lazy">
+            <div class="page-caption">第 35 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_36.png" target="_blank" title="点击查看第 36 页高精度大图">
+            <img src="pages/page_36.png" alt="第 36 页" loading="lazy">
+            <div class="page-caption">第 36 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_37.png" target="_blank" title="点击查看第 37 页高精度大图">
+            <img src="pages/page_37.png" alt="第 37 页" loading="lazy">
+            <div class="page-caption">第 37 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_38.png" target="_blank" title="点击查看第 38 页高精度大图">
+            <img src="pages/page_38.png" alt="第 38 页" loading="lazy">
+            <div class="page-caption">第 38 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_39.png" target="_blank" title="点击查看第 39 页高精度大图">
+            <img src="pages/page_39.png" alt="第 39 页" loading="lazy">
+            <div class="page-caption">第 39 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_40.png" target="_blank" title="点击查看第 40 页高精度大图">
+            <img src="pages/page_40.png" alt="第 40 页" loading="lazy">
+            <div class="page-caption">第 40 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_41.png" target="_blank" title="点击查看第 41 页高精度大图">
+            <img src="pages/page_41.png" alt="第 41 页" loading="lazy">
+            <div class="page-caption">第 41 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_42.png" target="_blank" title="点击查看第 42 页高精度大图">
+            <img src="pages/page_42.png" alt="第 42 页" loading="lazy">
+            <div class="page-caption">第 42 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_43.png" target="_blank" title="点击查看第 43 页高精度大图">
+            <img src="pages/page_43.png" alt="第 43 页" loading="lazy">
+            <div class="page-caption">第 43 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_44.png" target="_blank" title="点击查看第 44 页高精度大图">
+            <img src="pages/page_44.png" alt="第 44 页" loading="lazy">
+            <div class="page-caption">第 44 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_45.png" target="_blank" title="点击查看第 45 页高精度大图">
+            <img src="pages/page_45.png" alt="第 45 页" loading="lazy">
+            <div class="page-caption">第 45 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_46.png" target="_blank" title="点击查看第 46 页高精度大图">
+            <img src="pages/page_46.png" alt="第 46 页" loading="lazy">
+            <div class="page-caption">第 46 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_47.png" target="_blank" title="点击查看第 47 页高精度大图">
+            <img src="pages/page_47.png" alt="第 47 页" loading="lazy">
+            <div class="page-caption">第 47 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_48.png" target="_blank" title="点击查看第 48 页高精度大图">
+            <img src="pages/page_48.png" alt="第 48 页" loading="lazy">
+            <div class="page-caption">第 48 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_49.png" target="_blank" title="点击查看第 49 页高精度大图">
+            <img src="pages/page_49.png" alt="第 49 页" loading="lazy">
+            <div class="page-caption">第 49 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_50.png" target="_blank" title="点击查看第 50 页高精度大图">
+            <img src="pages/page_50.png" alt="第 50 页" loading="lazy">
+            <div class="page-caption">第 50 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_51.png" target="_blank" title="点击查看第 51 页高精度大图">
+            <img src="pages/page_51.png" alt="第 51 页" loading="lazy">
+            <div class="page-caption">第 51 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_52.png" target="_blank" title="点击查看第 52 页高精度大图">
+            <img src="pages/page_52.png" alt="第 52 页" loading="lazy">
+            <div class="page-caption">第 52 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_53.png" target="_blank" title="点击查看第 53 页高精度大图">
+            <img src="pages/page_53.png" alt="第 53 页" loading="lazy">
+            <div class="page-caption">第 53 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_54.png" target="_blank" title="点击查看第 54 页高精度大图">
+            <img src="pages/page_54.png" alt="第 54 页" loading="lazy">
+            <div class="page-caption">第 54 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_55.png" target="_blank" title="点击查看第 55 页高精度大图">
+            <img src="pages/page_55.png" alt="第 55 页" loading="lazy">
+            <div class="page-caption">第 55 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_56.png" target="_blank" title="点击查看第 56 页高精度大图">
+            <img src="pages/page_56.png" alt="第 56 页" loading="lazy">
+            <div class="page-caption">第 56 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_57.png" target="_blank" title="点击查看第 57 页高精度大图">
+            <img src="pages/page_57.png" alt="第 57 页" loading="lazy">
+            <div class="page-caption">第 57 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_58.png" target="_blank" title="点击查看第 58 页高精度大图">
+            <img src="pages/page_58.png" alt="第 58 页" loading="lazy">
+            <div class="page-caption">第 58 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_59.png" target="_blank" title="点击查看第 59 页高精度大图">
+            <img src="pages/page_59.png" alt="第 59 页" loading="lazy">
+            <div class="page-caption">第 59 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_60.png" target="_blank" title="点击查看第 60 页高精度大图">
+            <img src="pages/page_60.png" alt="第 60 页" loading="lazy">
+            <div class="page-caption">第 60 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_61.png" target="_blank" title="点击查看第 61 页高精度大图">
+            <img src="pages/page_61.png" alt="第 61 页" loading="lazy">
+            <div class="page-caption">第 61 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_62.png" target="_blank" title="点击查看第 62 页高精度大图">
+            <img src="pages/page_62.png" alt="第 62 页" loading="lazy">
+            <div class="page-caption">第 62 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_63.png" target="_blank" title="点击查看第 63 页高精度大图">
+            <img src="pages/page_63.png" alt="第 63 页" loading="lazy">
+            <div class="page-caption">第 63 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_64.png" target="_blank" title="点击查看第 64 页高精度大图">
+            <img src="pages/page_64.png" alt="第 64 页" loading="lazy">
+            <div class="page-caption">第 64 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_65.png" target="_blank" title="点击查看第 65 页高精度大图">
+            <img src="pages/page_65.png" alt="第 65 页" loading="lazy">
+            <div class="page-caption">第 65 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_66.png" target="_blank" title="点击查看第 66 页高精度大图">
+            <img src="pages/page_66.png" alt="第 66 页" loading="lazy">
+            <div class="page-caption">第 66 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_67.png" target="_blank" title="点击查看第 67 页高精度大图">
+            <img src="pages/page_67.png" alt="第 67 页" loading="lazy">
+            <div class="page-caption">第 67 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_68.png" target="_blank" title="点击查看第 68 页高精度大图">
+            <img src="pages/page_68.png" alt="第 68 页" loading="lazy">
+            <div class="page-caption">第 68 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_69.png" target="_blank" title="点击查看第 69 页高精度大图">
+            <img src="pages/page_69.png" alt="第 69 页" loading="lazy">
+            <div class="page-caption">第 69 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_70.png" target="_blank" title="点击查看第 70 页高精度大图">
+            <img src="pages/page_70.png" alt="第 70 页" loading="lazy">
+            <div class="page-caption">第 70 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_71.png" target="_blank" title="点击查看第 71 页高精度大图">
+            <img src="pages/page_71.png" alt="第 71 页" loading="lazy">
+            <div class="page-caption">第 71 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_72.png" target="_blank" title="点击查看第 72 页高精度大图">
+            <img src="pages/page_72.png" alt="第 72 页" loading="lazy">
+            <div class="page-caption">第 72 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_73.png" target="_blank" title="点击查看第 73 页高精度大图">
+            <img src="pages/page_73.png" alt="第 73 页" loading="lazy">
+            <div class="page-caption">第 73 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_74.png" target="_blank" title="点击查看第 74 页高精度大图">
+            <img src="pages/page_74.png" alt="第 74 页" loading="lazy">
+            <div class="page-caption">第 74 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_75.png" target="_blank" title="点击查看第 75 页高精度大图">
+            <img src="pages/page_75.png" alt="第 75 页" loading="lazy">
+            <div class="page-caption">第 75 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_76.png" target="_blank" title="点击查看第 76 页高精度大图">
+            <img src="pages/page_76.png" alt="第 76 页" loading="lazy">
+            <div class="page-caption">第 76 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_77.png" target="_blank" title="点击查看第 77 页高精度大图">
+            <img src="pages/page_77.png" alt="第 77 页" loading="lazy">
+            <div class="page-caption">第 77 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_78.png" target="_blank" title="点击查看第 78 页高精度大图">
+            <img src="pages/page_78.png" alt="第 78 页" loading="lazy">
+            <div class="page-caption">第 78 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_79.png" target="_blank" title="点击查看第 79 页高精度大图">
+            <img src="pages/page_79.png" alt="第 79 页" loading="lazy">
+            <div class="page-caption">第 79 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_80.png" target="_blank" title="点击查看第 80 页高精度大图">
+            <img src="pages/page_80.png" alt="第 80 页" loading="lazy">
+            <div class="page-caption">第 80 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_81.png" target="_blank" title="点击查看第 81 页高精度大图">
+            <img src="pages/page_81.png" alt="第 81 页" loading="lazy">
+            <div class="page-caption">第 81 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_82.png" target="_blank" title="点击查看第 82 页高精度大图">
+            <img src="pages/page_82.png" alt="第 82 页" loading="lazy">
+            <div class="page-caption">第 82 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_83.png" target="_blank" title="点击查看第 83 页高精度大图">
+            <img src="pages/page_83.png" alt="第 83 页" loading="lazy">
+            <div class="page-caption">第 83 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_84.png" target="_blank" title="点击查看第 84 页高精度大图">
+            <img src="pages/page_84.png" alt="第 84 页" loading="lazy">
+            <div class="page-caption">第 84 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_85.png" target="_blank" title="点击查看第 85 页高精度大图">
+            <img src="pages/page_85.png" alt="第 85 页" loading="lazy">
+            <div class="page-caption">第 85 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_86.png" target="_blank" title="点击查看第 86 页高精度大图">
+            <img src="pages/page_86.png" alt="第 86 页" loading="lazy">
+            <div class="page-caption">第 86 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_87.png" target="_blank" title="点击查看第 87 页高精度大图">
+            <img src="pages/page_87.png" alt="第 87 页" loading="lazy">
+            <div class="page-caption">第 87 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_88.png" target="_blank" title="点击查看第 88 页高精度大图">
+            <img src="pages/page_88.png" alt="第 88 页" loading="lazy">
+            <div class="page-caption">第 88 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_89.png" target="_blank" title="点击查看第 89 页高精度大图">
+            <img src="pages/page_89.png" alt="第 89 页" loading="lazy">
+            <div class="page-caption">第 89 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_90.png" target="_blank" title="点击查看第 90 页高精度大图">
+            <img src="pages/page_90.png" alt="第 90 页" loading="lazy">
+            <div class="page-caption">第 90 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_91.png" target="_blank" title="点击查看第 91 页高精度大图">
+            <img src="pages/page_91.png" alt="第 91 页" loading="lazy">
+            <div class="page-caption">第 91 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_92.png" target="_blank" title="点击查看第 92 页高精度大图">
+            <img src="pages/page_92.png" alt="第 92 页" loading="lazy">
+            <div class="page-caption">第 92 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_93.png" target="_blank" title="点击查看第 93 页高精度大图">
+            <img src="pages/page_93.png" alt="第 93 页" loading="lazy">
+            <div class="page-caption">第 93 页</div>
+          </a>
+        </div>
+        
+        <div class="page-thumb">
+          <a href="pages/page_94.png" target="_blank" title="点击查看第 94 页高精度大图">
+            <img src="pages/page_94.png" alt="第 94 页" loading="lazy">
+            <div class="page-caption">第 94 页</div>
+          </a>
+        </div>
+        
+    </div>
+
+    <!-- 上游信源只读快照 -->
+    <div class="section-title">📊 上游信源与常态备料快照（只读状态）</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>信源名称</th>
+            <th>分类属性</th>
+            <th>接入模式</th>
+            <th>选用状态</th>
+            <th>运行健康度</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+        <tr>
+          <td><strong>浙江宣传</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-sel">本期入选</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取30条, 30篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>澎湃·马上评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-sel">本期入选</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取30条, 30篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>南方周末·自由谈</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取10条, 10篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>红星评论</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取20条, 20篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>新京报·快评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-sel">本期入选</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取16条, 16篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>人民锐评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取21条, 20篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>人民网·壹时评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取30条, 30篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>中青评论·热点</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取30条, 30篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>光明网评论员</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取5条, 5篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>红辣椒·马上评论</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取50条, 0篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>红辣椒·青椒融评</strong></td>
+          <td>评论</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取50条, 0篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>中新网·事实滚动</strong></td>
+          <td>事实报道</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取10条, 8篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>澎湃·精选头条</strong></td>
+          <td>事实报道</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-sel">本期入选</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取10条, 8篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>南方周末·热门纪实</strong></td>
+          <td>事实报道</td>
+          <td><code>rsshub</code></td>
+          <td><span class="status-pill status-standby">常态备料</span></td>
+          <td><span class="status-pill status-ok">正常在线 (实时抓取10条, 10篇全文)</span></td>
+        </tr>
+        
+        <tr>
+          <td><strong>天天正能量</strong></td>
+          <td>暖文事实库</td>
+          <td><code>radar_crawler</code></td>
+          <td><span class="status-pill status-sel">本期入选</span></td>
+          <td><span class="status-pill status-ok">已就绪 (库存为空)</span></td>
+        </tr>
+        
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+</html>
