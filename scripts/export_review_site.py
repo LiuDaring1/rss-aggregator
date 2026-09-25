@@ -291,10 +291,35 @@ def build_review_site(issue_id: Optional[str] = None, output_dir: Optional[str] 
     sorted_issues = sorted(list(available_issues), key=parse_issue_sort_key, reverse=True)
     latest_issue = sorted_issues[0]
 
-    # 计算页数
-    pages_dir = os.path.join(target_issue_dir, "pages")
-    page_files = [f for f in os.listdir(pages_dir) if f.startswith("page_") and f.endswith(".png")] if os.path.exists(pages_dir) else []
-    total_pages_count = len(page_files) if page_files else 47
+    # 计算页数 (直接读取 build_receipt.json 或 PDF 元数据，坚决杜绝根据 pages/ 别名文件数盲目统计导致的 94 页 Bug)
+    total_pages_count = 47
+    receipt_candidates = [
+        os.path.join(target_issue_dir, "build_receipt.json"),
+        os.path.join(dist_issue_dir, "build_receipt.json"),
+        os.path.join(ROOT_DIR, "issues", issue_id, "build_receipt.json")
+    ]
+    for rp in receipt_candidates:
+        if os.path.exists(rp):
+            try:
+                with open(rp, "r", encoding="utf-8") as rf:
+                    rcpt_obj = json.load(rf)
+                    if rcpt_obj.get("total_pages"):
+                        total_pages_count = int(rcpt_obj["total_pages"])
+                        break
+            except Exception:
+                pass
+    if total_pages_count == 47:
+        target_pdf = os.path.join(target_issue_dir, f"{issue_id}.pdf")
+        if not os.path.exists(target_pdf):
+            target_pdf = os.path.join(dist_issue_dir, f"{issue_id}.pdf")
+        if os.path.exists(target_pdf):
+            try:
+                import fitz
+                doc = fitz.open(target_pdf)
+                total_pages_count = doc.page_count
+                doc.close()
+            except Exception:
+                pass
 
     # 构造根目录 index.html (首页防降级机制: 仅发布最新期或首次导出时刷新主站首页)
     index_path = os.path.join(effective_out_dir, "index.html")
@@ -748,7 +773,8 @@ def generate_index_html(manifest: Dict[str, Any],
           <span class="badge badge-blue">正式发行版 · 现行生效</span>
           <h2 style="font-size: 1.35rem; margin: 0.6rem 0 0.4rem;">{html.escape(manifest.get('title', '口语素材周刊'))} · {html.escape(manifest.get('issue_no_label', ''))}</h2>
           <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
-            时段：{html.escape(manifest.get('date_range', ''))}<br>
+            使用周：<strong>{html.escape(manifest.get('date_range', ''))}</strong><br>
+            资料窗口：{html.escape(manifest.get('source_window', '2026-09-17 20:00 ~ 2026-09-24 20:00 (回望连续7天)'))}<br>
             物理页数：<strong>严格 {total_pages} 页</strong>（9篇复述{r_pages}页 + 6篇评论{c_pages}页 + 6篇拆解{f_pages}页 + 封面/目录 2页）<br>
             门禁核验：原文连续精准匹配 100% · 纯文本无裸 HTML 标签 · {total_pages}页印张精确吻合
           </p>

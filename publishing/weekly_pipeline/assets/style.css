@@ -393,15 +393,24 @@ ol.qs li {
   margin: 0;
 }
 
-/* Page 2: 观点池与推演 */
+.baseline-blk {
+  margin-bottom: 2mm;
+}
+.views-blk {
+  margin-top: 1.5mm;
+}
 .baseline {
   font-size: 10pt;
   color: #333;
   margin-bottom: 1.2mm;
-  padding: 0.8mm 2mm;
-  background: #f7f7f7;
-  border-left: 1.5pt solid #888;
+  padding: 1.2mm 2.5mm;
+  background: #f8fafc;
+  border-left: 2pt solid #64748b;
   line-height: 1.45;
+}
+.baseline strong {
+  color: #0f172a;
+  font-weight: 700;
 }
 ul.views {
   margin: 0;

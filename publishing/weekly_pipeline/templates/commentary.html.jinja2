@@ -54,15 +54,20 @@
   <div class="cuhead">
     <h3>{{ unit.title }} · 观点与推演</h3>
   </div>
-  <div class="cu-blk">
-    <div class="lbl">观点参考（多元思考方向）</div>
-    {% if unit.learning.baseline_diagnostic %}
-    <div class="baseline">{{ unit.learning.baseline_diagnostic }}</div>
-    {% endif %}
+  {% if unit.learning.baseline_diagnostic %}
+  <div class="cu-blk baseline-blk">
+    <div class="lbl">最容易想到的：基准线</div>
+    <div class="baseline">
+      <strong>先想到什么：</strong>{{ unit.learning.baseline_diagnostic }}
+    </div>
+  </div>
+  {% endif %}
+  <div class="cu-blk views-blk">
+    <div class="lbl">再往前想：观点参考</div>
     <ul class="views">
       {% for v in unit.learning.viewpoints %}
       <li class="view-item">
-        <div class="view-claim"><b>{{ v.claim }}</b></div>
+        <div class="view-claim"><b>观点 {{ loop.index }}：{{ v.claim }}</b></div>
         <div class="how">
           <div class="how-row"><span class="how-tag">材料中的细节：</span><span class="how-txt">{{ v.evidence }}</span></div>
           {% if v.explanation %}

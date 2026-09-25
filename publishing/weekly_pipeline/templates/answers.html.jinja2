@@ -17,4 +17,7 @@
   <div class="mapkey">导图参照：{{ it.mapkey }}</div>
   {% endif %}
 </div>
+{% if loop.index % 3 == 0 and not loop.last %}
+<div class="page-break"></div>
+{% endif %}
 {% endfor %}

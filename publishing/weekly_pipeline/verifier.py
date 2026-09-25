@@ -12,6 +12,7 @@ import os
 import sys
 import glob
 import re
+import json
 import yaml
 import pypdf
 from typing import Optional, List, Tuple
@@ -474,6 +475,108 @@ def verify_fact_and_source_ledger(issue_id: str, content_dir: str = "content") -
     return True
 
 
+def verify_retelling_commentary_leak(issue_id: str, content_dir: str = "content") -> bool:
+    """核查复述参考是否夹带评论型升华句（retelling_commentary_leak）"""
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    issue_yaml = os.path.join(project_root, "issues", issue_id, "issue.yaml")
+    if not os.path.exists(issue_yaml):
+        return False
+
+    with open(issue_yaml, "r", encoding="utf-8") as f:
+        manifest = IssueManifest.model_validate(yaml.safe_load(f))
+
+    forbidden_patterns = [
+        r"体现了", r"彰显了", r"诠释了", r"告诉我们", r"启示我们",
+        r"真正的.+是", r"展现了新时代", r"不仅是.+更是"
+    ]
+
+    print(f"\n🗣️ [复述纯粹度核验] 正在检查 {issue_id} 复述参考中的价值升华与评论套话泄露...")
+    leaks = []
+    for rid in manifest.retelling_ids:
+        yp = os.path.join(project_root, content_dir, "retellings", f"{rid}.yaml")
+        if not os.path.exists(yp):
+            continue
+        with open(yp, "r", encoding="utf-8") as f:
+            ydata = yaml.safe_load(f)
+        ref_text = ydata.get("ref_retelling", "")
+        for pat in forbidden_patterns:
+            m = re.search(pat, ref_text)
+            if m:
+                leaks.append((rid, m.group(0), pat))
+
+    if leaks:
+        print(f"  ⚠️ [retelling_commentary_leak] 发现 {len(leaks)} 处评论型升华句泄露:")
+        for rid, match_str, pat in leaks:
+            print(f"     - [{rid}] 匹配模式 '{pat}': 命中 '{match_str}'")
+        return False
+
+    print("  ✅ 复述参考语言纯粹，无评论型价值升华套话，符合纯事实讲述规范。")
+    return True
+
+
+def verify_editorial_policy(issue_id: str, content_dir: str = "content") -> bool:
+    """依据 editor_policy.json 机器核验选题与来源集中度"""
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    policy_path = os.path.join(os.path.dirname(__file__), "editor_policy.json")
+    manifest_path = os.path.join(project_root, "issues", issue_id, "manifest_prep.json")
+    issue_yaml = os.path.join(project_root, "issues", issue_id, "issue.yaml")
+
+    if not os.path.exists(policy_path) or not os.path.exists(manifest_path):
+        return True
+
+    with open(policy_path, "r", encoding="utf-8") as pf:
+        policy = json.load(pf).get("rules", {})
+    with open(manifest_path, "r", encoding="utf-8") as mf:
+        manifest = json.load(mf)
+    with open(issue_yaml, "r", encoding="utf-8") as yf:
+        issue_cfg = yaml.safe_load(yf)
+
+    print(f"\n📋 [编辑规范核验] 正在依据 Editor Policy 核验选题题材、来源集中度与模块去重...")
+    warnings = []
+
+    # 1. 拆解模块来源多样性检查 (单一媒体最多2篇)
+    excerpts = manifest.get("excerpts", [])
+    exc_sources = {}
+    for exc in excerpts:
+        src = exc.get("source_media", "").split()[0]
+        exc_sources[src] = exc_sources.get(src, 0) + 1
+
+    max_exc = policy.get("excerpt_source_diversity", {}).get("single_source_max_in_excerpts", 2)
+    for src, count in exc_sources.items():
+        if count > max_exc:
+            warnings.append(f"拆解模块单一来源集中: '{src}' 入选 {count} 篇 (上限推荐: {max_exc} 篇)")
+
+    # 2. 暖事比例核验 (约3篇)
+    retellings = manifest.get("retellings", [])
+    warm_count = 0
+    for ret in retellings:
+        cat = ret.get("category", "")
+        title = ret.get("title", "")
+        if cat in ["暖文", "凡人善举"] or "暖" in cat:
+            warm_count += 1
+    if warm_count > 3:
+        warnings.append(f"复述板块暖事数量偏多: 达到 {warm_count} 篇 (推荐约 3 篇)")
+
+    # 3. 禁选题材核验 (体育竞技、机关公车资产)
+    for unit_list, u_type in [(retellings, "复述"), (manifest.get("commentaries", []), "时评")]:
+        for u in unit_list:
+            t = u.get("title", "")
+            uid = u.get("unit_id", "")
+            if any(k in t for k in ["世界杯", "西班牙足球", "青训", "夺冠"]):
+                warnings.append(f"[{uid} {u_type}] 疑似包含体育竞技胜负/青训题材: '{t}'")
+            if any(k in t for k in ["公车", "公物仓", "公务用车"]):
+                warnings.append(f"[{uid} {u_type}] 疑似包含党政机关公务资产调配题材: '{t}'")
+
+    if warnings:
+        print(f"  ⚠️ 发现 {len(warnings)} 项编辑策略提醒:")
+        for w in warnings:
+            print(f"     - {w}")
+    else:
+        print("  ✅ 选题题材边界合规，拆解信源来源多样，暖事比例及模块去重完全符合 Editor Policy。")
+
+    return len(warnings) == 0
+
+
 def print_verification_scope():
     """按审阅规范明确输出验证范围与边界"""
     print("\n" + "=" * 60)
@@ -485,11 +588,13 @@ def print_verification_scope():
 
 
 def run_full_issue_verification(issue_id: str, target_dir: Optional[str] = None, sources_dir: Optional[str] = None) -> bool:
-    """一键执行整刊信源字串、分册物理页数与台账事实全量校验"""
+    """一键执行整刊信源字串、分册物理页数、台账事实、编辑规范与复述纯粹度全量校验"""
     print(f"🚀 开始执行期刊产物通用校验: 期号 [{issue_id}]")
     f_ok = verify_fact_and_source_ledger(issue_id)
     q_ok = verify_issue_quotes(issue_id, sources_dir=sources_dir)
     p_ok = verify_issue_splits(issue_id, target_dir=target_dir)
+    l_ok = verify_retelling_commentary_leak(issue_id)
+    pol_ok = verify_editorial_policy(issue_id)
     print_verification_scope()
     
     if not (f_ok and q_ok and p_ok):

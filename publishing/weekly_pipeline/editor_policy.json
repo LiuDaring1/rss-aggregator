@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "policy_name": "口语素材周刊选材与编辑策略规范 (Editor Policy)",
+  "rules": {
+    "forbidden_categories": {
+      "sports_competition": {
+        "description": "常规排除体育比赛胜负、球员竞技成绩、战术与青训竞技体系，除非与青年成长/社会公共议题深度绑定并获教师特别确认",
+        "keywords": ["夺冠", "亚运", "世界杯", "金牌", "战术", "青训体系", "胜负", "国家队", "国乒", "男篮"]
+      },
+      "administrative_bureaucracy": {
+        "description": "常规不进入高中口语评论池：党政机关管理成效、公务资产配置、部门资源调配、复杂行政制度、财政效率评价、考公背景知识",
+        "keywords": ["公车", "公物仓", "公务用车", "机关资产", "财政绩效", "部门调拨", "国有化改革", "行政壁垒"]
+      }
+    },
+    "source_concentration_limits": {
+      "single_media_max_ratio": 0.35,
+      "top_two_media_max_ratio": 0.60,
+      "warning_message": "单一信源或前两大信源占比过高，请防范媒体垄断偏好"
+    },
+    "retelling_rules": {
+      "warm_stories_max": 3,
+      "warm_stories_target": "约3篇",
+      "warning_message": "复述板块暖事/凡人善举数量超过3篇，整刊存在好人好事合集倾向"
+    },
+    "commentary_rules": {
+      "claim_sentence_max_chars": 50,
+      "claim_sentence_recommended_chars": "20-40字",
+      "ending_recommended_lines": "2-2.5行",
+      "forbidden_cliches": [
+        "不是……而是……",
+        "不只是……更是……",
+        "振聋发聩",
+        "不可逾越的规律",
+        "历史性跨越",
+        "深刻飞跃",
+        "本体尊严",
+        "活出生命的辽阔"
+      ]
+    },
+    "retelling_commentary_leak": {
+      "forbidden_patterns": [
+        "体现了",
+        "彰显了",
+        "诠释了",
+        "告诉我们",
+        "启示我们",
+        "真正的.+是",
+        "展现了新时代",
+        "不仅是.+更是"
+      ],
+      "warning_message": "复述参考中检测到评论型价值升华套话，复述材料必须纯粹以讲清事实链为主"
+    },
+    "cross_module_deduplication": {
+      "max_module_occupancy": 2,
+      "rule": "同一话题允许'复述+评论'，但严禁'复述+评论+拆解'三模块同时完整占用"
+    },
+    "excerpt_source_diversity": {
+      "single_source_max_in_excerpts": 2,
+      "rule": "每期6篇拆解中，单一媒体（如浙江宣传）最多入选2篇，杜绝固定专栏垄断"
+    }
+  }
+}
