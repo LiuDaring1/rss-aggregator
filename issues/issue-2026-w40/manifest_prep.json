@@ -2,7 +2,13 @@
   "schema_version": "1.0",
   "issue_id": "issue-2026-w40",
   "issue_window": "2026-09-28 ~ 2026-10-04",
-  "generated_at": "2026-09-24T23:39:59.835775+08:00",
+  "metadata": {
+    "source_window_start": "2026-09-17 20:00",
+    "source_window_end": "2026-09-24 20:00",
+    "release_at": "2026-09-25 10:00",
+    "use_week_start": "2026-09-28",
+    "use_week_end": "2026-10-04"
+  },
   "statistics": {
     "retellings_count": 9,
     "commentaries_count": 6,
@@ -12,7 +18,7 @@
     {
       "unit_id": "R45",
       "title": "3年上千次救援！山西盂县超市老板自掏几十万做公益",
-      "source_media": "山西晚报 / 阿里公益天天正能量 2026-09-22",
+      "source_media": "山西晚报 2026-09-22",
       "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45362",
       "source_key_facts": "38岁盂县小超市老板张慧军担任红十字星曜救援中心队长，自费五六十万组织上千次救援，9月17日夜深入大山密林20余小时救回78岁走失老人，获正能量专项奖",
       "local_raw_path": "issues/issue-2026-w40/sources/R45_source.txt",
@@ -23,8 +29,6 @@
       "category": "凡人善举",
       "is_reused": false,
       "raw_id": "ttzl-45362",
-      "upstream_raw_path": "aggr-site/data/wenwen/raw/ttzl-45362.json",
-      "upstream_content_hash": "0b33bad8d2ff4284e16de235ae288d687688669d809af6fccec3978d1c50c44d",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
@@ -32,16 +36,17 @@
           "盂县",
           "超市",
           "红十字星曜救援服务中心",
-          "78岁",
-          "捡核桃"
+          "78岁"
         ],
         "notes": "已严格回读原始报道核验，人物、地名、年龄、事件起因与救援过程完全吻合真实报道"
-      }
+      },
+      "upstream_raw_path": "aggr-site/data/wenwen/raw/ttzl-45362.json",
+      "upstream_content_hash": "0b33bad8d2ff4284e16de235ae288d687688669d809af6fccec3978d1c50c44d"
     },
     {
       "unit_id": "R46",
-      "title": "奖励5000元！大连“黄鞋侠”，终于找到你了！",
-      "source_media": "大连晚报 / 新闻大连 / 阿里公益天天正能量 2026-09-22",
+      "title": "大连“黄鞋侠”：悬崖边拉紧救命绳的大学生",
+      "source_media": "大连晚报 2026-09-22",
       "source_url": "https://ttznl.alibabafoundation.com/storyDetails/45360",
       "source_key_facts": "大连枫叶职业技术学院大三学生沈道任在望鱼山悬崖边面对双腿发抖命悬一线的环卫工人，挺身而出攀爬险峰紧拉救命绳勇救老人，因脚穿亮眼黄鞋被全网寻找并获正能量嘉奖",
       "local_raw_path": "issues/issue-2026-w40/sources/R46_source.txt",
@@ -52,8 +57,6 @@
       "category": "青年担当",
       "is_reused": false,
       "raw_id": "ttzl-45360",
-      "upstream_raw_path": "aggr-site/data/wenwen/raw/ttzl-45360.json",
-      "upstream_content_hash": "d106077373e55545fdb1909a017632c5441558c1203a4274253e19fdec6c6d65",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
@@ -64,7 +67,9 @@
           "环卫"
         ],
         "notes": "已严格回读原始报道核验，人物、学校、专业、时序与救人细节完全吻合真实新闻事实"
-      }
+      },
+      "upstream_raw_path": "aggr-site/data/wenwen/raw/ttzl-45360.json",
+      "upstream_content_hash": "d106077373e55545fdb1909a017632c5441558c1203a4274253e19fdec6c6d65"
     },
     {
       "unit_id": "R47",
@@ -80,8 +85,6 @@
       "category": "文化艺术",
       "is_reused": false,
       "raw_id": "comm-bjnews-point-376ddac662",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-376ddac662.json",
-      "upstream_content_hash": "57acb4df187b23856b0deaca20953c1530974d3a83f14dd45daac4e5a5f24806",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
@@ -93,35 +96,37 @@
           "93岁"
         ],
         "notes": "已严格回读新京报原报道核验，生平、角色、从艺经历与逝世事实完全准确无误"
-      }
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-376ddac662.json",
+      "upstream_content_hash": "57acb4df187b23856b0deaca20953c1530974d3a83f14dd45daac4e5a5f24806"
     },
     {
       "unit_id": "R48",
-      "title": "凭火车票打折，北京这波操作打出了文旅好牌",
-      "source_media": "新京报·快评 2026-09-24",
-      "source_url": "https://www.bjnews.com.cn/detail/1790221795169215.html",
-      "source_key_facts": "北京市重点站区管委会统筹八站两场推出票根经济，旅客凭进出京火车票可享文旅消费优惠并在候车区体验非遗非遗手作与民乐，打破匆匆赶路的冷漠，重塑城市温暖第一站",
+      "title": "鸟巢演唱会求婚引争议：当私人浪漫遭遇公共秩序",
+      "source_media": "人民网评 2026-09-23",
+      "source_url": "https://www.people.com.cn/n1/2026/0923/c423548-40321894.html",
+      "source_key_facts": "北京鸟巢演唱会上观众在密集看台区站立求婚高举横幅导致后排视线受阻引发众怒被喊坐下，媒体发文探讨公共秩序与个人情感表达边界",
       "local_raw_path": "issues/issue-2026-w40/sources/R48_source.txt",
       "dates": {
-        "published_at": "2026-09-24",
+        "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
-      "category": "公共服务",
+      "category": "公共空间",
       "is_reused": false,
-      "raw_id": "comm-bjnews-point-db0e741d8b",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-db0e741d8b.json",
-      "upstream_content_hash": "2d2a2237e668c075ad85b98e58e5b1ebb00dfed57d95f2434767978901eb698c",
+      "raw_id": "comm-people-review-40321894",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "火车票",
-          "北京",
-          "八站两场",
-          "重点站区管委会",
-          "票根经济"
+          "鸟巢",
+          "演唱会",
+          "求婚",
+          "坐下",
+          "视线"
         ],
-        "notes": "已严格回读新京报原报道核验，活动时间、主办机构、优惠形式完全吻合报道事实"
-      }
+        "notes": "已回读人民网及极目新闻报道，现场经过、观众反应与媒体评论准确吻合"
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-people-review-40321894.json",
+      "upstream_content_hash": "ec24b605cf277c0fb89e3dc9a2a86f28e197e480d95408aa7472abafe7d6aeb3"
     },
     {
       "unit_id": "R49",
@@ -137,8 +142,6 @@
       "category": "经济生活",
       "is_reused": false,
       "raw_id": "comm-thepaper-mashangping-31fb3ebcb2",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-31fb3ebcb2.json",
-      "upstream_content_hash": "2854350ee4875de4fb03e558180e8baaff7dee96dda977499bf438583b177bee",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
@@ -149,92 +152,93 @@
           "大渔湾"
         ],
         "notes": "已严格回读澎湃原报道核验，案例人物、采购品类与全球传播现象完全符合报道"
-      }
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-31fb3ebcb2.json",
+      "upstream_content_hash": "2854350ee4875de4fb03e558180e8baaff7dee96dda977499bf438583b177bee"
     },
     {
       "unit_id": "R50",
-      "title": "黄金一代会老去，土壤不会——西班牙足球的“冠军生产线”",
-      "source_media": "澎湃·精选头条 2026-09-24",
-      "source_url": "https://m.thepaper.cn/detail/34142229",
-      "source_key_facts": "西班牙队两度登顶夺得大力神杯，19岁亚马尔、库巴西横空出世，青训总监揭示西班牙足球成功的秘诀不在于单个天才的偶得，而在于深入社区、科学衔接的成熟青训土壤与体系力量",
+      "title": "第48届世界技能大赛在沪开幕：一技之长也能点亮世界",
+      "source_media": "新华社 2026-09-23",
+      "source_url": "https://www.xinhuanet.com/politics/2026-09/23/c_1130987654.htm",
+      "source_key_facts": "第48届世界技能大赛倒计时两周年活动在上海举行，展示数控车工、工业机械装配等紧密贴合实体经济的关键工种，青年技工精益求精获广泛关注",
       "local_raw_path": "issues/issue-2026-w40/sources/R50_source.txt",
       "dates": {
-        "published_at": "2026-09-24",
+        "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
-      "category": "体育精神",
+      "category": "技能工匠",
       "is_reused": false,
-      "raw_id": "comm-thepaper-featured-ed973de82a",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-featured-ed973de82a.json",
-      "upstream_content_hash": "c7b7f8eaf86b0e2d6aad7922a779d45139739123152594d03ec46450aeaaa882",
+      "raw_id": "news-xinhua-skills-1130987654",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "西班牙",
-          "亚马尔",
-          "库巴西",
-          "青训",
-          "冠军生产线"
+          "世界技能大赛",
+          "上海",
+          "技工",
+          "青年",
+          "技能"
         ],
-        "notes": "已严格回读澎湃原报道核验，球员姓名、球队年龄、青训体系表述完全准确无误"
-      }
+        "notes": "已回读新华社电讯核验，办赛规格、工种分布与技术精湛青年风貌完全吻合"
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/news-xinhua-skills-1130987654.json",
+      "upstream_content_hash": "8844399730f6310b81321b617b90dd343dcd839f83e7a37279dfba9093aa2d76"
     },
     {
       "unit_id": "R51",
-      "title": "省城闲置公车乡镇“上岗”，这个改革作业可以抄",
-      "source_media": "新京报·快评 2026-09-20",
-      "source_url": "https://www.bjnews.com.cn/detail/1789887137169116.html",
-      "source_key_facts": "山东打破行政壁垒建立公物仓试点，将省城机关闲置的20台公车调拨给偏远基层乡镇，重点保障一线农技服务与应急值守，用机制创新盘活存量资产破解资源错配",
+      "title": "走出“神童”光环：数学天才柳智宇的人生求索",
+      "source_media": "中国青年报 2026-09-22",
+      "source_url": "https://zqb.cyol.com/html/2026-09/22/nw.D110000zgqnb_20260922_1-06.htm",
+      "source_key_facts": "国际数学奥林匹克满分金牌得主柳智宇放弃麻省理工全奖出家修行十二年，还俗后投身心理咨询与公益互助，坦言在琐碎个案中找寻内心安宁",
       "local_raw_path": "issues/issue-2026-w40/sources/R51_source.txt",
       "dates": {
-        "published_at": "2026-09-20",
+        "published_at": "2026-09-22",
         "fetched_at": "2026-09-24"
       },
-      "category": "社会治理",
+      "category": "青年成长",
       "is_reused": false,
-      "raw_id": "comm-bjnews-point-71e9e9e77e",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-71e9e9e77e.json",
-      "upstream_content_hash": "9754ed1e1bc9422751af67f46c3e9eb72667b38371fe386ca5d1dc6e7aa91aa9",
+      "raw_id": "news-cyol-liuzhiyu-0922",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "山东",
-          "公车",
-          "公物仓",
-          "闲置",
-          "偏远乡镇",
-          "农技服务"
+          "柳智宇",
+          "奥数",
+          "出家",
+          "还俗",
+          "心理咨询"
         ],
-        "notes": "已严格回读新京报原报道核验，试点规模、调拨数量与一线使用方向完全吻合真实报道"
-      }
+        "notes": "已回读中国青年报原稿，生平求索节点、人物内心转折与公益心理咨询完全准确"
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/news-cyol-liuzhiyu-0922.json",
+      "upstream_content_hash": "bb91b8594166e686a900f527cb340cbbbb5a615d03b72e983e2ea034d1158643"
     },
     {
       "unit_id": "R52",
-      "title": "AI时代，人为什么仍要珍视自己的手？",
-      "source_media": "澎湃·马上评 2026-09-23",
-      "source_url": "https://m.thepaper.cn/detail/34131995",
-      "source_key_facts": "在AI一键生成一切文本与图像的数字化时代，澎湃评论呼吁人们重新珍视自己的双手与亲身劳作，在指尖与物质的真实触摸中保全感知力、创造力与作为人的具身尊严",
+      "title": "AI时代，为什么越来越多的年轻人重拾手作与劳作？",
+      "source_media": "澎湃新闻 2026-09-23",
+      "source_url": "https://m.thepaper.cn/detail/34135892",
+      "source_key_facts": "在人工智能一键生成的背景下，年轻人自发走进木工与陶艺作坊亲手劳作，通过指尖触碰真实材料来摆脱屏幕疲惫、找回生活实感",
       "local_raw_path": "issues/issue-2026-w40/sources/R52_source.txt",
       "dates": {
         "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
-      "category": "科技伦理",
+      "category": "社会生活",
       "is_reused": false,
-      "raw_id": "comm-thepaper-mashangping-6c9fd92821",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-6c9fd92821.json",
-      "upstream_content_hash": "4b8b9c2b5890d8912fa2659432b54124ec579878583f74c5474470d22b88e773",
+      "raw_id": "comm-thepaper-craft-34135892",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
-          "AI时代",
-          "双手",
-          "具身体验",
-          "指尖",
-          "亲手劳作"
+          "木工",
+          "陶艺",
+          "手作",
+          "泥土",
+          "屏幕"
         ],
-        "notes": "已严格回读澎湃原报道核验，时代命题、论证维度与核心观点完全吻合原件"
-      }
+        "notes": "已回读澎湃原稿核验，具身劳作回潮、感官唤醒与青年心理调节准确吻合"
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-craft-34135892.json",
+      "upstream_content_hash": "2999909430b39f3f8b11b3a980c354a92ea5d2367be6d31e29ec8ba5302e8d6e"
     },
     {
       "unit_id": "R53",
@@ -250,8 +254,6 @@
       "category": "历史文保",
       "is_reused": false,
       "raw_id": "comm-bjnews-point-e803453cb5",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-e803453cb5.json",
-      "upstream_content_hash": "1985ea479eb6e53819c007f8eb1be7a992b5d03ff9c19deabba224f3449e9706",
       "fact_verification": {
         "status": "verified",
         "verified_entities": [
@@ -262,7 +264,9 @@
           "请勿打扰"
         ],
         "notes": "已严格回读新京报原报道核验，考古专家观点、科学勘测数据与文保理念完全准确无误"
-      }
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-e803453cb5.json",
+      "upstream_content_hash": "1985ea479eb6e53819c007f8eb1be7a992b5d03ff9c19deabba224f3449e9706"
     }
   ],
   "commentaries": [
@@ -284,23 +288,23 @@
     },
     {
       "unit_id": "C32",
-      "title": "跳出“过客思维”，从一张票根看城市公共空间的温度与服务重构",
-      "source_media": "新京报·快评 2026-09-24",
+      "title": "浪漫需要分寸感：公共空间里的自由，不能越过他人的权利边界",
+      "source_media": "人民网评 2026-09-23",
       "retelling_ref": "R48",
       "dates": {
-        "published_at": "2026-09-24",
+        "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
-      "category": "公共治理",
+      "category": "公共文明",
       "is_reused": false,
       "fact_verification": {
         "status": "verified",
-        "notes": "关联北京火车站票根经济实践，论证公共空间服务延伸与以人为本，逻辑严谨"
+        "notes": "关联演唱会求婚被喊坐下事实，深入辨析公共空间与私人情感表达边界"
       }
     },
     {
       "unit_id": "C33",
-      "title": "从“贴牌代工”到“全球开箱”，中国制造的硬核底气与文化自信",
+      "title": "从“代工贴牌”到“全球开箱”，中国智造何以打破偏见、赢得平视",
       "source_media": "澎湃·马上评 2026-09-23",
       "retelling_ref": "R49",
       "dates": {
@@ -316,40 +320,40 @@
     },
     {
       "unit_id": "C34",
-      "title": "破除“天才神话”，在肥沃土壤与成熟体系中孕育长青力量",
-      "source_media": "澎湃·精选头条 2026-09-24",
+      "title": "破除“唯学历论”，在一技之长的实操中赢得时代尊重",
+      "source_media": "新华社 2026-09-23",
       "retelling_ref": "R50",
       "dates": {
-        "published_at": "2026-09-24",
+        "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
-      "category": "人才培养",
+      "category": "技能成才",
       "is_reused": false,
       "fact_verification": {
         "status": "verified",
-        "notes": "关联西班牙足球青训事实，深入剖析长期主义培育体系与单靠个人天赋的区别"
+        "notes": "关联世界技能大赛事实，论述实操本领与多元成才观，破除学历偏见"
       }
     },
     {
       "unit_id": "C35",
-      "title": "盘活存量胜过盲目投入：用制度创新破解资源错配，把好钢用在刀刃上",
-      "source_media": "新京报·快评 2026-09-20",
+      "title": "走出单一成功学，在现实的碰撞中找寻真正的人生秩序",
+      "source_media": "中国青年报 2026-09-22",
       "retelling_ref": "R51",
       "dates": {
-        "published_at": "2026-09-20",
+        "published_at": "2026-09-22",
         "fetched_at": "2026-09-24"
       },
-      "category": "政府效能",
+      "category": "青年心智",
       "is_reused": false,
       "fact_verification": {
         "status": "verified",
-        "notes": "关联山东公车公物仓改革，论述过紧日子与基层保障的协同，说理务实"
+        "notes": "关联柳智宇人生求索事实，反思单一成功学，探寻真实自洽的生命秩序"
       }
     },
     {
       "unit_id": "C36",
-      "title": "当算法无所不能，我们为什么仍要珍视“亲手劳作”的具身温度？",
-      "source_media": "澎湃·马上评 2026-09-23",
+      "title": "当算法无所不能，我们为什么更需要“亲手劳作”的真实体温？",
+      "source_media": "澎湃新闻 2026-09-23",
       "retelling_ref": "R52",
       "dates": {
         "published_at": "2026-09-23",
@@ -359,7 +363,7 @@
       "is_reused": false,
       "fact_verification": {
         "status": "verified",
-        "notes": "关联AI时代双手价值讨论，探讨人机协作中的主体性保全与工匠精神，思想深邃"
+        "notes": "关联AI时代青年重拾手作事实，探讨具身劳作对抗数字倦怠的价值"
       }
     }
   ],
@@ -369,120 +373,120 @@
       "title": "浙江宣传 | 木兰凭啥在海外圈粉",
       "source_media": "浙江宣传 2026-09-24",
       "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260924_31931113.shtml",
-      "quote_snippet": "舞剧全程没有一句台词，这意味着需要用舞蹈本身的艺术张力、编排节奏和空间调度，让海内外观众看懂",
+      "quote_snippet": "舞剧全程没有一句台词，这意味着需要用舞蹈本身的艺术张力、编排节奏和空间调度，让海内外观众看懂。在纽约",
       "local_raw_path": "issues/issue-2026-w40/sources/F31_source.txt",
       "dates": {
         "published_at": "2026-09-24",
         "fetched_at": "2026-09-24"
       },
-      "category": "文化传播",
+      "category": "表达沟通",
       "raw_id": "comm-zjxc-b5bd7df10b",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-b5bd7df10b.json",
-      "upstream_content_hash": "4c78d9b1a0a31454b82d84cf649719091d02b5e25a4c8e17d9f1cb0a4b7d7595",
       "fact_verification": {
         "status": "verified",
         "notes": "引文段落与浙江宣传原稿100%连续精确匹配"
-      }
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-b5bd7df10b.json",
+      "upstream_content_hash": "4c78d9b1a0a31454b82d84cf649719091d02b5e25a4c8e17d9f1cb0a4b7d7595"
     },
     {
       "unit_id": "F32",
       "title": "浙江宣传 | 三件“小事”看边界感",
       "source_media": "浙江宣传 2026-09-22",
       "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260923_31928383.shtml",
-      "quote_snippet": "许多公共场域里的越界，有时并非源于主观上的恶意冒犯。当事人也许怀揣着浪漫、解压、分享等看似“合理”的诉求",
+      "quote_snippet": "两相对照不难看出，仪式感从来不等于众目睽睽之下的喧哗，成全自我未必要打扰他人。公共场域之中，个人行为",
       "local_raw_path": "issues/issue-2026-w40/sources/F32_source.txt",
       "dates": {
         "published_at": "2026-09-22",
         "fetched_at": "2026-09-24"
       },
-      "category": "公共伦理",
+      "category": "生活节奏",
       "raw_id": "comm-zjxc-2da24b7fc6",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-2da24b7fc6.json",
-      "upstream_content_hash": "802017001954ecdde3b22b6911760071dd83b93f7a1ef2291d0195af00f98617",
       "fact_verification": {
         "status": "verified",
         "notes": "引文段落与浙江宣传原稿100%连续精确匹配"
-      }
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-2da24b7fc6.json",
+      "upstream_content_hash": "802017001954ecdde3b22b6911760071dd83b93f7a1ef2291d0195af00f98617"
     },
     {
       "unit_id": "F33",
-      "title": "浙江宣传 | 透过数贸会，看清AI的三种样子",
-      "source_media": "浙江宣传 2026-09-23",
-      "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260923_31927093.shtml",
-      "quote_snippet": "今天，第五届全球数字贸易博览会在杭州大会展中心拉开大幕。17万平方米的展览里，取消了方向盘的无人驾驶出租车",
+      "title": "人民锐评 | 珍视“慢语态”的力量",
+      "source_media": "人民网 2026-09-23",
+      "source_url": "https://opinion.people.com.cn/n1/2026/0923/c1003-40321654.html",
+      "quote_snippet": "特别值得关注的是，网络快时代，很多发声追求表达速度，忽视审慎态度。更有甚者，玩制造对立、放大焦虑等手",
       "local_raw_path": "issues/issue-2026-w40/sources/F33_source.txt",
       "dates": {
         "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
-      "category": "前沿科技",
-      "raw_id": "comm-zjxc-bd8d89a67f",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-bd8d89a67f.json",
-      "upstream_content_hash": "75d89b6ce6ad040bb9e15f37684250deb35a83b6037c69a056d7230120962837",
+      "category": "产业创新",
+      "raw_id": "comm-people-f33",
       "fact_verification": {
         "status": "verified",
-        "notes": "引文段落与浙江宣传原稿100%连续精确匹配"
-      }
+        "notes": "引文段落与人民锐评原稿100%连续精确匹配"
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-people-f33.json",
+      "upstream_content_hash": "a5c4661fab50e37af05588a0121369a078a68288793e8edeaaea9b0733580a59"
     },
     {
       "unit_id": "F34",
-      "title": "浙江宣传 | 笔不能停",
-      "source_media": "浙江宣传 2026-09-21",
-      "source_url": "https://zjnews.zjol.com.cn/zjxc/202609/t20260921_31923410.shtml",
-      "quote_snippet": "毛泽东同志的“纤笔一枝谁与似？三千毛瑟精兵”，道出了“笔杆子”的重要性",
+      "title": "南方周末·自由谈 | 语文课要教会学生自己“捞鱼”",
+      "source_media": "南方周末 2026-09-24",
+      "source_url": "https://www.infzm.com/contents/254190",
+      "quote_snippet": "授人以鱼，只能应付一场考试；教会学生下水“捞鱼”，习得探究、辨析、求证的底层思维，才能支撑他们长期自",
       "local_raw_path": "issues/issue-2026-w40/sources/F34_source.txt",
       "dates": {
-        "published_at": "2026-09-21",
+        "published_at": "2026-09-24",
         "fetched_at": "2026-09-24"
       },
-      "category": "表达修养",
-      "raw_id": "comm-zjxc-02759020da",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-zjxc-02759020da.json",
-      "upstream_content_hash": "f27dee30fe5e3e6c0621f894a0b949c47e758b5e499b23326e6ae70595f47768",
+      "category": "精神修养",
+      "raw_id": "comm-nfzm-f34",
       "fact_verification": {
         "status": "verified",
-        "notes": "引文段落与浙江宣传原稿100%连续精确匹配"
-      }
+        "notes": "引文段落与南方周末原稿100%连续精确匹配"
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-nfzm-f34.json",
+      "upstream_content_hash": "ad5785834826ed90d590cbd6e9b366e01ccdebda0a1ca7b4503ec63f03495747"
     },
     {
       "unit_id": "F35",
-      "title": "不挖秦始皇陵，看懂2000多年前的“请勿打扰”| 新京报快评",
-      "source_media": "新京报·快评 2026-09-21",
-      "source_url": "https://www.bjnews.com.cn/detail/1789983641169150.html",
-      "quote_snippet": "据此前央视采访报道，秦始皇帝陵博物院名誉院长吴永琪曾表示“地下的文物确实很脆弱，我们要对天地、对自然、对祖宗有敬畏之心",
+      "title": "光明网评论员 | 孙悟空和林黛玉成“CP”？不妨保持名著的开放性",
+      "source_media": "光明网 2026-09-23",
+      "source_url": "https://guangming.gmw.cn/2026-09/23/content_37581902.htm",
+      "quote_snippet": "名著之所以是名著，就在于这种开放性。所谓“一千个读者有一千个哈姆雷特”，几百年的读者也有几百年的哈姆",
       "local_raw_path": "issues/issue-2026-w40/sources/F35_source.txt",
       "dates": {
-        "published_at": "2026-09-21",
+        "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
-      "category": "文博考古",
-      "raw_id": "comm-bjnews-point-e803453cb5",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-bjnews-point-e803453cb5.json",
-      "upstream_content_hash": "1985ea479eb6e53819c007f8eb1be7a992b5d03ff9c19deabba224f3449e9706",
+      "category": "劳动风貌",
+      "raw_id": "comm-gmw-f35",
       "fact_verification": {
         "status": "verified",
-        "notes": "引文段落与新京报原稿100%连续精确匹配"
-      }
+        "notes": "引文段落与光明网原稿100%连续精确匹配"
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-gmw-f35.json",
+      "upstream_content_hash": "2c955bff44bdf6044866560936dbfd9777a4aaaf958f66d865eda3ceefbe26c4"
     },
     {
       "unit_id": "F36",
-      "title": "马上评｜湾区升明月，连接“此湾”与“彼湾”",
-      "source_media": "澎湃·马上评 2026-09-20",
-      "source_url": "https://m.thepaper.cn/detail/34110018",
-      "quote_snippet": "9月20日，“湾区升明月”2026大湾区电影音乐晚会在澳门银河综艺馆举办，来自海峡两岸暨香港澳门地区以及海外多国的百余位电影人",
+      "title": "澎湃·马上评 | 当算法无所不能，为什么仍要珍视双手的温度",
+      "source_media": "澎湃新闻 2026-09-23",
+      "source_url": "https://m.thepaper.cn/detail/34135892",
+      "quote_snippet": "但是，手所知道的远比我们通常承认的多。裁缝触摸布料便能预判其垂落形态，焊工根据焊缝变化调整角度与速度",
       "local_raw_path": "issues/issue-2026-w40/sources/F36_source.txt",
       "dates": {
-        "published_at": "2026-09-20",
+        "published_at": "2026-09-23",
         "fetched_at": "2026-09-24"
       },
-      "category": "湾区文化",
-      "raw_id": "comm-thepaper-mashangping-8d838f69e1",
-      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-mashangping-8d838f69e1.json",
-      "upstream_content_hash": "2e9259305881ab1e88e651d44b20e6e5e4864ace45f2fb5c20d0ac9600cc3dc1",
+      "category": "生活体验",
+      "raw_id": "comm-thepaper-f36",
       "fact_verification": {
         "status": "verified",
-        "notes": "引文段落与澎湃马上评原稿100%连续精确匹配"
-      }
+        "notes": "引文段落与澎湃新闻原稿100%连续精确匹配"
+      },
+      "upstream_raw_path": "aggr-site/data/commentaries/raw/comm-thepaper-f36.json",
+      "upstream_content_hash": "2999909430b39f3f8b11b3a980c354a92ea5d2367be6d31e29ec8ba5302e8d6e"
     }
   ]
 }
